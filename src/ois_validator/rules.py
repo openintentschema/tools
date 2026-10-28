@@ -158,6 +158,26 @@ def r11_revocation(document: Document) -> Iterator[Report]:
             yield Report(Level.VIOLATION, "R11", message, f"{entry.path}.subject")
 
 
+def r12_context_attestation(document: Document) -> Iterator[Report]:
+    """R12: a context counts as attested only if another actor recorded it and signed the bundle
+    or passport that carries it. Otherwise it is self-declared (warning).
+
+    Signatures are not verified yet, so every context is reported as self-declared.
+    """
+    for entry in document.of_type("artifact"):
+        if "context" not in entry.record:
+            continue
+        recorder = entry.record.get("contextRecordedBy")
+        if recorder is None:
+            reason = "no contextRecordedBy"
+        elif _actor_id(recorder) == _actor_id(entry.record["producedBy"]):
+            reason = "recorded by its own producer"
+        else:
+            reason = f"no verified signature of {recorder}"
+        message = f"context is self-declared: {reason}"
+        yield Report(Level.WARNING, "R12", message, f"{entry.path}.context")
+
+
 def r14_finding_chain(document: Document) -> Iterator[Report]:
     """R14: a finding has at most one superseding finding."""
     first: dict[str, str] = {}
@@ -200,6 +220,7 @@ CONTAINER_RULES: tuple[Rule, ...] = (
     r9_waivers,
     r10_resolution,
     r11_revocation,
+    r12_context_attestation,
     r14_finding_chain,
 )  # bundles and passports only
 
