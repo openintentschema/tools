@@ -10,6 +10,7 @@ Thank you for helping to build the reference validator for the Open Intent Schem
 - A change to what the validator accepts or reports therefore starts there, as an RFC issue.
   Bug fixes, refactoring and tooling can go straight to a pull request here.
 - Nothing in this repository may depend on, name or favour a specific product or vendor.
+- Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Developer Certificate of Origin
 

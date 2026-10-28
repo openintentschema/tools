@@ -115,8 +115,8 @@ walks through it step by step, including a CI example.
 ## Contributing
 
 What the validator accepts is decided in the specification repository; bug fixes, tooling and
-documentation are welcome here. See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues:
-[SECURITY.md](SECURITY.md).
+documentation are welcome here. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md). Security issues: [SECURITY.md](SECURITY.md).
 
 ## License
 
