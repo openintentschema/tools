@@ -863,6 +863,25 @@
           "level": "warning"
         }
       ]
+    },
+    {
+      "path": "valid/keyless-passport.json",
+      "description": "The passport, signed keylessly by a GitHub Actions workflow through the public-good Sigstore instance (a recorded Sigstore bundle). The workflow is the agent runtime's certificate identity, so every recorded context is attested.",
+      "expect": []
+    },
+    {
+      "path": "invalid/signature/keyless-tampered.json",
+      "description": "The recorded keyless passport with its payload changed after signing.",
+      "expect": [
+        {
+          "rule": "signature",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
     }
   ]
 }

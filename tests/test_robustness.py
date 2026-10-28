@@ -14,9 +14,11 @@ import pytest
 
 from ois_tools import rules
 from ois_tools.document import Document, Signers
+from ois_tools.keyless import is_sigstore_bundle, load_trusted_roots, open_sigstore_bundle
 from ois_tools.signing import is_envelope, open_envelope
 
-VALID = sorted((Path(__file__).parent / "fixtures" / "valid").glob("*.json"))
+FIXTURES = Path(__file__).parent / "fixtures"
+VALID = sorted((FIXTURES / "valid").glob("*.json"))
 
 
 def replace_at(document: Any, path: str, value: str) -> None:
@@ -35,6 +37,12 @@ def test_references_to_any_record_never_crash(path: Path) -> None:
     if is_envelope(document):  # signed fixtures: the payload, with every key id as a signer
         signers = Signers(keyids=frozenset(s["keyid"] for s in document["signatures"]))
         document = open_envelope(document, []).payload
+    elif is_sigstore_bundle(document):  # keyless fixtures: the payload and its verified signer
+        roots = load_trusted_roots(
+            [str(FIXTURES / "keys" / "sigstore-public-good.trusted_root.json")]
+        )
+        opened = open_sigstore_bundle(document, roots)
+        document, signers = opened.payload, opened.signers
     parsed = Document.of(document, signers=signers)
     targets = sorted(
         e.record["id"] + (f"@{e.record['version']}" if "version" in e.record else "")
