@@ -1,4 +1,4 @@
-"""The records of a bundle or passport and how references between them resolve.
+"""The records of an input document (a record, bundle or passport) and how references resolve.
 
 Resolution follows the conformance fixtures (fixtures/README.md in the specification repository):
 `<id>@<version>` resolves to the intent or actor with that id and version, `<id>` to a record

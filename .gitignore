@@ -14,5 +14,6 @@ dist/
 htmlcov/
 
 # Local only
+.DS_Store
 /.idea/
 /.claude/

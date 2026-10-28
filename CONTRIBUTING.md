@@ -22,10 +22,15 @@ git commit -s -m "Describe your change"
 
 ## Pull requests
 
-- One topic per pull request.
+- One topic per pull request, with tests. A bug fix starts with a test that shows the bug.
 - Do not edit the copies of the schema, examples or fixtures; update them with
   `uv run scripts/sync_spec.py` from a clean checkout of the specification repository.
 - CI must pass: lint, format, strict type check and tests on every supported Python version.
+- User-visible changes get a line under "Unreleased" in `CHANGELOG.md`.
+
+[docs/development.md](docs/development.md) shows the setup, the checks and how a rule is added;
+[docs/architecture.md](docs/architecture.md) how the code is organised. Security issues are
+reported privately, see [SECURITY.md](SECURITY.md).
 
 ## License
 

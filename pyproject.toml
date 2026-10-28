@@ -2,6 +2,7 @@
 name = "ois-validator"
 version = "0.1.0"
 description = "Reference validator for the Open Intent Schema (OIS)"
+keywords = ["ois", "open-intent-schema", "requirements", "traceability", "evidence", "in-toto", "junit"]
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
@@ -25,6 +26,9 @@ ois-junit = "ois_validator.junit_cli:main"
 
 [project.urls]
 Repository = "https://github.com/openintentschema/validator"
+Documentation = "https://github.com/openintentschema/validator/tree/main/docs"
+Changelog = "https://github.com/openintentschema/validator/blob/main/CHANGELOG.md"
+Issues = "https://github.com/openintentschema/validator/issues"
 Specification = "https://github.com/openintentschema/openintentschema"
 
 [dependency-groups]
