@@ -531,6 +531,20 @@
       ]
     },
     {
+      "path": "invalid/R10/artifact-digest-differs.json",
+      "description": "Two artifact records share an id and differ only in digest, so a reference to that id no longer says which content it means. Only intents ignore status and digest (proposed clarification of R10).",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
       "path": "invalid/R10/passport-missing-record.json",
       "description": "The release decision lists evidence that the passport does not carry.",
       "expect": [

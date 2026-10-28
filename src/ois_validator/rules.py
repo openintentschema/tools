@@ -31,7 +31,11 @@ def r10_resolution(document: Document) -> Iterator[Report]:
 
 
 def _content(record: Record) -> Record:
-    """What R10 compares: the record without status and digest."""
+    """What R10 compares. A draft intent and its approved record differ only in status and
+    digest, and an intent's digest follows from its content, so intents leave both out. For
+    every other record the digest pins the content and is compared."""
+    if record["type"] != "intent":
+        return record
     return {k: v for k, v in record.items() if k not in ("status", "digest")}
 
 
