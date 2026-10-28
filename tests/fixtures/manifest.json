@@ -77,26 +77,6 @@
       ]
     },
     {
-      "path": "valid/supersedes-outside-bundle.json",
-      "description": "Intent version 2 supersedes version 1, which the bundle does not carry. supersedes may point outside the document (proposed exception to R10).",
-      "expect": [
-        {
-          "rule": "R12",
-          "level": "warning"
-        }
-      ]
-    },
-    {
-      "path": "valid/finding-supersedes-outside-bundle.json",
-      "description": "A finding supersedes a finding that the bundle does not carry (proposed exception to R10).",
-      "expect": [
-        {
-          "rule": "R12",
-          "level": "warning"
-        }
-      ]
-    },
-    {
       "path": "valid/passport-low-finding.json",
       "description": "An open finding with severity low does not trigger R13.",
       "expect": [
@@ -511,6 +491,34 @@
     {
       "path": "invalid/R10/conflicting-records.json",
       "description": "Two artifact records share an id but differ in content.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/supersedes-outside-bundle.json",
+      "description": "Intent version 2 supersedes version 1, which the bundle does not carry. The history must stay verifiable, so supersedes must resolve like every other reference.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/finding-supersedes-outside-bundle.json",
+      "description": "A finding supersedes a finding that the bundle does not carry.",
       "expect": [
         {
           "rule": "R10",
