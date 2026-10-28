@@ -14,7 +14,7 @@ import pytest
 from ois_validator import validate
 
 FIXTURES = Path(__file__).parent / "fixtures"
-IMPLEMENTED = {"schema", "R10"}
+IMPLEMENTED = {"schema", "R2", "R3", "R10"}
 
 MANIFEST: list[dict[str, Any]] = json.loads(
     (FIXTURES / "manifest.json").read_text(encoding="utf-8")

@@ -68,6 +68,14 @@ class Document:
             return [e for e in candidates if str(e.record.get("version")) == version]
         return [e for e in candidates if "version" not in e.record]
 
+    def record(self, reference: str) -> Record | None:
+        """The record a reference names, or None if it does not resolve."""
+        found = self.resolve(reference)
+        return found[0].record if found else None
+
+    def of_type(self, kind: str) -> Iterator[Entry]:
+        return (entry for entry in self.entries if entry.record["type"] == kind)
+
     def references(self) -> Iterator[Reference]:
         """Every reference in the document, in document order."""
         for entry in self.entries:

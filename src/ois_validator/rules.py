@@ -30,6 +30,37 @@ def r10_resolution(document: Document) -> Iterator[Report]:
             yield Report(Level.VIOLATION, "R10", message, entry.path)
 
 
+def r2_criterion_references(document: Document) -> Iterator[Report]:
+    """R2: a criterion reference names a key that exists in that intent version."""
+    for reference in document.references():
+        intent_ref, _, key = reference.value.partition("#")
+        intent = document.record(intent_ref) if key else None
+        if intent is not None and criterion(intent, key) is None:
+            message = f"{intent_ref} has no criterion {key!r}"
+            yield Report(Level.VIOLATION, "R2", message, reference.path)
+
+
+def r3_evidence_targets(document: Document) -> Iterator[Report]:
+    """R3: evidence names an artifact of kind test as test, and code or build as subject."""
+    for entry in document.of_type("evidence"):
+        for name, kinds in (("test", ("test",)), ("subject", ("code", "build"))):
+            if name not in entry.record:
+                continue
+            target = document.record(entry.record[name])
+            if target is not None and (target["type"] != "artifact" or target["kind"] not in kinds):
+                expected = " or ".join(kinds)
+                message = f"{name} must be an artifact of kind {expected}, not {_kind(target)}"
+                yield Report(Level.VIOLATION, "R3", message, f"{entry.path}.{name}")
+
+
+def criterion(intent: Record, key: str) -> Record | None:
+    return next((c for c in intent["criteria"] if c["key"] == key), None)
+
+
+def _kind(record: Record) -> str:
+    return f"{record['type']} of kind {record['kind']}" if "kind" in record else record["type"]
+
+
 def _content(record: Record) -> Record:
     """What R10 compares. A draft intent and its approved record differ only in status and
     digest, and an intent's digest follows from its content, so intents leave both out. For
@@ -40,7 +71,11 @@ def _content(record: Record) -> Record:
 
 
 RECORD_RULES: tuple[Rule, ...] = ()  # also for a single record
-CONTAINER_RULES: tuple[Rule, ...] = (r10_resolution,)  # bundles and passports only
+CONTAINER_RULES: tuple[Rule, ...] = (
+    r2_criterion_references,
+    r3_evidence_targets,
+    r10_resolution,
+)  # bundles and passports only
 
 
 def check(document: Document) -> Iterator[Report]:
