@@ -7,6 +7,7 @@ unresolved reference skips it; R10 reports the reference once.
 
 from collections.abc import Callable, Iterator
 
+from ois_validator import digests
 from ois_validator.document import Document, Record
 from ois_validator.report import Level, Report
 
@@ -28,6 +29,37 @@ def r10_resolution(document: Document) -> Iterator[Report]:
         elif seen[key][0] != _content(entry.record):
             message = f"same id as {seen[key][1]}, but different content"
             yield Report(Level.VIOLATION, "R10", message, entry.path)
+
+
+def r1_approval(document: Document) -> Iterator[Report]:
+    """R1: an approved intent has an approved intent-approval decision bound to its digest.
+
+    The approving actor SHOULD be human (info).
+    """
+    for entry in document.of_type("intent"):
+        intent = entry.record
+        if intent["status"] != "approved":
+            continue
+        subject = f"{intent['id']}@{intent['version']}"
+        approvals = [
+            decision
+            for decision in document.of_type("decision")
+            if decision.record["gate"] == "intent-approval"
+            and decision.record["subject"] == subject
+            and decision.record["outcome"] == "approved"
+            and digests.equal(decision.record.get("subjectDigest", {}), intent["digest"])
+        ]
+        if not approvals:
+            message = (
+                f"{subject} is approved, but no intent-approval decision approves it "
+                "with a subjectDigest equal to its digest"
+            )
+            yield Report(Level.VIOLATION, "R1", message, entry.path)
+        for decision in approvals:
+            decided_by = decision.record["decidedBy"]
+            if _is_human(document, decided_by) is False:
+                message = f"{subject} SHOULD be approved by a human, not {decided_by}"
+                yield Report(Level.INFO, "R1", message, f"{decision.path}.decidedBy")
 
 
 def r2_criterion_references(document: Document) -> Iterator[Report]:
@@ -53,8 +85,33 @@ def r3_evidence_targets(document: Document) -> Iterator[Report]:
                 yield Report(Level.VIOLATION, "R3", message, f"{entry.path}.{name}")
 
 
+def r17_digests(document: Document) -> Iterator[Report]:
+    """R17 (proposed): intent and criterion digests match their content (section 6.4)."""
+    for entry in document.of_type("intent"):
+        intent = entry.record
+        for index, item in enumerate(intent["criteria"]):
+            stored = item.get("digest", {}).get("sha256")
+            if stored is not None and stored != digests.criterion_sha256(item):
+                message = f"criterion {item['key']!r}: sha256 does not match its content"
+                yield Report(
+                    Level.VIOLATION, "R17", message, f"{entry.path}.criteria[{index}].digest"
+                )
+        stored = intent.get("digest", {}).get("sha256")
+        if stored is not None and stored != digests.intent_sha256(intent):
+            message = "sha256 does not match the intent's content"
+            yield Report(Level.VIOLATION, "R17", message, f"{entry.path}.digest")
+
+
 def criterion(intent: Record, key: str) -> Record | None:
     return next((c for c in intent["criteria"] if c["key"] == key), None)
+
+
+def _is_human(document: Document, reference: str) -> bool | None:
+    """Whether a reference names a human actor; None if it does not resolve to an actor."""
+    actor = document.record(reference)
+    if actor is None or actor["type"] != "actor":
+        return None
+    return bool(actor["kind"] == "human")
 
 
 def _kind(record: Record) -> str:
@@ -70,8 +127,9 @@ def _content(record: Record) -> Record:
     return {k: v for k, v in record.items() if k not in ("status", "digest")}
 
 
-RECORD_RULES: tuple[Rule, ...] = ()  # also for a single record
+RECORD_RULES: tuple[Rule, ...] = (r17_digests,)  # also for a single record
 CONTAINER_RULES: tuple[Rule, ...] = (
+    r1_approval,
     r2_criterion_references,
     r3_evidence_targets,
     r10_resolution,
