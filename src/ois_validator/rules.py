@@ -8,10 +8,80 @@ unresolved reference skips it; R10 reports the reference once.
 from collections.abc import Callable, Iterator
 
 from ois_validator import digests
-from ois_validator.document import Document, Record
+from ois_validator.document import Document, Entry, Record
 from ois_validator.report import Level, Report
 
 Rule = Callable[[Document], Iterator[Report]]
+
+
+def r4_derivation(document: Document) -> Iterator[Report]:
+    """R4: a test derived from the intent saw the criterion and no code.
+
+    Its context includes the criterion, or a version of the intent whose criterion with the same
+    key has the same digest, and no artifact of kind code.
+    """
+    for entry, intent, required, test in _derived_from_intent(document):
+        path = f"{entry.path}.derivedFrom"
+        context = test.get("context", [])
+        if not context:
+            yield Report(Level.VIOLATION, "R4", f"test {test['id']} has no context", path)
+            continue
+        for reference in context:
+            seen = document.record(reference)
+            if seen is not None and seen["type"] == "artifact" and seen["kind"] == "code":
+                message = f"the context of test {test['id']} includes code {reference}"
+                yield Report(Level.VIOLATION, "R4", message, path)
+        if not any(_covers(document, reference, intent, required) for reference in context):
+            message = (
+                f"the context of test {test['id']} includes neither {entry.record['criterion']} "
+                "nor a version of the intent with the same criterion digest"
+            )
+            yield Report(Level.VIOLATION, "R4", message, path)
+
+
+def r5_independence(document: Document) -> Iterator[Report]:
+    """R5: a test derived from the intent was not produced by the actor that produced the
+    subject, in any version."""
+    for entry, _, _, test in _derived_from_intent(document):
+        subject = document.record(entry.record.get("subject", ""))
+        if subject is None or subject["type"] != "artifact":
+            continue
+        producer = _actor_id(test["producedBy"])
+        if producer == _actor_id(subject["producedBy"]):
+            message = f"test and subject are both produced by {producer}"
+            yield Report(Level.VIOLATION, "R5", message, f"{entry.path}.derivedFrom")
+
+
+def _derived_from_intent(document: Document) -> Iterator[tuple[Entry, Record, Record, Record]]:
+    """Evidence with derivedFrom intent, with its intent version, criterion and test artifact,
+    where all three resolve."""
+    for entry in document.of_type("evidence"):
+        if entry.record["derivedFrom"] != "intent":
+            continue
+        intent_ref, _, key = entry.record["criterion"].partition("#")
+        intent = document.record(intent_ref)
+        required = criterion(intent, key) if intent is not None else None
+        test = document.record(entry.record["test"])
+        if intent is None or required is None or test is None or test["type"] != "artifact":
+            continue
+        yield entry, intent, required, test
+
+
+def _covers(document: Document, reference: str, intent: Record, required: Record) -> bool:
+    """Whether a context entry gives the producer the required criterion (R4)."""
+    base, _, rest = reference.partition("@")
+    version, _, key = rest.partition("#")
+    if base != intent["id"] or not version or key not in ("", required["key"]):
+        return False
+    if version == str(intent["version"]):
+        return True
+    other = document.record(f"{base}@{version}")
+    seen = criterion(other, required["key"]) if other is not None else None
+    return seen is not None and digests.equal(seen.get("digest", {}), required.get("digest", {}))
+
+
+def _actor_id(reference: str) -> str:
+    return reference.partition("@")[0]
 
 
 def r10_resolution(document: Document) -> Iterator[Report]:
@@ -132,6 +202,8 @@ CONTAINER_RULES: tuple[Rule, ...] = (
     r1_approval,
     r2_criterion_references,
     r3_evidence_targets,
+    r4_derivation,
+    r5_independence,
     r10_resolution,
 )  # bundles and passports only
 
