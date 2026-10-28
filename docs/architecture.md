@@ -100,7 +100,7 @@ by the recorder.
 
 **Proposed rules.** R16 (release decision), R17 (digests), the rule IDs `schema` and
 `signature` and the narrower R10 comparison (only intents ignore `status` and `digest`) are
-proposed in RFCs #1, #2, #3, #5 and one pending for `signature`. The fixtures already use
+proposed in RFCs #1, #2, #3, #5 and #8 (`signature`). The fixtures already use
 them; if an RFC is rejected, the fixtures change and this validator follows.
 
 ## No network access
@@ -214,7 +214,7 @@ compares instead.
   (section 6.3). Evidence for a later version never counts.
 - **Several intents.** Appendix D defines coverage for one intent version; a passport lists
   several. The criteria in scope of all listed intents are counted together, as section 8.2
-  reads `scope` for the passport. With one intent both readings agree.
+  reads `scope` for the passport (proposed in RFC #7). With one intent both readings agree.
 - **The release subject** of a passport is the build of its approved or passed release decision
   whose digest matches the statement subject, as R16 finds it.
 - **Attested** uses `rules.self_declared`, the reason R12 reports, with the key ids that signed
