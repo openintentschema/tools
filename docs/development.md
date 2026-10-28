@@ -1,7 +1,7 @@
 # Development
 
 How to work on the validator. How it is built: [architecture.md](architecture.md). Rules for
-contributions: [CONTRIBUTING.md](../CONTRIBUTING.md).
+contributions: [CONTRIBUTING.md](../.github/CONTRIBUTING.md).
 
 ## Setup and checks
 
@@ -29,6 +29,8 @@ tests/
 scripts/sync_spec.py copies schema, examples and fixtures from the specification
 spec.lock            the specification commit the copies come from
 docs/                this file and architecture.md
+.github/             CI and release workflows, templates, contributing guide, Code of Conduct,
+                     security policy
 ```
 
 ## Copies from the specification
@@ -74,13 +76,22 @@ fix.
 The workflow `.github/workflows/release.yml` checks that tag and version match, builds the
 package, smoke-tests the installed wheel and publishes to PyPI with trusted publishing: no
 stored token, and PyPI records signed attestations of where the package was built. The
-`pypi` environment asks a maintainer to approve each release. A published version cannot be
-replaced; fix forward with a new version.
+`pypi` environment asks a maintainer to approve each release and accepts only tags `v*`
+(*Settings → Environments → pypi*). A published version cannot be replaced; fix forward with a
+new version.
+
+After a release, update the guides on the website (specification repository,
+`site/src/content/docs/`) that describe a changed command, and install the new version from PyPI
+once to check it (`uvx --refresh --from ois-validator==<version> …`; shields.io caches the PyPI
+badge for up to six hours).
 
 ## Conventions
 
-- Newest released versions of Python, libraries, tools and GitHub Actions. Actions are pinned to
-  a commit SHA with the version as a comment.
+- Newest released versions of Python, libraries, tools and GitHub Actions, looked up rather than
+  remembered. Actions are pinned to a commit SHA with the version as a comment. Dependencies are
+  updated by hand, without bots.
 - Python 3.13 or later, ruff with line length 100, mypy strict, pytest.
 - English in code and documentation; rule IDs and levels exactly as in the specification.
-- Every commit carries a DCO sign-off (`git commit -s`).
+- Every commit carries a DCO sign-off: `git commit -s -m "<what changed>"`, one line.
+- No network access at run time: commands read local files and the local Git checkout only.
+  Verify a new feature in a sandbox that blocks the network before stating otherwise.

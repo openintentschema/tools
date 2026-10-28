@@ -29,8 +29,8 @@ git commit -s -m "Describe your change"
 - CI must pass: lint, format, strict type check and tests on every supported Python version.
 - User-visible changes get a line under "Unreleased" in `CHANGELOG.md`.
 
-[docs/development.md](docs/development.md) shows the setup, the checks and how a rule is added;
-[docs/architecture.md](docs/architecture.md) how the code is organised. Security issues are
+[docs/development.md](../docs/development.md) shows the setup, the checks and how a rule is added;
+[docs/architecture.md](../docs/architecture.md) how the code is organised. Security issues are
 reported privately, see [SECURITY.md](SECURITY.md).
 
 ## License
