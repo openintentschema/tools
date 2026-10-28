@@ -55,6 +55,7 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
 | `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
@@ -167,12 +168,32 @@ the command is named on each run, as on the command line.
 - **Trust comes from the command line only.** Keys in a document are never trusted; otherwise a
   producer could attest its own contexts.
 - **Attribution** follows section 8.3: a signer key id counts for the actor whose
-  `identity.keyId` equals it. Certificate identities (`issuer`, `subject`) need Sigstore and are
-  not verified yet, so they never attest.
+  `identity.keyId` equals it; certificate identities (`issuer`, `subject`) come from Sigstore
+  bundles (see Keyless signatures).
 - **Algorithms:** Ed25519 (`ois key generate`) and ECDSA P-256 with SHA-256, the usual choices
   for DSSE and Sigstore. Ed25519 signs deterministically, which the fixtures rely on.
 - **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
   gets a signature; adding a signature keeps the payload bytes unchanged.
+
+## Keyless signatures
+
+`keyless.py` reads Sigstore bundles with the optional `sigstore` package, verifying offline:
+
+- **No provider code.** A provider is a trusted root and an OIDC issuer; `--trusted-root` takes
+  any, including the JSON lines of `gh attestation trusted-root`. Organizations with their own
+  Sigstore instance pass its trusted root.
+- **Identity after verification.** Certificate chain, transparency log entry and signature are
+  checked with `Verifier.verify_dsse` and a policy that accepts any identity but records it; the
+  identity (OIDC issuer extension, subject alternative name) is then matched to actors by R12, as
+  the attribution of section 8.3 requires. Matching is exact; a GitHub workflow's subject includes
+  its ref.
+- **Same payload rules as DSSE.** The bundle's DSSE envelope goes through `signing.read_payload`,
+  so payload type and content are checked alike; `Signers` carries key ids and certificate
+  identities together.
+- **Optional.** Without the package, `--trusted-root` fails with an install hint; a bundle without
+  trusted roots validates as unsigned with a `signature` warning.
+- **Tests** use the real provenance bundle of the ois-tools 0.6.0 image and a frozen public-good
+  trusted root, so they run offline.
 
 ## Intent coverage
 

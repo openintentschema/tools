@@ -5,6 +5,19 @@ All notable changes to `ois-tools`, called `ois-validator` up to 0.5.0. Versions
 
 ## Unreleased
 
+## 0.8.0 (2026-10-28)
+
+- Keyless signatures (Sigstore): `ois validate`, `ois coverage` and `ois passport build` read
+  Sigstore bundles, as `actions/attest`, cosign and sigstore-python write them, and verify them
+  offline against the trusted roots given with `--trusted-root` (JSON, or the JSON lines of
+  `gh attestation trusted-root`). A verified signature counts for the actor whose
+  `identity.issuer` and `identity.subject` equal the certificate's OIDC issuer and subject, for
+  example a GitHub Actions workflow; R12 and the attested coverage follow.
+- `ois passport build --keyless-signer ISSUER=SUBJECT` counts a signer that signs the passport
+  afterwards, for example with `actions/attest`, in the attested coverage.
+- Optional dependency: `pip install ois-tools[sigstore]`; the container image includes it.
+- Passes the keyless conformance fixtures once they are recorded in the specification repository.
+
 ## 0.7.0 (2026-10-28)
 
 - DSSE signatures (specification section 8.3). `ois key generate` writes an Ed25519 key pair and

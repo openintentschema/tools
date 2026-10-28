@@ -37,6 +37,34 @@ class Reference:
     path: str  # JSONPath of the reference in the input document
 
 
+@dataclass(frozen=True)
+class Signers:
+    """Who signed a document, as verified: key ids whose signatures verified under trusted keys,
+    and the (issuer, subject) identities of certificates verified under trusted roots."""
+
+    keyids: frozenset[str] = frozenset()
+    identities: frozenset[tuple[str, str]] = frozenset()
+
+    def __bool__(self) -> bool:
+        return bool(self.keyids or self.identities)
+
+    def include(self, identity: object) -> bool:
+        """Whether an actor `identity` (section 4.4) is among the signers (section 8.3)."""
+        if not isinstance(identity, dict):
+            return False
+        return (
+            identity.get("keyId") in self.keyids
+            or (
+                identity.get("issuer"),
+                identity.get("subject"),
+            )
+            in self.identities
+        )
+
+
+NOBODY = Signers()  # an unsigned document
+
+
 @dataclass
 class Document:
     """The records of a single record, a bundle or a passport, after the schema check passed."""
@@ -45,7 +73,7 @@ class Document:
     container: bool = True  # False for a single record: no rules across records apply
     passport: Record | None = None  # the predicate, for passports
     subjects: list[dict[str, str]] = field(default_factory=list)  # statement subject digests
-    signers: frozenset[str] = frozenset()  # key ids whose signatures verified under trusted keys
+    signers: Signers = NOBODY  # who signed the envelope around it, as verified
     _by_id: dict[str, list[Entry]] = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -53,9 +81,8 @@ class Document:
             self._by_id.setdefault(entry.record["id"], []).append(entry)
 
     @classmethod
-    def of(cls, document: Record, *, signers: frozenset[str] = frozenset()) -> "Document":
-        """The records of a single record, bundle or passport; `signers` are the key ids whose
-        signatures on its envelope verified under trusted keys."""
+    def of(cls, document: Record, *, signers: Signers = NOBODY) -> "Document":
+        """The records of a single record, bundle or passport; `signers` signed its envelope."""
         if document.get("_type") == STATEMENT_TYPE:
             predicate: Record = document["predicate"]
             # Appendix B covers only the predicate, so the statement's subject is read defensively.

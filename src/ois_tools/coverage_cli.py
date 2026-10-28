@@ -10,6 +10,7 @@ from pathlib import Path
 
 from ois_tools.authoring import AuthoringError, files, load
 from ois_tools.coverage import METHOD, Coverage, CoverageError, coverage, passport_coverage
+from ois_tools.keyless import is_sigstore_bundle, load_trusted_roots, open_sigstore_bundle
 from ois_tools.passports import PassportError, collect, latest_approved
 from ois_tools.schema import STATEMENT_TYPE
 from ois_tools.signing import SigningError, is_envelope, load_trusted, open_envelope
@@ -42,19 +43,28 @@ def main(argv: list[str] | None = None) -> int:
         metavar="KEY",
         help="public key for a signed passport (attested coverage); a directory, or KEYID=FILE",
     )
+    parser.add_argument(
+        "--trusted-root",
+        action="append",
+        default=[],
+        metavar="FILE",
+        help="Sigstore trusted root for a keyless signed passport (attested coverage)",
+    )
     args = parser.parse_args(argv)
 
     try:
         documents = [load(path) for path in files(args.inputs)]
         single = documents[0] if len(documents) == 1 else None
-        statement = (
-            open_envelope(single, []).payload
-            if isinstance(single, dict) and is_envelope(single)
-            else single
-        )
+        statement = single
+        if isinstance(single, dict) and is_envelope(single):
+            statement = open_envelope(single, []).payload
+        elif isinstance(single, dict) and is_sigstore_bundle(single):
+            statement = open_sigstore_bundle(single, []).payload
         if isinstance(statement, dict) and statement.get("_type") == STATEMENT_TYPE:
             assert isinstance(single, dict)
-            result = passport_coverage(single, load_trusted(args.trusted_key))
+            result = passport_coverage(
+                single, load_trusted(args.trusted_key), load_trusted_roots(args.trusted_root)
+            )
             declared = {
                 a["name"]: a["value"]
                 for a in statement["predicate"].get("assessments", [])

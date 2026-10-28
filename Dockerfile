@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Every ois command in one image, for projects in any language:
+# Every ois command in one image, Sigstore verification included, for projects in any language:
 #   docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 #     ghcr.io/openintentschema/ois-tools validate bundle.json
 # In CI jobs that use it as their image, override the entrypoint (GitLab: entrypoint: [""]).
@@ -14,7 +14,7 @@ WORKDIR /src
 COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src ./src
 RUN uv build --wheel --out-dir /dist \
- && uv export --frozen --no-dev --no-emit-project --output-file /dist/requirements.txt
+ && uv export --frozen --no-dev --extra sigstore --no-emit-project --output-file /dist/requirements.txt
 
 FROM python:3.15.2-slim-trixie@sha256:c4158543ecb725b99e57d129dfd43d761d4c43e4577b5e23326aabb223cf7f4e
 LABEL org.opencontainers.image.title="ois-tools" \

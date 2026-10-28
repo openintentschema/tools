@@ -301,8 +301,8 @@ def check(document: Document) -> Iterator[Report]:
 
 def self_declared(artifact: Record, document: Document) -> str | None:
     """R12: why an artifact's context is self-declared, or None if it has none or it is attested:
-    recorded by another actor whose `identity.keyId` signed the document under a trusted key.
-    Certificate identities (Sigstore keyless) are not verified yet."""
+    recorded by another actor whose `identity` signed the document: its key id under a trusted
+    key, or its certificate issuer and subject under a trusted root."""
     if "context" not in artifact:
         return None
     recorder = artifact.get("contextRecordedBy")
@@ -311,12 +311,11 @@ def self_declared(artifact: Record, document: Document) -> str | None:
     if _actor_id(recorder) == _actor_id(artifact["producedBy"]):
         return "recorded by its own producer"
     actor = document.record(recorder)
-    keyid = (
-        (actor or {}).get("identity", {}).get("keyId")
-        if actor and actor["type"] == "actor"
-        else None
-    )
-    if keyid is not None and keyid in document.signers:
+    if (
+        actor is not None
+        and actor["type"] == "actor"
+        and document.signers.include(actor.get("identity"))
+    ):
         return None
     if not document.signers:
         return f"the document is not signed by {recorder}"

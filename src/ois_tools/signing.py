@@ -25,6 +25,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
+from ois_tools.document import NOBODY, Signers
 from ois_tools.report import Level, Report
 from ois_tools.schema import STATEMENT_TYPE
 
@@ -47,11 +48,11 @@ class TrustedKey:
 
 @dataclass
 class Opened:
-    """What an envelope holds: its payload if it is JSON, the key ids whose signatures verified
-    under trusted keys (empty if the envelope counts as unsigned), and the signature reports."""
+    """What an envelope holds: its payload if it is JSON, who signed it as verified (nobody if it
+    counts as unsigned), and the signature reports."""
 
     payload: Any
-    signers: frozenset[str] = frozenset()
+    signers: Signers = NOBODY
     reports: list[Report] = field(default_factory=list)
 
 
@@ -148,27 +149,32 @@ def sign(document: dict[str, Any], key: PrivateKey) -> dict[str, Any]:
     return dict(envelope)
 
 
-def open_envelope(envelope: dict[str, Any], trusted: Iterable[TrustedKey]) -> Opened:
-    keys = {k.keyid: k.key for k in trusted}
+def read_payload(envelope: dict[str, Any], path: str = "$") -> tuple[Any, bytes, list[Report]]:
+    """The payload of a DSSE envelope, its bytes, and violations of section 8.3: not base64 JSON
+    (payload None), not a bundle or passport, or the wrong payload type."""
     try:
-        body = base64.b64decode(envelope["payload"], validate=True)
+        body = base64.b64decode(envelope.get("payload", ""), validate=True)
         payload = json.loads(body)
     except (binascii.Error, ValueError, TypeError) as error:
-        return Opened(
-            None, reports=[_violation(f"payload is not base64 JSON: {error}", "$.payload")]
-        )
-
+        return None, b"", [_violation(f"payload is not base64 JSON: {error}", f"{path}.payload")]
     reports: list[Report] = []
     try:
         required = payload_type_of(payload)
     except SigningError as error:
-        reports.append(_violation(str(error), "$.payload"))
+        reports.append(_violation(str(error), f"{path}.payload"))
     else:
-        if envelope["payloadType"] != required:
-            message = (
-                f"payload type {envelope['payloadType']!r}; this payload requires {required!r}"
-            )
-            reports.append(_violation(message, "$.payloadType"))
+        kind = envelope.get("payloadType")
+        if kind != required:
+            message = f"payload type {kind!r}; this payload requires {required!r}"
+            reports.append(_violation(message, f"{path}.payloadType"))
+    return payload, body, reports
+
+
+def open_envelope(envelope: dict[str, Any], trusted: Iterable[TrustedKey]) -> Opened:
+    keys = {k.keyid: k.key for k in trusted}
+    payload, body, reports = read_payload(envelope)
+    if payload is None:
+        return Opened(None, reports=reports)
     signatures = envelope["signatures"] if isinstance(envelope["signatures"], list) else []
     if not signatures:
         reports.append(_violation("the envelope carries no signature", "$.signatures"))
@@ -188,7 +194,7 @@ def open_envelope(envelope: dict[str, Any], trusted: Iterable[TrustedKey]) -> Op
             reports.append(_violation(f"the signature by key {keyid} does not verify", path))
 
     unsigned = any(r.level == Level.VIOLATION for r in reports)
-    return Opened(payload, frozenset() if unsigned else frozenset(signers), reports)
+    return Opened(payload, Signers() if unsigned else Signers(keyids=frozenset(signers)), reports)
 
 
 def _sign(key: PrivateKey, data: bytes) -> bytes:

@@ -5,6 +5,9 @@
     "keys/ci-recorder.pub",
     "keys/passport-issuer.pub"
   ],
+  "trustedRoots": [
+    "keys/sigstore-public-good.trusted_root.json"
+  ],
   "fixtures": [
     {
       "path": "valid/bundle.json",

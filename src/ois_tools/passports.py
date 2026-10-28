@@ -13,6 +13,8 @@ from datetime import UTC, datetime
 from typing import Any
 
 from ois_tools.coverage import coverage
+from ois_tools.document import NOBODY, Signers
+from ois_tools.keyless import is_sigstore_bundle, open_sigstore_bundle
 from ois_tools.rules import content
 from ois_tools.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
 from ois_tools.signing import is_envelope, open_envelope
@@ -69,11 +71,11 @@ def build(
     release_outcome: str = "approved",
     release_decision_id: str | None = None,
     assess_coverage: bool = True,
-    signers: frozenset[str] = frozenset(),
+    signers: Signers = NOBODY,
 ) -> Record:
     """A conforming passport, not yet signed, for the release of `build`, with its intent
     coverage by the reference method of Appendix D unless `assess_coverage` is false. `signers`
-    are the key ids that will sign it, which the attested coverage counts (R12)."""
+    are who will sign it, which the attested coverage counts (R12)."""
     records = copy.deepcopy(records)
     artifact = next((r for r in records if r["id"] == build and r["type"] == "artifact"), None)
     if artifact is None:
@@ -136,6 +138,9 @@ def _records(document: object) -> list[Record]:
     if is_envelope(document):  # a signed bundle or passport: its records, not its signatures
         assert isinstance(document, dict)
         document = open_envelope(document, []).payload
+    elif is_sigstore_bundle(document):
+        assert isinstance(document, dict)
+        document = open_sigstore_bundle(document, []).payload
     if not isinstance(document, dict):
         raise PassportError("expected a JSON object: a record, a bundle or a passport")
     if document.get("_type") == STATEMENT_TYPE:

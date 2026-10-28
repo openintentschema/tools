@@ -17,7 +17,8 @@ from datetime import datetime
 from typing import Any
 
 from ois_tools import digests
-from ois_tools.document import Document, Entry
+from ois_tools.document import NOBODY, Document, Entry, Signers
+from ois_tools.keyless import is_sigstore_bundle, open_sigstore_bundle
 from ois_tools.rules import criterion as criterion_of
 from ois_tools.rules import self_declared
 from ois_tools.schema import STATEMENT_TYPE
@@ -81,13 +82,20 @@ class Coverage:
         ]
 
 
-def passport_coverage(statement: Record, trusted_keys: Iterable[TrustedKey] = ()) -> Coverage:
+def passport_coverage(
+    statement: Record,
+    trusted_keys: Iterable[TrustedKey] = (),
+    trusted_roots: Iterable[Any] = (),
+) -> Coverage:
     """Coverage of a passport: its intents and scope, for the build its release decision names.
-    A passport in a DSSE envelope counts its signatures under `trusted_keys` for the attested
-    variant (R12)."""
-    signers: frozenset[str] = frozenset()
+    A signed passport (DSSE envelope or Sigstore bundle) counts its verified signers for the
+    attested variant (R12)."""
+    signers = Signers()
     if is_envelope(statement):
         opened = open_envelope(statement, trusted_keys)
+        statement, signers = opened.payload, opened.signers
+    elif is_sigstore_bundle(statement):
+        opened = open_sigstore_bundle(statement, trusted_roots)
         statement, signers = opened.payload, opened.signers
     if not isinstance(statement, dict) or statement.get("_type") != STATEMENT_TYPE:
         raise CoverageError("not a passport: expected an in-toto Statement")
@@ -128,10 +136,10 @@ def coverage(
     subject: str,
     intents: list[str],
     scope: list[str] | None = None,
-    signers: frozenset[str] = frozenset(),
+    signers: Signers = NOBODY,
 ) -> Coverage:
     """Coverage of the listed intent versions for the release subject `subject` (an artifact id).
-    `signers` are the key ids that signed the document carrying the records (R12)."""
+    `signers` signed the document carrying the records (R12)."""
     document = _document(list(records), signers)
     release = document.record(subject)
     if release is None or release["type"] != "artifact":
@@ -265,7 +273,7 @@ def _share(criteria: tuple[Criterion, ...], covered: Callable[[Criterion], bool]
     return sum(1 for c in criteria if covered(c)) / len(criteria)
 
 
-def _document(records: list[Record], signers: frozenset[str] = frozenset()) -> Document:
+def _document(records: list[Record], signers: Signers = NOBODY) -> Document:
     entries = [Entry(record, f"$.records[{i}]") for i, record in enumerate(records)]
     return Document(entries, signers=signers)
 

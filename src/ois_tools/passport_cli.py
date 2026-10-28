@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from ois_tools.authoring import AuthoringError, files, load
+from ois_tools.document import Signers
 from ois_tools.passports import PassportError, Release, build, collect
 from ois_tools.signing import TrustedKey, key_id, load_private_key, sign
 from ois_tools.validator import validate
@@ -65,6 +66,14 @@ def main(argv: list[str] | None = None) -> int:
         metavar="KEY",
         help="sign with this private key (DSSE); repeatable. Attested coverage counts these keys",
     )
+    building.add_argument(
+        "--keyless-signer",
+        action="append",
+        default=[],
+        metavar="ISSUER=SUBJECT",
+        help="certificate identity that will sign the passport keylessly (e.g. with actions/attest)"
+        "; attested coverage counts it",
+    )
     building.add_argument("--at", help="issuedAt, RFC 3339 (default now)")
     building.add_argument("--output", type=Path, help="write the passport here instead of stdout")
     args = parser.parse_args(argv)
@@ -94,7 +103,10 @@ def main(argv: list[str] | None = None) -> int:
             release_outcome=args.release_outcome,
             release_decision_id=args.release_decision_id,
             assess_coverage=not args.no_coverage,
-            signers=frozenset(key_id(key.public_key()) for key in keys),
+            signers=Signers(
+                keyids=frozenset(key_id(key.public_key()) for key in keys),
+                identities=frozenset(_identity(text) for text in args.keyless_signer),
+            ),
         )
     except PassportError as error:
         print(f"ois passport: {error}", file=sys.stderr)
@@ -110,6 +122,13 @@ def main(argv: list[str] | None = None) -> int:
         )
     _emit(passport, args.output)
     return EXIT_OK
+
+
+def _identity(text: str) -> tuple[str, str]:
+    issuer, separator, subject = text.partition("=")
+    if not (separator and issuer and subject):
+        raise PassportError(f"{text!r}: expected ISSUER=SUBJECT")
+    return issuer, subject
 
 
 def _emit(passport: dict[str, Any], path: Path | None) -> None:

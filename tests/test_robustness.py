@@ -13,7 +13,7 @@ from typing import Any
 import pytest
 
 from ois_tools import rules
-from ois_tools.document import Document
+from ois_tools.document import Document, Signers
 from ois_tools.signing import is_envelope, open_envelope
 
 VALID = sorted((Path(__file__).parent / "fixtures" / "valid").glob("*.json"))
@@ -31,9 +31,9 @@ def replace_at(document: Any, path: str, value: str) -> None:
 @pytest.mark.parametrize("path", VALID, ids=[p.name for p in VALID])
 def test_references_to_any_record_never_crash(path: Path) -> None:
     document = json.loads(path.read_text(encoding="utf-8"))
-    signers: frozenset[str] = frozenset()
+    signers = Signers()
     if is_envelope(document):  # signed fixtures: the payload, with every key id as a signer
-        signers = frozenset(s["keyid"] for s in document["signatures"])
+        signers = Signers(keyids=frozenset(s["keyid"] for s in document["signatures"]))
         document = open_envelope(document, []).payload
     parsed = Document.of(document, signers=signers)
     targets = sorted(

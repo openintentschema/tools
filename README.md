@@ -32,7 +32,7 @@ its rule and level (specification section 11.1):
 **Status:** pre-alpha, targets specification v0.1. `ois validate` checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
 conformance fixtures, signed ones included. Signatures are verified with keys you trust (Ed25519
-or ECDSA P-256); Sigstore keyless signatures are not verified yet. Up to version 0.5.0 the package was called `ois-validator`, with one command per
+or ECDSA P-256) or, for keyless Sigstore signatures, against the trusted roots you choose. Up to version 0.5.0 the package was called `ois-validator`, with one command per
 tool (`ois-validator`, `ois-junit`, …).
 
 ## Install
@@ -58,8 +58,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 - `--network none` is optional and shows that no command needs the network.
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.7.0`, `0.7` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.7.0 --owner openintentschema`.
+- Tags: `0.8.0`, `0.8` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.8.0 --owner openintentschema`.
 
 ## Validate
 
@@ -282,7 +282,43 @@ ois validate passport.dsse.json --trusted-key keys/       # a .pub file, a direc
   envelope then counts as unsigned; a warning for a key that is not trusted.
 - Private keys are written readable by you only and are never needed for verification. Keep them
   in a secret store; an encrypted key is opened with `OIS_KEY_PASSPHRASE`.
-- Sigstore keyless signing and transparency logs follow later.
+### Keyless with Sigstore, for example on GitHub
+
+In a pipeline, no key needs to be kept: GitHub Actions (or GitLab CI, Google Cloud, Buildkite)
+proves the workflow's identity to Sigstore, which certifies it for ten minutes and logs the
+signature publicly. On GitHub, `actions/attest` signs the passport:
+
+```bash
+ois passport build .ois/ … --keyless-signer \
+  "https://token.actions.githubusercontent.com=https://github.com/$GITHUB_WORKFLOW_REF" \
+  --output passport.json                      # attested coverage counts the workflow
+jq .predicate passport.json > predicate.json  # actions/attest builds the statement itself
+```
+
+```yaml
+- uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+  with:
+    subject-name: billing
+    subject-digest: sha256:${{ steps.passport.outputs.digest }}   # the passport's subject
+    predicate-type: https://ois.example/passport/v0.1
+    predicate-path: predicate.json
+```
+
+```bash
+pip install 'ois-tools[sigstore]'
+gh attestation trusted-root > trusted_root.jsonl             # refresh it now and then
+ois validate passport.sigstore.json --trusted-root trusted_root.jsonl
+```
+
+- The signer is the certificate identity. An actor that signs keylessly names it:
+  `ois record actor … --identity-issuer https://token.actions.githubusercontent.com
+  --identity-subject https://github.com/<owner>/<repo>/.github/workflows/<file>@<ref>`.
+- Another provider or an organization's own Sigstore instance is another trusted root and another
+  issuer; nothing in the tools is specific to GitHub. Outside GitHub, `cosign attest-blob` signs.
+- Verification runs offline; the trusted root changes when Sigstore rotates keys, so refresh it.
+- People should not sign through the public instance, which puts their e-mail address into the
+  certificate (specification section 12): let them approve in GitHub (for example as required
+  reviewers of an environment) and the workflow sign, or give them their own key.
 
 ## Privacy
 

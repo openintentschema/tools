@@ -4,7 +4,9 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
+from ois_tools.keyless import load_trusted_roots
 from ois_tools.report import Level, Report, Result
 from ois_tools.signing import SigningError, TrustedKey, load_trusted
 from ois_tools.validator import validate
@@ -28,9 +30,17 @@ def main(argv: list[str] | None = None) -> int:
         metavar="KEY",
         help="public key (PEM) to verify signatures; a directory of *.pub files, or KEYID=FILE",
     )
+    parser.add_argument(
+        "--trusted-root",
+        action="append",
+        default=[],
+        metavar="FILE",
+        help="Sigstore trusted root (JSON, or JSON lines from gh attestation trusted-root)",
+    )
     args = parser.parse_args(argv)
     try:
         trusted = load_trusted(args.trusted_key)
+        roots = load_trusted_roots(args.trusted_root)
     except (OSError, SigningError) as error:
         print(f"ois validate: {error}", file=sys.stderr)
         return EXIT_USAGE
@@ -42,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, UnicodeDecodeError) as error:
             print(f"ois validate: {name}: {error}", file=sys.stderr)
             return EXIT_USAGE
-        results[name] = _validate_text(text, trusted)
+        results[name] = _validate_text(text, trusted, roots)
 
     if args.format == "json":
         out = [
@@ -60,12 +70,12 @@ def main(argv: list[str] | None = None) -> int:
     return EXIT_CONFORMS if all(r.conforms for r in results.values()) else EXIT_VIOLATION
 
 
-def _validate_text(text: str, trusted: list[TrustedKey]) -> Result:
+def _validate_text(text: str, trusted: list[TrustedKey], roots: list[Any]) -> Result:
     try:
         document = json.loads(text)
     except json.JSONDecodeError as error:
         return Result([Report(Level.VIOLATION, "json", f"not valid JSON: {error}", "$")])
-    return validate(document, trusted_keys=trusted)
+    return validate(document, trusted_keys=trusted, trusted_roots=roots)
 
 
 if __name__ == "__main__":
