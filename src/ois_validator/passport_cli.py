@@ -8,15 +8,13 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from ois_validator.authoring import AuthoringError, load
+from ois_validator.authoring import AuthoringError, files, load
 from ois_validator.passports import PassportError, Release, build, collect
 from ois_validator.validator import validate
 
 EXIT_OK = 0
 EXIT_INVALID = 1
 EXIT_USAGE = 2
-
-SUFFIXES = (".json", ".yaml", ".yml")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -59,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        documents = [load(path) for path in _files(args.inputs)]
+        documents = [load(path) for path in files(args.inputs)]
         issued_at = _moment(args.at)
     except (OSError, AuthoringError, ValueError) as error:
         print(f"ois-passport: {error}", file=sys.stderr)
@@ -89,16 +87,6 @@ def main(argv: list[str] | None = None) -> int:
         )
     _emit(passport, args.output)
     return EXIT_OK
-
-
-def _files(inputs: list[Path]) -> list[Path]:
-    files: list[Path] = []
-    for path in inputs:
-        if path.is_dir():
-            files.extend(sorted(p for p in path.rglob("*") if p.suffix in SUFFIXES and p.is_file()))
-        else:
-            files.append(path)
-    return files
 
 
 def _emit(passport: dict[str, Any], path: Path | None) -> None:

@@ -1,6 +1,6 @@
 [project]
 name = "ois-validator"
-version = "0.3.0"
+version = "0.4.0"
 description = "Reference validator for the Open Intent Schema (OIS)"
 keywords = ["ois", "open-intent-schema", "requirements", "traceability", "evidence", "in-toto", "junit"]
 readme = "README.md"
@@ -26,6 +26,7 @@ ois-validator = "ois_validator.cli:main"
 ois-junit = "ois_validator.junit_cli:main"
 ois-intent = "ois_validator.intent_cli:main"
 ois-passport = "ois_validator.passport_cli:main"
+ois-record = "ois_validator.record_cli:main"
 
 [project.urls]
 Repository = "https://github.com/openintentschema/validator"

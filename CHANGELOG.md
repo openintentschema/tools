@@ -5,6 +5,15 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.4.0 (2026-10-28)
+
+- `ois-record`: write artifact, actor, evidence, decision and finding records, supersede a
+  finding and bundle records. Digests of files and commits, the Git location of a file, a
+  decision's subject digest and ids are computed; each command prints the reference of its record.
+- `ois-record` refuses what the rules forbid: a changed record under an existing id, a wrong
+  subject or outcome for a well-known gate, a second successor of a finding and a finding
+  resolution confirmed by an actor who took part in it (R14).
+
 ## 0.3.0 (2026-10-28)
 
 - `ois-passport build`: assemble a validated, unsigned Quality Passport from records, bundles

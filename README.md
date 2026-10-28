@@ -12,9 +12,12 @@ rule and level (specification section 11.1):
 - **warning:** R8, R12 and R13 ask for a report; the input still conforms.
 - **info:** a SHOULD is not followed.
 
-The package also brings `ois-junit`, which turns the JUnit XML of an existing pipeline into OIS
-records, `ois-intent`, which seals, approves and versions intents written in YAML or JSON, and
-`ois-passport`, which assembles a Quality Passport for a release.
+The package also brings the commands that write OIS records:
+
+- `ois-junit` turns the JUnit XML of an existing pipeline into OIS records;
+- `ois-intent` seals, approves and versions intents written in YAML or JSON;
+- `ois-record` writes artifacts, actors, evidence, decisions and findings, with their digests;
+- `ois-passport` assembles a Quality Passport for a release.
 
 **Status:** pre-alpha, targets specification v0.1. The validator checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
@@ -125,6 +128,47 @@ ois-intent compare .ois/intents/INT-142-v1.ois.json .ois/intents/INT-142-v2.ois.
   merge keys and non-string or duplicate keys are refused, so that digests do not depend on how
   a YAML library reads the text.
 
+## Record artifacts, actors, evidence, decisions and findings
+
+`ois-record` writes every other record type, one record per command, to `.ois/<type>s/`. It
+computes what is error-prone by hand, validates the record and prints the reference other records
+use for it, so a pipeline can pass it on:
+
+```bash
+export OIS_NAMESPACE=https://ois.acme.example              # for derived ids, or --namespace
+
+CI=$(ois-record actor --kind tool --name "CI build" --version 7)
+DEV=$(ois-record actor --kind agent --name "Dev Agent" --version 2.1 --model acme-ai:coder:2026-09)
+CODE=$(ois-record artifact src/invoice.py --kind code --produced-by "$DEV")
+BUILD=$(ois-record artifact dist/billing-2026.10.4-py3-none-any.whl --kind build \
+  --location pkg:pypi/billing@2026.10.4 --produced-by "$CI" --input "$CODE")
+ois-record decision --gate merge --subject "$CODE" --outcome passed --by "$CI"
+```
+
+| Command | Writes | Computed for you |
+| --- | --- | --- |
+| `actor` | a human, agent or tool | id from the name; the reference `<id>@<version>` |
+| `artifact FILE` | an artifact of any kind | `sha256`; for a committed file also `gitCommit`, location `git+<origin>@<HEAD>` and path |
+| `artifact --commit REPO` | the repository at `HEAD` | `gitCommit` and location |
+| `artifact --digest ALG:HEX` | an artifact with a known digest, such as an image | id from name and digest |
+| `evidence` | one result of one test for one criterion | id; measures from `--measure responseTimeP95=420ms` |
+| `decision` | a gate outcome | `subjectDigest` from the subject among the records (R1, R16) |
+| `finding` | a defect or incident | id |
+| `supersede FILE` | the next record of a finding chain | id (`FND-18-r2`), `supersedes`, the unchanged fields |
+| `bundle INPUT...` | a self-contained bundle, to stdout or `--output` | each record once, validated |
+
+- **Records never change.** Recording the same thing again prints its reference and keeps the
+  file; a different record under an existing id is refused (R10). A changed actor needs a new
+  `--version`.
+- **Files are located in Git.** A file must be committed and unchanged unless `--location` names
+  where it lives, for example a Package URL for a build.
+- **Rules are checked where the records allow it.** `decision` checks subject and outcome of the
+  well-known gates (specification section 4.6) and, for `finding-resolution`, that the deciding
+  actor took no part in the resolution (R14). `supersede` refuses a second successor (R14).
+  `decision` and `supersede` look up references in the output directory and in `--records`.
+- Exit code 0 writes the record, 1 means it would break a rule and nothing is written, 2 means a
+  file could not be read or an argument is malformed.
+
 ## Build a Quality Passport
 
 `ois-passport` collects the records behind a release into an in-toto Statement with the OIS
@@ -133,8 +177,8 @@ passport predicate (specification section 8) and validates it before writing:
 ```bash
 ois-passport build .ois/ ci-bundles/ \
   --release-name billing --release-version 2026.10.4 \
-  --build https://ois.acme.example/artifacts/billing-2026.10.4 \
-  --issuer https://ois.acme.example/actors/passport-issuer@0.3.0 \
+  --build "$BUILD" \
+  --issuer https://ois.acme.example/actors/passport-issuer@1 \
   --approve-release-by https://ois.acme.example/actors/release-manager-1d2e \
   --output passport.json
 ```
@@ -151,9 +195,9 @@ ois-passport build .ois/ ci-bundles/ \
 
 ## Privacy
 
-None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-passport`) opens a network
-connection: the JSON Schema ships inside the
-package, and `ois-junit` reads the JUnit XML and the local Git checkout only. Installing the
+None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-record`, `ois-passport`)
+opens a network connection: the JSON Schema ships inside the package, and `ois-junit` and
+`ois-record` read local files and the local Git checkout only. Installing the
 package contacts PyPI. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).
 
@@ -161,7 +205,7 @@ package contacts PyPI. Details and a diagram:
 
 - [Specification, schema and conformance fixtures](https://github.com/openintentschema/openintentschema)
 - [Getting started](https://openintentschema.io/getting-started/): first OIS bundle from JUnit XML
-- [Architecture](docs/architecture.md): how the validator and `ois-junit` are built, and why
+- [Architecture](docs/architecture.md): how the validator and the commands are built, and why
 - [Development](docs/development.md): setup, checks, specification sync, adding a rule, releases
 - [Changelog](CHANGELOG.md)
 

@@ -106,3 +106,17 @@ def loads(text: str, *, json_only: bool = False) -> Any:
 def load(path: Path) -> Any:
     """A `.json` file as JSON; anything else as YAML, which also reads JSON."""
     return loads(path.read_text(encoding="utf-8"), json_only=path.suffix == ".json")
+
+
+SUFFIXES = (".json", ".yaml", ".yml")
+
+
+def files(inputs: list[Path]) -> list[Path]:
+    """Files as given, and in directories every JSON or YAML file, recursively and sorted."""
+    found: list[Path] = []
+    for path in inputs:
+        if path.is_dir():
+            found.extend(sorted(p for p in path.rglob("*") if p.suffix in SUFFIXES and p.is_file()))
+        else:
+            found.append(path)
+    return found

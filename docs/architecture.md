@@ -47,9 +47,10 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois-validator`: exit 0 conforms, 1 violation, 2 unreadable file. |
 | `junit.py`, `junit_cli.py` | `ois-junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
-| `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7). |
+| `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois-intent`: seal, approve, next version, compare. |
 | `passports.py`, `passport_cli.py` | `ois-passport build`: collect records, assemble and validate a passport. |
+| `records.py`, `record_cli.py` | `ois-record`: artifacts, actors, evidence, decisions, findings, finding chains and bundles. |
 | `schemas/ois-0.1.schema.json` | Copy of Appendix B, shipped in the package. |
 
 ## Design decisions
@@ -91,9 +92,10 @@ this validator follows.
 ## No network access
 
 None of the commands opens a network connection. The schema is bundled (`schemas/`) and loaded
-through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` runs local `git`
-commands only (`rev-parse`, `ls-files`, `show`, `remote get-url`). This was verified by running
-both commands and the whole test suite in a sandbox that blocks all network access. A new
+through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` and `ois-record`
+run local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This
+was verified by running every command and the whole test suite in a sandbox that blocks all
+network access. A new
 dependency or feature must keep it that way; the specification's
 [privacy page](https://openintentschema.io/privacy/) states it to users.
 
@@ -123,6 +125,33 @@ dependency or feature must keep it that way; the specification's
 - **Nothing non-conforming leaves.** The statement is validated before it is returned; a violation
   raises, warnings are left to the caller to show.
 - **Unsigned.** Signing wraps the finished statement in DSSE and is a separate step.
+
+## Recording the other records
+
+`ois-record` closes the gap between `ois-intent` and `ois-passport`: without it, artifacts,
+actors, decisions and findings were written by hand. Design choices:
+
+- **One record per command, its reference on stdout.** A pipeline captures it
+  (`BUILD=$(ois-record artifact …)`) and passes it to the next command; what was written goes to
+  stderr. Records go to `.ois/<type>s/`, next to what `ois-intent` writes, so `ois-passport build
+  .ois/` finds them.
+- **Ids that do not depend on the moment.** Actors are named (`actors/ci-build`, versioned by
+  `--version`); artifacts take a readable name and the start of their digest; evidence, decisions
+  and findings a hash of their content without `id` and `createdAt`. Recording the same thing twice
+  therefore lands on the same file, which is kept: records never change, and a different record
+  under an existing id is refused, as R10 would.
+- **Git is the default location.** A file without `--location` must be committed and unchanged
+  (`ls-files --error-unmatch`, `diff --quiet HEAD`), so that `sha256`, `gitCommit` and
+  `git+<origin>@<HEAD>` describe the same content. The location reuses `junit.location_of`, which
+  strips credentials.
+- **Rules where the records at hand allow them.** Each record passes the schema and R17 before it
+  is written. `decision` resolves its subject among the output directory and `--records` as
+  validators do, copies the subject's digest (R1, R16) and checks the well-known gates of section
+  4.6. For `finding-resolution` and `supersede` it applies R14: one successor per finding and a
+  confirming actor who did not produce, record or decide any part of the resolution. Everything
+  across records that this cannot see is left to `ois-validator` and `ois-passport`.
+- **Bundles are self-contained.** `bundle` reuses `passports.collect` and refuses a bundle with a
+  violation, typically an unresolved reference (R10).
 
 ## JUnit adapter
 
