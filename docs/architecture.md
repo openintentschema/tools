@@ -85,6 +85,15 @@ narrower R10 comparison (only intents ignore `status` and `digest`) are proposed
 #2, #3 and #5. The fixtures already use them; if an RFC is rejected, the fixtures change and
 this validator follows.
 
+## No network access
+
+Neither command opens a network connection. The schema is bundled (`schemas/`) and loaded
+through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` runs local `git`
+commands only (`rev-parse`, `ls-files`, `show`, `remote get-url`). This was verified by running
+both commands and the whole test suite in a sandbox that blocks all network access. A new
+dependency or feature must keep it that way; the specification's
+[privacy page](https://openintentschema.io/privacy/) states it to users.
+
 ## JUnit adapter
 
 `ois-junit` builds what the quick start of spec section 11.4 asks for and validates it before

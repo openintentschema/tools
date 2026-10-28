@@ -104,6 +104,13 @@ nothing is written, 2 means a report or the Git checkout could not be read.
 The [getting started guide](https://openintentschema.io/getting-started/)
 walks through it step by step, including a CI example.
 
+## Privacy
+
+`ois-validator` and `ois-junit` open no network connection: the JSON Schema ships inside the
+package, and `ois-junit` reads the JUnit XML and the local Git checkout only. Installing the
+package contacts PyPI. Details and a diagram:
+[Privacy and data flows](https://openintentschema.io/privacy/).
+
 ## Documentation
 
 - [Specification, schema and conformance fixtures](https://github.com/openintentschema/openintentschema)
