@@ -1,4 +1,4 @@
-name: CI
+name: Lint, type check and test
 
 on:
   push:
@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   check:
+    name: Python ${{ matrix.python }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
