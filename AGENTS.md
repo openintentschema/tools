@@ -22,6 +22,7 @@ depend on, name or favour a product or vendor.
 | `src/ois_validator/` | the package; one module per concern, see [docs/architecture.md](docs/architecture.md) |
 | `tests/` | unit tests per module; `fixtures/` and `examples/` are copies from the specification |
 | `scripts/sync_spec.py`, `spec.lock` | copy schema, examples and fixtures; the specification commit they come from |
+| `Dockerfile` | the container image `ghcr.io/openintentschema/ois-validator`, published by `release.yml` |
 | `docs/` | [architecture.md](docs/architecture.md) (design decisions), [development.md](docs/development.md) (setup, adding a rule, releases) |
 | `.github/` | CI and release workflows, templates, contributing guide, Code of Conduct, security policy |
 

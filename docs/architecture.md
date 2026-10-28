@@ -96,7 +96,7 @@ None of the commands opens a network connection. The schema is bundled (`schemas
 through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` and `ois-record`
 run local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This
 was verified by running every command and the whole test suite in a sandbox that blocks all
-network access. A new
+network access, and the container image with `docker run --network none` in CI. A new
 dependency or feature must keep it that way; the specification's
 [privacy page](https://openintentschema.io/privacy/) states it to users.
 
@@ -129,6 +129,16 @@ dependency or feature must keep it that way; the specification's
   from the passport's own records, intents and scope; `--no-coverage` leaves them out for producers
   who report their own method.
 - **Unsigned.** Signing wraps the finished statement in DSSE and is a separate step.
+
+## Container image
+
+The `Dockerfile` builds the wheel from source in one stage and installs it in a slim Python image
+with the runtime dependencies exported from `uv.lock` and checked by hash, so the image holds
+exactly what the lock file names. git is installed because `ois-junit` and `ois-record` read the
+checkout; `safe.directory '*'` lets git read a checkout mounted from the host, which belongs to
+another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker run --user`
+with the host's ids works and written files belong to the host user. It has no entrypoint:
+the command is named on each run, as on the command line.
 
 ## Intent coverage
 

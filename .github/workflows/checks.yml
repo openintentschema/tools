@@ -41,3 +41,22 @@ jobs:
           path: spec
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - run: uv run scripts/sync_spec.py --check spec
+
+  image:
+    name: Container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          tags: ois-validator:check
+      - name: Commands run offline on a mounted checkout as the runner's user
+        run: |
+          run() { docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-validator:check "$@"; }
+          run ois-validator tests/fixtures/valid/passport.json
+          run ois-coverage tests/fixtures/valid/passport.json
+          run ois-record artifact --commit . --kind code --namespace https://ois.acme.example \
+            --produced-by https://ois.acme.example/actors/dev@1 --output-dir /tmp/ois

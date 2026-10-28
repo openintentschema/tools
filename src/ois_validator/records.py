@@ -84,12 +84,16 @@ def file_source(path: Path, location: str | None = None) -> Source:
 
 
 def commit_source(repo: Path) -> Source:
-    """The repository at its HEAD commit (section 6.4 allows gitCommit alone in Git)."""
+    """The repository at its HEAD commit (section 6.4 allows gitCommit alone in Git). It is named
+    after its origin, since a checkout's folder name depends on where it was cloned."""
     root = _git_root(repo)
     if root is None:
         raise RecordError(f"{repo} is not in a Git working tree")
     commit = _git(root, "rev-parse", "HEAD")
-    return Source(_location(root), {"gitCommit": commit}, root.name)
+    location = _location(root)  # git+<origin URL>@<commit>
+    origin = location.removeprefix("git+").rpartition("@")[0]
+    name = origin.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git") or root.name
+    return Source(location, {"gitCommit": commit}, name)
 
 
 def digest_source(digest: str, *, location: str, name: str | None = None) -> Source:

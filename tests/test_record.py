@@ -114,7 +114,7 @@ def test_a_commit_artifact_names_the_commit(repo: Path) -> None:
     )
     assert record["digest"] == {"gitCommit": commit}
     assert record["location"] == f"git+{ORIGIN}@{commit}"
-    assert record["id"] == f"{NS}/artifacts/repo-{commit[:12]}"
+    assert record["id"] == f"{NS}/artifacts/billing-{commit[:12]}"  # after origin, not the folder
     assert validate(record).conforms
 
 

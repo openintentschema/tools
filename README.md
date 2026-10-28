@@ -32,6 +32,21 @@ uvx ois-validator bundle.json          # run without installing
 pip install ois-validator              # or install; Python 3.13 or later
 ```
 
+The commands work for projects in any language: they read JSON, YAML, JUnit XML and the local
+Git checkout, not the code. Without Python, use [uv](https://docs.astral.sh/uv/) alone (`uvx`
+fetches a Python on first use) or the container image, which holds every command and git:
+
+```bash
+docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
+  ghcr.io/openintentschema/ois-validator ois-validator bundle.json
+```
+
+- `-v "$PWD:/work"` mounts the current directory; paths are relative to it.
+- `--user` writes files as you rather than as the image's user.
+- `--network none` is optional and shows that no command needs the network.
+- Tags: `0.5.0`, `0.5` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-validator:0.5.0 --owner openintentschema`.
+
 ## Validate
 
 ```bash
@@ -230,8 +245,9 @@ passport declares; 2 means a file could not be read or the release subject is mi
 
 None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-record`, `ois-passport`,
 `ois-coverage`) opens a network connection: the JSON Schema ships inside the package, and `ois-junit` and
-`ois-record` read local files and the local Git checkout only. Installing the
-package contacts PyPI. Details and a diagram:
+`ois-record` read local files and the local Git checkout only. Installing the package contacts
+PyPI, pulling the container image contacts GitHub (ghcr.io), and `uvx` without a local Python
+downloads one from GitHub. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).
 
 ## Documentation

@@ -15,6 +15,11 @@ during 0.x any release may change behaviour.
   on a context (R12).
 - `ois-coverage`: per criterion, what counts and why other evidence does not; for a passport, a
   check of the coverage it declares (exit code 1 if it differs).
+- Container image `ghcr.io/openintentschema/ois-validator` with every command and git, for
+  projects in any language (linux/amd64 and linux/arm64, with build provenance and SBOM).
+  Published by the release workflow after the PyPI release.
+- `ois-record artifact --commit` names the artifact after the origin repository instead of the
+  checkout's folder, which differs between clones and containers.
 
 ## 0.4.0 (2026-10-28)
 
