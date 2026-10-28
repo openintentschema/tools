@@ -44,6 +44,7 @@ class Document:
     entries: list[Entry]
     container: bool = True  # False for a single record: no rules across records apply
     passport: Record | None = None  # the predicate, for passports
+    subjects: list[dict[str, str]] = field(default_factory=list)  # statement subject digests
     _by_id: dict[str, list[Entry]] = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -54,7 +55,15 @@ class Document:
     def of(cls, document: Record) -> "Document":
         if document.get("_type") == STATEMENT_TYPE:
             predicate: Record = document["predicate"]
-            return cls(_entries(predicate["records"], "$.predicate.records"), passport=predicate)
+            # Appendix B covers only the predicate, so the statement's subject is read defensively.
+            subject = document.get("subject")
+            subjects = [
+                s["digest"]
+                for s in (subject if isinstance(subject, list) else [])
+                if isinstance(s, dict) and isinstance(s.get("digest"), dict)
+            ]
+            entries = _entries(predicate["records"], "$.predicate.records")
+            return cls(entries, passport=predicate, subjects=subjects)
         if document["type"] == "bundle":
             return cls(_entries(document["records"], "$.records"))
         return cls([Entry(document, "$")], container=False)

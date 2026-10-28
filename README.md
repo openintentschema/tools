@@ -8,9 +8,9 @@ every problem with its rule ID and level (spec section 11.1):
 - **warning**: R8, R12 and R13 ask for a report; the input still conforms.
 - **info**: a SHOULD is not followed.
 
-Status: pre-alpha. The schema check (Appendix B) and the rules R1–R5, R8–R11, R14 and R17 pass
-their part of the conformance fixtures. The passport rules R13, R15 and R16, R12 and DSSE
-signatures follow.
+Status: pre-alpha. The validator checks Appendix B and every rule of section 5 that can be
+checked from the records at hand (R1–R5, R8–R17) and passes all conformance fixtures. Signatures
+are not verified yet, so R12 reports every recorded context as self-declared.
 
 ## Usage
 

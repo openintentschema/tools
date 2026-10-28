@@ -14,7 +14,7 @@ import pytest
 from ois_validator import validate
 
 FIXTURES = Path(__file__).parent / "fixtures"
-IMPLEMENTED = {"schema", "R1", "R2", "R3", "R4", "R5", "R8", "R9", "R10", "R11", "R12", "R14", "R17"}
+IMPLEMENTED = {"schema", *(f"R{n}" for n in range(1, 18) if n not in (6, 7))}
 
 MANIFEST: list[dict[str, Any]] = json.loads(
     (FIXTURES / "manifest.json").read_text(encoding="utf-8")

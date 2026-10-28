@@ -6,6 +6,7 @@ unresolved reference skips it; R10 reports the reference once.
 """
 
 from collections.abc import Callable, Iterator
+from datetime import datetime
 
 from ois_validator import digests
 from ois_validator.document import Document, Entry, Record
@@ -178,6 +179,26 @@ def r12_context_attestation(document: Document) -> Iterator[Report]:
         yield Report(Level.WARNING, "R12", message, f"{entry.path}.context")
 
 
+def r13_open_findings(document: Document) -> Iterator[Report]:
+    """R13: a passport lists an intent that a current, unresolved high or critical finding
+    references directly or through a criterion (warning)."""
+    if document.passport is None:
+        return
+    findings = list(document.of_type("finding"))
+    superseded = {f.record["supersedes"] for f in findings if "supersedes" in f.record}
+    for index, listed in enumerate(document.passport["intents"]):
+        for entry in findings:
+            finding = entry.record
+            if finding["id"] in superseded or finding["severity"] not in ("high", "critical"):
+                continue
+            concerns = finding.get("intent") == listed or (
+                finding.get("criterion", "").partition("#")[0] == listed
+            )
+            if concerns and not _resolved(document, finding):
+                message = f"{listed} has an open {finding['severity']} finding {finding['id']}"
+                yield Report(Level.WARNING, "R13", message, f"$.predicate.intents[{index}]")
+
+
 def r14_finding_chain(document: Document) -> Iterator[Report]:
     """R14: a finding has at most one superseding finding."""
     first: dict[str, str] = {}
@@ -190,6 +211,58 @@ def r14_finding_chain(document: Document) -> Iterator[Report]:
             yield Report(Level.VIOLATION, "R14", message, f"{entry.path}.supersedes")
         else:
             first[previous] = entry.path
+
+
+def r15_passport_intents(document: Document) -> Iterator[Report]:
+    """R15: a passport lists approved intent versions that are not withdrawn, and SHOULD list the
+    latest version approved before issuedAt (info)."""
+    if document.passport is None:
+        return
+    issued_at = _time(document.passport["issuedAt"])
+    for index, listed in enumerate(document.passport["intents"]):
+        intent = document.record(listed)
+        if intent is None or intent["type"] != "intent":
+            continue
+        path = f"$.predicate.intents[{index}]"
+        later = [
+            e.record
+            for e in document.of_type("intent")
+            if e.record["id"] == intent["id"] and e.record["version"] > intent["version"]
+        ]
+        withdrawn = [r["version"] for r in later if r["status"] == "withdrawn"]
+        if intent["status"] != "approved":
+            message = f"{listed} is {intent['status']}, not approved"
+            yield Report(Level.VIOLATION, "R15", message, path)
+        elif withdrawn:
+            message = f"{listed} is withdrawn by version {min(withdrawn)}"
+            yield Report(Level.VIOLATION, "R15", message, path)
+        elif newer := [r["version"] for r in later if _approved_before(document, r, issued_at)]:
+            message = f"{listed} SHOULD be the latest approved version, which is {max(newer)}"
+            yield Report(Level.INFO, "R15", message, path)
+
+
+def r16_release_decision(document: Document) -> Iterator[Report]:
+    """R16 (proposed): a passport carries an approved or passed release decision for a build
+    whose digest matches a subject of the statement."""
+    if document.passport is None:
+        return
+    for entry in document.of_type("decision"):
+        decision = entry.record
+        if decision["gate"] != "release" or decision["outcome"] not in ("approved", "passed"):
+            continue
+        build = document.record(decision["subject"])
+        if (
+            build is not None
+            and build["type"] == "artifact"
+            and build["kind"] == "build"
+            and any(digests.equal(build["digest"], subject) for subject in document.subjects)
+        ):
+            return
+    message = (
+        "no release decision with outcome approved or passed for a build "
+        "whose digest matches a subject of the statement"
+    )
+    yield Report(Level.VIOLATION, "R16", message, "$.predicate.records")
 
 
 def r17_digests(document: Document) -> Iterator[Report]:
@@ -221,7 +294,10 @@ CONTAINER_RULES: tuple[Rule, ...] = (
     r10_resolution,
     r11_revocation,
     r12_context_attestation,
+    r13_open_findings,
     r14_finding_chain,
+    r15_passport_intents,
+    r16_release_decision,
 )  # bundles and passports only
 
 
@@ -278,6 +354,40 @@ def _is_human(document: Document, reference: str) -> bool | None:
     if actor is None or actor["type"] != "actor":
         return None
     return bool(actor["kind"] == "human")
+
+
+def _resolved(document: Document, finding: Record) -> bool:
+    """R14: an approved finding-resolution decision for the finding, by an actor that produced,
+    recorded or decided none of the records in its resolvedBy."""
+    involved = set()
+    for reference in finding.get("resolvedBy", []):
+        record = document.record(reference)
+        for name in ("producedBy", "recordedBy", "decidedBy"):
+            if record is not None and name in record:
+                involved.add(_actor_id(record[name]))
+    return any(
+        d.record["gate"] == "finding-resolution"
+        and d.record["outcome"] == "approved"
+        and d.record["subject"] == finding["id"]
+        and _actor_id(d.record["decidedBy"]) not in involved
+        for d in document.of_type("decision")
+    )
+
+
+def _approved_before(document: Document, intent: Record, moment: datetime) -> bool:
+    """Whether an intent version is approved by an intent-approval decision made before moment."""
+    subject = f"{intent['id']}@{intent['version']}"
+    return intent["status"] == "approved" and any(
+        d.record["gate"] == "intent-approval"
+        and d.record["outcome"] == "approved"
+        and d.record["subject"] == subject
+        and _time(d.record["decidedAt"]) < moment
+        for d in document.of_type("decision")
+    )
+
+
+def _time(timestamp: str) -> datetime:
+    return datetime.fromisoformat(timestamp)
 
 
 def _kind(record: Record) -> str:
