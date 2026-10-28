@@ -1,4 +1,4 @@
-"""Integrity rules of spec section 5, checked on a bundle or passport that passed the schema.
+"""Integrity rules of spec section 5, checked on input that passed the schema.
 
 How each rule is read, and which rules apply to which input, is fixed by the conformance fixtures
 (fixtures/README.md in the specification repository). A check that needs the record behind an
@@ -12,93 +12,6 @@ from ois_validator.document import Document, Entry, Record
 from ois_validator.report import Level, Report
 
 Rule = Callable[[Document], Iterator[Report]]
-
-
-def r4_derivation(document: Document) -> Iterator[Report]:
-    """R4: a test derived from the intent saw the criterion and no code.
-
-    Its context includes the criterion, or a version of the intent whose criterion with the same
-    key has the same digest, and no artifact of kind code.
-    """
-    for entry, intent, required, test in _derived_from_intent(document):
-        path = f"{entry.path}.derivedFrom"
-        context = test.get("context", [])
-        if not context:
-            yield Report(Level.VIOLATION, "R4", f"test {test['id']} has no context", path)
-            continue
-        for reference in context:
-            seen = document.record(reference)
-            if seen is not None and seen["type"] == "artifact" and seen["kind"] == "code":
-                message = f"the context of test {test['id']} includes code {reference}"
-                yield Report(Level.VIOLATION, "R4", message, path)
-        if not any(_covers(document, reference, intent, required) for reference in context):
-            message = (
-                f"the context of test {test['id']} includes neither {entry.record['criterion']} "
-                "nor a version of the intent with the same criterion digest"
-            )
-            yield Report(Level.VIOLATION, "R4", message, path)
-
-
-def r5_independence(document: Document) -> Iterator[Report]:
-    """R5: a test derived from the intent was not produced by the actor that produced the
-    subject, in any version."""
-    for entry, _, _, test in _derived_from_intent(document):
-        subject = document.record(entry.record.get("subject", ""))
-        if subject is None or subject["type"] != "artifact":
-            continue
-        producer = _actor_id(test["producedBy"])
-        if producer == _actor_id(subject["producedBy"]):
-            message = f"test and subject are both produced by {producer}"
-            yield Report(Level.VIOLATION, "R5", message, f"{entry.path}.derivedFrom")
-
-
-def _derived_from_intent(document: Document) -> Iterator[tuple[Entry, Record, Record, Record]]:
-    """Evidence with derivedFrom intent, with its intent version, criterion and test artifact,
-    where all three resolve."""
-    for entry in document.of_type("evidence"):
-        if entry.record["derivedFrom"] != "intent":
-            continue
-        intent_ref, _, key = entry.record["criterion"].partition("#")
-        intent = document.record(intent_ref)
-        required = criterion(intent, key) if intent is not None else None
-        test = document.record(entry.record["test"])
-        if intent is None or required is None or test is None or test["type"] != "artifact":
-            continue
-        yield entry, intent, required, test
-
-
-def _covers(document: Document, reference: str, intent: Record, required: Record) -> bool:
-    """Whether a context entry gives the producer the required criterion (R4)."""
-    base, _, rest = reference.partition("@")
-    version, _, key = rest.partition("#")
-    if base != intent["id"] or not version or key not in ("", required["key"]):
-        return False
-    if version == str(intent["version"]):
-        return True
-    other = document.record(f"{base}@{version}")
-    seen = criterion(other, required["key"]) if other is not None else None
-    return seen is not None and digests.equal(seen.get("digest", {}), required.get("digest", {}))
-
-
-def _actor_id(reference: str) -> str:
-    return reference.partition("@")[0]
-
-
-def r10_resolution(document: Document) -> Iterator[Report]:
-    """R10: every reference resolves to exactly one record; no conflicting duplicates."""
-    for reference in document.references():
-        if not document.resolve(reference.value):
-            yield Report(
-                Level.VIOLATION, "R10", f"{reference.value} resolves to no record", reference.path
-            )
-    seen: dict[tuple[str, str], tuple[Record, str]] = {}
-    for entry in document.entries:
-        key = (entry.record["id"], str(entry.record.get("version", "")))
-        if key not in seen:
-            seen[key] = (_content(entry.record), entry.path)
-        elif seen[key][0] != _content(entry.record):
-            message = f"same id as {seen[key][1]}, but different content"
-            yield Report(Level.VIOLATION, "R10", message, entry.path)
 
 
 def r1_approval(document: Document) -> Iterator[Report]:
@@ -155,6 +68,110 @@ def r3_evidence_targets(document: Document) -> Iterator[Report]:
                 yield Report(Level.VIOLATION, "R3", message, f"{entry.path}.{name}")
 
 
+def r4_derivation(document: Document) -> Iterator[Report]:
+    """R4: a test derived from the intent saw the criterion and no code.
+
+    Its context includes the criterion, or a version of the intent whose criterion with the same
+    key has the same digest, and no artifact of kind code.
+    """
+    for entry, intent, required, test in _derived_from_intent(document):
+        path = f"{entry.path}.derivedFrom"
+        context = test.get("context", [])
+        if not context:
+            yield Report(Level.VIOLATION, "R4", f"test {test['id']} has no context", path)
+            continue
+        for reference in context:
+            seen = document.record(reference)
+            if seen is not None and seen["type"] == "artifact" and seen["kind"] == "code":
+                message = f"the context of test {test['id']} includes code {reference}"
+                yield Report(Level.VIOLATION, "R4", message, path)
+        if not any(_covers(document, reference, intent, required) for reference in context):
+            message = (
+                f"the context of test {test['id']} includes neither {entry.record['criterion']} "
+                "nor a version of the intent with the same criterion digest"
+            )
+            yield Report(Level.VIOLATION, "R4", message, path)
+
+
+def r5_independence(document: Document) -> Iterator[Report]:
+    """R5: a test derived from the intent was not produced by the actor that produced the
+    subject, in any version."""
+    for entry, _, _, test in _derived_from_intent(document):
+        subject = document.record(entry.record.get("subject", ""))
+        if subject is None or subject["type"] != "artifact":
+            continue
+        producer = _actor_id(test["producedBy"])
+        if producer == _actor_id(subject["producedBy"]):
+            message = f"test and subject are both produced by {producer}"
+            yield Report(Level.VIOLATION, "R5", message, f"{entry.path}.derivedFrom")
+
+
+def r8_production_data(document: Document) -> Iterator[Report]:
+    """R8: evidence that uses a production dataset is reported (warning)."""
+    for entry in document.of_type("evidence"):
+        for index, reference in enumerate(entry.record.get("inputs", [])):
+            dataset = document.record(reference)
+            if (
+                dataset is not None
+                and dataset["type"] == "artifact"
+                and dataset.get("classification") == "production"
+            ):
+                message = f"input {reference} is a dataset classified as production"
+                yield Report(Level.WARNING, "R8", message, f"{entry.path}.inputs[{index}]")
+
+
+def r9_waivers(document: Document) -> Iterator[Report]:
+    """R9: a waiver SHOULD be made by a human (info). The rationale is in Appendix B."""
+    for entry in document.of_type("decision"):
+        decided_by = entry.record["decidedBy"]
+        if entry.record["outcome"] == "waived" and _is_human(document, decided_by) is False:
+            message = f"a waiver SHOULD be made by a human, not {decided_by}"
+            yield Report(Level.INFO, "R9", message, f"{entry.path}.decidedBy")
+
+
+def r10_resolution(document: Document) -> Iterator[Report]:
+    """R10: every reference resolves to exactly one record; no conflicting duplicates."""
+    for reference in document.references():
+        if not document.resolve(reference.value):
+            yield Report(
+                Level.VIOLATION, "R10", f"{reference.value} resolves to no record", reference.path
+            )
+    seen: dict[tuple[str, str], tuple[Record, str]] = {}
+    for entry in document.entries:
+        key = (entry.record["id"], str(entry.record.get("version", "")))
+        if key not in seen:
+            seen[key] = (_content(entry.record), entry.path)
+        elif seen[key][0] != _content(entry.record):
+            message = f"same id as {seen[key][1]}, but different content"
+            yield Report(Level.VIOLATION, "R10", message, entry.path)
+
+
+def r11_revocation(document: Document) -> Iterator[Report]:
+    """R11: an evidence-revocation decision revokes evidence. Rationale and outcome are in
+    Appendix B."""
+    for entry in document.of_type("decision"):
+        if entry.record["gate"] != "evidence-revocation":
+            continue
+        subject = document.record(entry.record["subject"])
+        if subject is not None and subject["type"] != "evidence":
+            message = f"evidence-revocation must have evidence as subject, not {_kind(subject)}"
+            yield Report(Level.VIOLATION, "R11", message, f"{entry.path}.subject")
+
+
+def r14_finding_chain(document: Document) -> Iterator[Report]:
+    """R14: a finding has at most one superseding finding."""
+    first: dict[str, str] = {}
+    for entry in document.of_type("finding"):
+        previous = entry.record.get("supersedes")
+        if previous is None:
+            continue
+        if previous in first:
+            message = f"{previous} is already superseded by the finding at {first[previous]}"
+            yield Report(Level.VIOLATION, "R14", message, f"{entry.path}.supersedes")
+        else:
+            first[previous] = entry.path
+
+
 def r17_digests(document: Document) -> Iterator[Report]:
     """R17 (proposed): intent and criterion digests match their content (section 6.4)."""
     for entry in document.of_type("intent"):
@@ -172,8 +189,66 @@ def r17_digests(document: Document) -> Iterator[Report]:
             yield Report(Level.VIOLATION, "R17", message, f"{entry.path}.digest")
 
 
-def criterion(intent: Record, key: str) -> Record | None:
-    return next((c for c in intent["criteria"] if c["key"] == key), None)
+RECORD_RULES: tuple[Rule, ...] = (r17_digests,)  # also for a single record
+CONTAINER_RULES: tuple[Rule, ...] = (
+    r1_approval,
+    r2_criterion_references,
+    r3_evidence_targets,
+    r4_derivation,
+    r5_independence,
+    r8_production_data,
+    r9_waivers,
+    r10_resolution,
+    r11_revocation,
+    r14_finding_chain,
+)  # bundles and passports only
+
+
+def check(document: Document) -> Iterator[Report]:
+    for rule in RECORD_RULES:
+        yield from rule(document)
+    if document.container:
+        for rule in CONTAINER_RULES:
+            yield from rule(document)
+
+
+def criterion(record: Record, key: str) -> Record | None:
+    """The criterion with that key, if the record is an intent that has one."""
+    if record["type"] != "intent":
+        return None
+    return next((c for c in record["criteria"] if c["key"] == key), None)
+
+
+def _derived_from_intent(document: Document) -> Iterator[tuple[Entry, Record, Record, Record]]:
+    """Evidence with derivedFrom intent, with its intent version, criterion and test artifact,
+    where all three resolve."""
+    for entry in document.of_type("evidence"):
+        if entry.record["derivedFrom"] != "intent":
+            continue
+        intent_ref, _, key = entry.record["criterion"].partition("#")
+        intent = document.record(intent_ref)
+        required = criterion(intent, key) if intent is not None else None
+        test = document.record(entry.record["test"])
+        if intent is None or required is None or test is None or test["type"] != "artifact":
+            continue
+        yield entry, intent, required, test
+
+
+def _covers(document: Document, reference: str, intent: Record, required: Record) -> bool:
+    """Whether a context entry gives the producer the required criterion (R4)."""
+    base, _, rest = reference.partition("@")
+    version, _, key = rest.partition("#")
+    if base != intent["id"] or not version or key not in ("", required["key"]):
+        return False
+    if version == str(intent["version"]):
+        return True
+    other = document.record(f"{base}@{version}")
+    seen = criterion(other, required["key"]) if other is not None else None
+    return seen is not None and digests.equal(seen.get("digest", {}), required.get("digest", {}))
+
+
+def _actor_id(reference: str) -> str:
+    return reference.partition("@")[0]
 
 
 def _is_human(document: Document, reference: str) -> bool | None:
@@ -195,22 +270,3 @@ def _content(record: Record) -> Record:
     if record["type"] != "intent":
         return record
     return {k: v for k, v in record.items() if k not in ("status", "digest")}
-
-
-RECORD_RULES: tuple[Rule, ...] = (r17_digests,)  # also for a single record
-CONTAINER_RULES: tuple[Rule, ...] = (
-    r1_approval,
-    r2_criterion_references,
-    r3_evidence_targets,
-    r4_derivation,
-    r5_independence,
-    r10_resolution,
-)  # bundles and passports only
-
-
-def check(document: Document) -> Iterator[Report]:
-    for rule in RECORD_RULES:
-        yield from rule(document)
-    if document.container:
-        for rule in CONTAINER_RULES:
-            yield from rule(document)
