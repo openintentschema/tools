@@ -13,6 +13,9 @@ All notable changes to `ois-tools`, called `ois-validator` up to 0.5.0. Versions
   `gh attestation trusted-root`). A verified signature counts for the actor whose
   `identity.issuer` and `identity.subject` equal the certificate's OIDC issuer and subject, for
   example a GitHub Actions workflow; R12 and the attested coverage follow.
+- `ois trust update --output FILE` fetches a Sigstore trusted root through TUF: the public-good
+  instance's by default, an organization's own with `--tuf-url` and, the first time,
+  `--tuf-root`. It is the only command that opens a network connection, and only when run.
 - `ois passport build --keyless-signer ISSUER=SUBJECT` counts a signer that signs the passport
   afterwards, for example with `actions/attest`, in the attested coverage.
 - Optional dependency: `pip install ois-tools[sigstore]`; the container image includes it.

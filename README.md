@@ -55,7 +55,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 - The image runs `ois`; its arguments follow the image name.
 - `-v "$PWD:/work"` mounts the current directory; paths are relative to it.
 - `--user` writes files as you rather than as the image's user.
-- `--network none` is optional and shows that no command needs the network.
+- `--network none` is optional and shows that the commands need no network (`ois trust update`
+  aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
 - Tags: `0.8.0`, `0.8` and `latest`. Each image carries a signed build provenance and an SBOM:
@@ -306,8 +307,9 @@ jq .predicate passport.json > predicate.json  # actions/attest builds the statem
 
 ```bash
 pip install 'ois-tools[sigstore]'
-gh attestation trusted-root > trusted_root.jsonl             # refresh it now and then
-ois validate passport.sigstore.json --trusted-root trusted_root.jsonl
+ois trust update --output trusted_root.json                # through TUF; refresh it now and then
+# or, from the GitHub CLI, with GitHub's own instance too: gh attestation trusted-root > trusted_root.jsonl
+ois validate passport.sigstore.json --trusted-root trusted_root.json
 ```
 
 - The signer is the certificate identity. An actor that signs keylessly names it:
@@ -322,10 +324,11 @@ ois validate passport.sigstore.json --trusted-root trusted_root.jsonl
 
 ## Privacy
 
-None of the commands opens a network connection: the JSON Schema ships inside the package, and `ois junit` and
-`ois record` read local files and the local Git checkout only. Installing the package contacts
-PyPI, pulling the container image contacts GitHub (ghcr.io), and `uvx` without a local Python
-downloads one from GitHub. Details and a diagram:
+No command opens a network connection except `ois trust update`, which fetches a Sigstore trusted
+root when you run it. The JSON Schema ships inside the package, `ois junit` and `ois record` read
+local files and the local Git checkout only, and verifying signatures uses local files. Installing
+the package contacts PyPI, pulling the container image contacts GitHub (ghcr.io), and `uvx`
+without a local Python downloads one from GitHub. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).
 
 ## Documentation

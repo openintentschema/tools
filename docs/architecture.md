@@ -56,6 +56,7 @@ that passed it, so they can rely on its structure.
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
+| `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
 | `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
@@ -104,12 +105,15 @@ them; if an RFC is rejected, the fixtures change and this validator follows.
 
 ## No network access
 
-None of the commands opens a network connection. The schema is bundled (`schemas/`) and loaded
+No command opens a network connection, with one explicit exception: `ois trust update` fetches a
+Sigstore trusted root through TUF when it is run, so that verifiers need not use another tool;
+verification itself reads that file. The schema is bundled (`schemas/`) and loaded
 through a local `referencing` registry, so no `$ref` is fetched; `ois junit` and `ois record`
 run local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This
 was verified by running every command and the whole test suite in a sandbox that blocks all
 network access, and the container image with `docker run --network none` in CI. A new
-dependency or feature must keep it that way; the specification's
+dependency or feature must keep it that way, and a command that needs the network must say so in
+its name or help, as `ois trust update` does; the specification's
 [privacy page](https://openintentschema.io/privacy/) states it to users.
 
 ## Authoring intents

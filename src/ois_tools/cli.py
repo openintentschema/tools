@@ -16,6 +16,7 @@ from ois_tools import (
     passport_cli,
     record_cli,
     sign_cli,
+    trust_cli,
     validate_cli,
 )
 
@@ -36,6 +37,7 @@ COMMANDS: dict[str, tuple[str, Callable[[list[str]], int]]] = {
     ),
     "sign": ("sign a bundle or passport with DSSE, or add a signature", sign_cli.main),
     "key": ("create signing keys and show their key ids", key_cli.main),
+    "trust": ("fetch a Sigstore trusted root for keyless signatures (network)", trust_cli.main),
 }
 
 

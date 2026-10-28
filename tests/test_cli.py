@@ -48,7 +48,7 @@ def test_stdin(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[st
 
 # --- the ois command --------------------------------------------------------------------------
 
-COMMANDS = ("validate", "junit", "intent", "record", "passport", "coverage", "sign", "key")
+COMMANDS = ("validate", "junit", "intent", "record", "passport", "coverage", "sign", "key", "trust")
 
 
 def test_ois_version(capsys: pytest.CaptureFixture[str]) -> None:

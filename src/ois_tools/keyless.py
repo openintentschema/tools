@@ -95,7 +95,7 @@ class _Recorder:
 def _verify(bundle: dict[str, Any], roots: list[Any]) -> tuple[str, str]:
     """Certificate chain, transparency log entry and signature against any of the roots."""
     models = _sigstore_models()
-    from sigstore.verify import Verifier
+    from sigstore.verify import Verifier  # optional dependency
 
     try:
         parsed = models.Bundle.from_json(json.dumps(bundle))
@@ -145,7 +145,7 @@ def _der_utf8(raw: bytes) -> str:
 
 def _sigstore_models() -> Any:
     try:
-        import sigstore.models as models
+        import sigstore.models as models  # optional dependency
     except ImportError as error:
         raise SigningError(INSTALL) from error
     return models

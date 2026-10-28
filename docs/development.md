@@ -109,5 +109,6 @@ badge for up to six hours).
 - Python 3.13 or later, ruff with line length 100, mypy strict, pytest.
 - English in code and documentation; rule IDs and levels exactly as in the specification.
 - Every commit carries a DCO sign-off: `git commit -s -m "<what changed>"`, one line.
-- No network access at run time: commands read local files and the local Git checkout only.
+- No network access at run time: commands read local files and the local Git checkout only. The
+  one exception, `ois trust update`, fetches a trusted root when asked; keep it that way.
   Verify a new feature in a sandbox that blocks the network before stating otherwise.

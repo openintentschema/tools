@@ -44,7 +44,8 @@ uv run scripts/sync_spec.py ../openintentschema # update the copies from a clean
 - A new or changed rule starts as an RFC there; then fixtures, sync, implementation, and the rule
   in `IMPLEMENTED` of `tests/test_fixtures.py` (see docs/development.md).
 - Tests first; a bug fix starts with a test that shows the bug.
-- Every command validates what it writes and opens no network connection.
+- Every command validates what it writes and opens no network connection; the one exception is
+  `ois trust update`, which fetches a Sigstore trusted root when run.
 - Keep `docs/architecture.md` current with design decisions, `CHANGELOG.md` with user-visible
   changes, and the README and the website guides with every changed command.
 - English everywhere; rule IDs and levels exactly as in the specification.
