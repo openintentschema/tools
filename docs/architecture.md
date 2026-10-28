@@ -47,6 +47,8 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois-validator`: exit 0 conforms, 1 violation, 2 unreadable file. |
 | `junit.py`, `junit_cli.py` | `ois-junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
+| `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7). |
+| `intents.py`, `intent_cli.py` | `ois-intent`: seal, approve, next version, compare. |
 | `schemas/ois-0.1.schema.json` | Copy of Appendix B, shipped in the package. |
 
 ## Design decisions
@@ -87,12 +89,27 @@ this validator follows.
 
 ## No network access
 
-Neither command opens a network connection. The schema is bundled (`schemas/`) and loaded
+None of the commands opens a network connection. The schema is bundled (`schemas/`) and loaded
 through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` runs local `git`
 commands only (`rev-parse`, `ls-files`, `show`, `remote get-url`). This was verified by running
 both commands and the whole test suite in a sandbox that blocks all network access. A new
 dependency or feature must keep it that way; the specification's
 [privacy page](https://openintentschema.io/privacy/) states it to users.
+
+## Authoring intents
+
+`ois-intent` exists because digests by hand are error-prone. Design choices:
+
+- **YAML without surprises.** PyYAML reads YAML 1.1, where `yes` is a boolean, `0123` an octal
+  number and `2026-10-14T09:12:00Z` a datetime. `authoring.py` replaces its implicit resolvers
+  with the JSON schema of YAML 1.2 and refuses tags, merge keys, non-string and duplicate keys,
+  because section 7 requires a lossless conversion to JSON and the digest covers the result.
+- **Immutability is enforced.** `approve` recomputes the digest of an already approved intent and
+  refuses it if the content changed; the way forward is `next`.
+- **Every output is validated** (schema and R17) before it is written. The decision's
+  `subjectDigest` is copied from the sealed intent, so R1 holds by construction.
+- **Repository layout.** Files go to `.ois/intents/` and `.ois/decisions/` as section 7
+  recommends; drafts stay YAML, approved records are JSON.
 
 ## JUnit adapter
 

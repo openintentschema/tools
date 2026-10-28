@@ -5,6 +5,9 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.2.0 (2026-10-28)
+
+- `ois-intent`: seal, approve, version and compare intents written in YAML or JSON.
 - Docs: `docs/architecture.md` and `docs/development.md`; the README covers usage only.
 - Tests: `test_robustness.py` points every reference of every valid fixture at every record.
 - `ois-validator --version` and `ois-junit --version`.

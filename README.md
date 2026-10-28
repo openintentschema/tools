@@ -13,7 +13,7 @@ rule and level (specification section 11.1):
 - **info:** a SHOULD is not followed.
 
 The package also brings `ois-junit`, which turns the JUnit XML of an existing pipeline into OIS
-records.
+records, and `ois-intent`, which seals, approves and versions intents written in YAML or JSON.
 
 **Status:** pre-alpha, targets specification v0.1. The validator checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
@@ -104,9 +104,29 @@ nothing is written, 2 means a report or the Git checkout could not be read.
 The [getting started guide](https://openintentschema.io/getting-started/)
 walks through it step by step, including a CI example.
 
+## Write and approve intents
+
+`ois-intent` takes an intent written in YAML or JSON and does what is error-prone by hand:
+
+```bash
+ois-intent seal INT-142.ois.yaml                      # criterion and intent digests (RFC 8785)
+ois-intent approve INT-142.ois.yaml --by https://ois.acme.example/actors/po-7f3a
+ois-intent next .ois/intents/INT-142-v1.ois.json      # draft of version 2, superseding version 1
+ois-intent compare .ois/intents/INT-142-v1.ois.json .ois/intents/INT-142-v2.ois.yaml
+```
+
+- `approve` writes the approved intent and its intent-approval decision, bound by the intent's
+  digest (R1), to `.ois/intents/` and `.ois/decisions/` (specification section 7). It refuses an
+  approved intent whose content no longer matches its digest: approved intents never change.
+- `compare` shows per criterion whether evidence carries over to the new version or is stale
+  (section 6.3); `criticality` does not count.
+- YAML is read as section 7 requires: `2026-10-14T09:12:00Z` and `yes` stay strings, and tags,
+  merge keys and non-string or duplicate keys are refused, so that digests do not depend on how
+  a YAML library reads the text.
+
 ## Privacy
 
-`ois-validator` and `ois-junit` open no network connection: the JSON Schema ships inside the
+`ois-validator`, `ois-junit` and `ois-intent` open no network connection: the JSON Schema ships inside the
 package, and `ois-junit` reads the JUnit XML and the local Git checkout only. Installing the
 package contacts PyPI. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).
