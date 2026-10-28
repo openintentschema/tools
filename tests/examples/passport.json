@@ -8,8 +8,8 @@
   "predicate": {
     "ois": "0.1",
     "release": { "name": "customer-portal", "version": "2026.10.3" },
-    "intents": ["https://ois.acme.example/intents/INT-142@3"],
-    "scope": ["https://ois.acme.example/intents/INT-142@3#AC-1", "https://ois.acme.example/intents/INT-142@3#AC-2"],
+    "intents": ["https://ois.acme.example/intents/INT-142@1"],
+    "scope": ["https://ois.acme.example/intents/INT-142@1#AC-1", "https://ois.acme.example/intents/INT-142@1#AC-2"],
     "records": [
       {
         "ois": "0.1", "type": "artifact", "id": "https://ois.acme.example/artifacts/ART-305",

@@ -24,13 +24,12 @@
       "createdAt": "2026-09-01T08:00:00Z", "kind": "tool", "name": "CI evidence recorder", "version": "1.2" },
     {
       "ois": "0.1", "type": "intent", "id": "https://ois.acme.example/intents/INT-142",
-      "createdAt": "2026-10-14T09:12:00Z", "version": 3,
+      "createdAt": "2026-10-14T09:12:00Z", "version": 1,
       "title": "Customers change their address in the portal",
       "status": "approved",
       "language": "en",
       "producedBy": "https://ois.acme.example/actors/requirement-agent@1.4",
       "source": "https://jira.acme.example/browse/PORTAL-1187",
-      "supersedes": "https://ois.acme.example/intents/INT-142@2",
       "risk": "high",
       "criteria": [
         { "key": "AC-1", "notation": "gherkin", "kind": "functional", "criticality": "high",
@@ -53,7 +52,7 @@
       "path": "api/address.openapi.yaml",
       "digest": { "sha256": "5f2b8c41a9e07d36c4b18f92e6a05d7c3b91e48f20a6d5c7b39e81f4a2c60d95" },
       "producedBy": "https://ois.acme.example/actors/dev-agent@3.0",
-      "context": ["https://ois.acme.example/intents/INT-142@3"],
+      "context": ["https://ois.acme.example/intents/INT-142@1"],
       "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3"
     },
     {
@@ -62,7 +61,7 @@
       "location": "git+https://git.acme.example/portal.git@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
       "digest": { "gitCommit": "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678" },
       "producedBy": "https://ois.acme.example/actors/dev-agent@3.0",
-      "context": ["https://ois.acme.example/intents/INT-142@3", "https://ois.acme.example/artifacts/ART-301"],
+      "context": ["https://ois.acme.example/intents/INT-142@1", "https://ois.acme.example/artifacts/ART-301"],
       "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3"
     },
     {
@@ -71,7 +70,7 @@
       "location": "https://testdata.acme.example/sets/addresses-without-canton-v1",
       "digest": { "sha256": "8a41c7e29b05f3d68e17a4c92b6f0d3e5a78c19b42e6f0a3d57c81b9e4f20a6c" },
       "producedBy": "https://ois.acme.example/actors/testdata-generator@5.2",
-      "context": ["https://ois.acme.example/intents/INT-142@3#AC-2"],
+      "context": ["https://ois.acme.example/intents/INT-142@1#AC-2"],
       "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3"
     },
     {
@@ -81,14 +80,14 @@
       "path": "tests/address.spec.ts",
       "digest": { "sha256": "c39e5a17f482b06d9e3c71a5b48f20e6d1a9c74b3e58f02a6d91c4b7e3f05a28" },
       "producedBy": "https://ois.acme.example/actors/qe-agent@2.1",
-      "context": ["https://ois.acme.example/intents/INT-142@3", "https://ois.acme.example/artifacts/ART-301",
+      "context": ["https://ois.acme.example/intents/INT-142@1", "https://ois.acme.example/artifacts/ART-301",
                   "https://ois.acme.example/artifacts/ART-303"],
       "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3"
     },
     {
       "ois": "0.1", "type": "evidence", "id": "https://ois.acme.example/evidence/EV-9021",
       "createdAt": "2026-10-20T14:32:05Z",
-      "criterion": "https://ois.acme.example/intents/INT-142@3#AC-2",
+      "criterion": "https://ois.acme.example/intents/INT-142@1#AC-2",
       "test": "https://ois.acme.example/artifacts/ART-304",
       "subject": "https://ois.acme.example/artifacts/ART-302",
       "inputs": ["https://ois.acme.example/artifacts/ART-303"],
@@ -104,7 +103,7 @@
       "ois": "0.1", "type": "decision", "id": "https://ois.acme.example/decisions/DEC-77",
       "createdAt": "2026-10-14T10:05:00Z",
       "gate": "intent-approval",
-      "subject": "https://ois.acme.example/intents/INT-142@3",
+      "subject": "https://ois.acme.example/intents/INT-142@1",
       "subjectDigest": { "sha256": "2e7d4a91c6b38f05e1a9d72c4b60f83e95a1d7c2b4f06e38a9c15d7b2e40f6a1" },
       "outcome": "approved",
       "decidedBy": "https://ois.acme.example/actors/po-7f3a",
