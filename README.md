@@ -13,7 +13,8 @@ rule and level (specification section 11.1):
 - **info:** a SHOULD is not followed.
 
 The package also brings `ois-junit`, which turns the JUnit XML of an existing pipeline into OIS
-records, and `ois-intent`, which seals, approves and versions intents written in YAML or JSON.
+records, `ois-intent`, which seals, approves and versions intents written in YAML or JSON, and
+`ois-passport`, which assembles a Quality Passport for a release.
 
 **Status:** pre-alpha, targets specification v0.1. The validator checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
@@ -124,9 +125,34 @@ ois-intent compare .ois/intents/INT-142-v1.ois.json .ois/intents/INT-142-v2.ois.
   merge keys and non-string or duplicate keys are refused, so that digests do not depend on how
   a YAML library reads the text.
 
+## Build a Quality Passport
+
+`ois-passport` collects the records behind a release into an in-toto Statement with the OIS
+passport predicate (specification section 8) and validates it before writing:
+
+```bash
+ois-passport build .ois/ ci-bundles/ \
+  --release-name billing --release-version 2026.10.4 \
+  --build https://ois.acme.example/artifacts/billing-2026.10.4 \
+  --issuer https://ois.acme.example/actors/passport-issuer@0.3.0 \
+  --approve-release-by https://ois.acme.example/actors/release-manager-1d2e \
+  --output passport.json
+```
+
+- Inputs are record or bundle files, or directories such as `.ois/`, in JSON or YAML. Identical
+  records are merged, a draft gives way to its approved record, and two different records with the
+  same id are refused (R10).
+- The passport lists the latest approved version of each intent unless `--intent` names them, and
+  embeds every input record. Its subject is the build artifact with its digest.
+- `--approve-release-by` adds the release decision for the build when the records carry none
+  (R16). Exit code 1 means the passport would break a rule and nothing was written; warnings such as
+  R12 are printed and the passport is written.
+- The passport is not signed yet; DSSE signing follows.
+
 ## Privacy
 
-`ois-validator`, `ois-junit` and `ois-intent` open no network connection: the JSON Schema ships inside the
+None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-passport`) opens a network
+connection: the JSON Schema ships inside the
 package, and `ois-junit` reads the JUnit XML and the local Git checkout only. Installing the
 package contacts PyPI. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).

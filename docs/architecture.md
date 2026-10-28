@@ -49,6 +49,7 @@ that passed it, so they can rely on its structure.
 | `junit.py`, `junit_cli.py` | `ois-junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7). |
 | `intents.py`, `intent_cli.py` | `ois-intent`: seal, approve, next version, compare. |
+| `passports.py`, `passport_cli.py` | `ois-passport build`: collect records, assemble and validate a passport. |
 | `schemas/ois-0.1.schema.json` | Copy of Appendix B, shipped in the package. |
 
 ## Design decisions
@@ -110,6 +111,18 @@ dependency or feature must keep it that way; the specification's
   `subjectDigest` is copied from the sealed intent, so R1 holds by construction.
 - **Repository layout.** Files go to `.ois/intents/` and `.ois/decisions/` as section 7
   recommends; drafts stay YAML, approved records are JSON.
+
+## Assembling passports
+
+- **One record per id.** `collect` merges identical copies from several inputs (the same actor in
+  every bundle is normal), keeps the approved state of an intent and refuses different records
+  with the same id, using the same comparison as R10 (`rules.content`).
+- **Defaults follow the rules.** Without `--intent`, each intent is listed in its latest approved
+  version (R15); the subject is the build artifact's digest, so R16 can bind the release decision
+  to it.
+- **Nothing non-conforming leaves.** The statement is validated before it is returned; a violation
+  raises, warnings are left to the caller to show.
+- **Unsigned.** Signing wraps the finished statement in DSSE and is a separate step.
 
 ## JUnit adapter
 

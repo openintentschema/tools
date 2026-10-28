@@ -141,8 +141,8 @@ def r10_resolution(document: Document) -> Iterator[Report]:
     for entry in document.entries:
         key = (entry.record["id"], str(entry.record.get("version", "")))
         if key not in seen:
-            seen[key] = (_content(entry.record), entry.path)
-        elif seen[key][0] != _content(entry.record):
+            seen[key] = (content(entry.record), entry.path)
+        elif seen[key][0] != content(entry.record):
             message = f"same id as {seen[key][1]}, but different content"
             yield Report(Level.VIOLATION, "R10", message, entry.path)
 
@@ -394,7 +394,7 @@ def _kind(record: Record) -> str:
     return f"{record['type']} of kind {record['kind']}" if "kind" in record else record["type"]
 
 
-def _content(record: Record) -> Record:
+def content(record: Record) -> Record:
     """What R10 compares. A draft intent and its approved record differ only in status and
     digest, and an intent's digest follows from its content, so intents leave both out. For
     every other record the digest pins the content and is compared."""

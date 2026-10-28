@@ -5,6 +5,11 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.3.0 (2026-10-28)
+
+- `ois-passport build`: assemble a validated, unsigned Quality Passport from records, bundles
+  and directories.
+
 ## 0.2.0 (2026-10-28)
 
 - `ois-intent`: seal, approve, version and compare intents written in YAML or JSON.
