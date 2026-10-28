@@ -17,7 +17,8 @@ The package also brings the commands that write OIS records:
 - `ois-junit` turns the JUnit XML of an existing pipeline into OIS records;
 - `ois-intent` seals, approves and versions intents written in YAML or JSON;
 - `ois-record` writes artifacts, actors, evidence, decisions and findings, with their digests;
-- `ois-passport` assembles a Quality Passport for a release.
+- `ois-passport` assembles a Quality Passport for a release, with its intent coverage;
+- `ois-coverage` shows that coverage per criterion and checks what a passport declares.
 
 **Status:** pre-alpha, targets specification v0.1. The validator checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
@@ -191,12 +192,44 @@ ois-passport build .ois/ ci-bundles/ \
 - `--approve-release-by` adds the release decision for the build when the records carry none
   (R16). Exit code 1 means the passport would break a rule and nothing was written; warnings such as
   R12 are printed and the passport is written.
+- The passport reports intent coverage by the reference method of Appendix D in `assessments`
+  (below); `--no-coverage` leaves it out.
 - The passport is not signed yet; DSSE signing follows.
+
+## Measure intent coverage
+
+Intent coverage is the share of criteria in scope with counted evidence: passed, derived from the
+intent, for the released build or one of its inputs, not revoked, observed after its subject was
+created and, for a criterion with a target, meeting it (Appendix D). `ois-coverage` shows per
+criterion what counts and why other evidence does not:
+
+```bash
+ois-coverage passport.json                        # also checks the coverage the passport declares
+ois-coverage .ois/ --build "$BUILD"               # before the passport: what is still missing
+```
+
+```
+https://ois.acme.example/intents/INT-142@1#AC-1  not covered
+    https://ois.acme.example/evidence/EV-9022: derivedFrom is unknown
+https://ois.acme.example/intents/INT-142@1#AC-2  covered  https://ois.acme.example/evidence/EV-9021
+intentCoverage 0.5 (declared 0.5)
+```
+
+| Measurement | Counts |
+| --- | --- |
+| `intentCoverage` | covered criteria in scope / criteria in scope |
+| `intentCoverageAttested` | only evidence whose test context is attested (R12); 0 until signatures are verified |
+| `intentCoverageWeighted` | criteria weighted by `criticality`: high 3, medium 2, low 1 |
+| `intentCoverageDiverse` | only evidence whose test and subject come from a human, or from agents on different models |
+
+A passport that lists several intents counts the criteria in scope of all of them together.
+Exit code 1 means a declared value differs from the computed one, compared at the precision the
+passport declares; 2 means a file could not be read or the release subject is missing.
 
 ## Privacy
 
-None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-record`, `ois-passport`)
-opens a network connection: the JSON Schema ships inside the package, and `ois-junit` and
+None of the commands (`ois-validator`, `ois-junit`, `ois-intent`, `ois-record`, `ois-passport`,
+`ois-coverage`) opens a network connection: the JSON Schema ships inside the package, and `ois-junit` and
 `ois-record` read local files and the local Git checkout only. Installing the
 package contacts PyPI. Details and a diagram:
 [Privacy and data flows](https://openintentschema.io/privacy/).

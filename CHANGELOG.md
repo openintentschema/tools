@@ -5,6 +5,17 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.5.0 (2026-10-28)
+
+- Intent coverage by the reference method of Appendix D: `intentCoverage` and the variants
+  `intentCoverageAttested`, `intentCoverageWeighted` and `intentCoverageDiverse`
+  (`ois_validator.coverage`).
+- `ois-passport build` records them in the passport's `assessments`; `--no-coverage` leaves them
+  out. Signatures are not verified yet, so `intentCoverageAttested` is 0 wherever evidence rests
+  on a context (R12).
+- `ois-coverage`: per criterion, what counts and why other evidence does not; for a passport, a
+  check of the coverage it declares (exit code 1 if it differs).
+
 ## 0.4.0 (2026-10-28)
 
 - `ois-record`: write artifact, actor, evidence, decision and finding records, supersede a

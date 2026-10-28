@@ -50,6 +50,7 @@ that passed it, so they can rely on its structure.
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois-intent`: seal, approve, next version, compare. |
 | `passports.py`, `passport_cli.py` | `ois-passport build`: collect records, assemble and validate a passport. |
+| `coverage.py`, `coverage_cli.py` | Intent coverage by the reference method of Appendix D and its variants; `ois-coverage`. |
 | `records.py`, `record_cli.py` | `ois-record`: artifacts, actors, evidence, decisions, findings, finding chains and bundles. |
 | `schemas/ois-0.1.schema.json` | Copy of Appendix B, shipped in the package. |
 
@@ -124,7 +125,35 @@ dependency or feature must keep it that way; the specification's
   to it.
 - **Nothing non-conforming leaves.** The statement is validated before it is returned; a violation
   raises, warnings are left to the caller to show.
+- **Coverage by default.** `assessments` carries the four measurements of Appendix D, computed
+  from the passport's own records, intents and scope; `--no-coverage` leaves them out for producers
+  who report their own method.
 - **Unsigned.** Signing wraps the finished statement in DSSE and is a separate step.
+
+## Intent coverage
+
+`coverage.py` implements the reference method of Appendix D, which is informative: no rule and no
+fixture requires it, and `ois-validator` does not report on declared coverage. `ois-coverage`
+compares instead.
+
+- **One function per condition.** For each criterion in scope, every evidence record for the same
+  intent and key is either counted or given the first condition it fails, in the order of
+  Appendix D. That reason is what `ois-coverage` prints, so a missing figure can be traced.
+- **Stale evidence** is read as R4 reads context: evidence for an earlier version counts if that
+  version is among the records and its criterion with the same key has the same digest
+  (section 6.3). Evidence for a later version never counts.
+- **Several intents.** Appendix D defines coverage for one intent version; a passport lists
+  several. The criteria in scope of all listed intents are counted together, as section 8.2
+  reads `scope` for the passport. With one intent both readings agree.
+- **The release subject** of a passport is the build of its approved or passed release decision
+  whose digest matches the statement subject, as R16 finds it.
+- **Attested** uses `rules.self_declared`, the reason R12 reports. Until signatures are verified
+  it never counts, so `intentCoverageAttested` is 0 wherever evidence rests on a context.
+- **Diverse** follows the text literally: a human producer counts, two agents count if no model of
+  one shares provider and name with a model of the other, and a tool does not count.
+- **Values** are rounded to four decimals. A declared value agrees if it is equal at its own
+  precision (0.33 agrees with 0.3333).
+- The method URI is the specification's placeholder until RFC #6 replaces it.
 
 ## Recording the other records
 

@@ -1,8 +1,9 @@
 """Assemble a Quality Passport (specification section 8) from the records behind a release.
 
 The passport is an in-toto Statement v1: its subject is the released build, its predicate lists
-the intents the release delivers and embeds every record it relies on. It is validated before it
-is returned; signing (DSSE) is a separate step.
+the intents the release delivers, embeds every record it relies on and reports intent coverage by
+the reference method of Appendix D. It is validated before it is returned; signing (DSSE) is a
+separate step.
 """
 
 import copy
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from ois_validator.coverage import coverage
 from ois_validator.rules import content
 from ois_validator.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
 from ois_validator.validator import validate
@@ -65,8 +67,10 @@ def build(
     approve_release_by: str | None = None,
     release_outcome: str = "approved",
     release_decision_id: str | None = None,
+    assess_coverage: bool = True,
 ) -> Record:
-    """A conforming, unsigned passport for the release of `build`."""
+    """A conforming, unsigned passport for the release of `build`, with its intent coverage by
+    the reference method of Appendix D unless `assess_coverage` is false."""
     records = copy.deepcopy(records)
     artifact = next((r for r in records if r["id"] == build and r["type"] == "artifact"), None)
     if artifact is None:
@@ -91,7 +95,7 @@ def build(
             }
         )
 
-    listed = intents or _latest_approved(records)
+    listed = intents or latest_approved(records)
     if not listed:
         raise PassportError("no approved intent among the records; name the intents to list")
     predicate: Record = {
@@ -102,7 +106,12 @@ def build(
     }
     if scope:
         predicate["scope"] = scope
-    predicate |= {"records": records, "issuedBy": issued_by, "issuedAt": _timestamp(issued_at)}
+    predicate["records"] = records
+    if assess_coverage:
+        measured = coverage(records, subject=build, intents=listed, scope=scope).measurements()
+        if measured:
+            predicate["assessments"] = measured
+    predicate |= {"issuedBy": issued_by, "issuedAt": _timestamp(issued_at)}
     statement: Record = {
         "_type": STATEMENT_TYPE,
         "subject": [
@@ -130,7 +139,7 @@ def _records(document: object) -> list[Record]:
     return [document]
 
 
-def _latest_approved(records: list[Record]) -> list[str]:
+def latest_approved(records: list[Record]) -> list[str]:
     """Per intent id, in order of appearance, its latest approved version (R15)."""
     latest: dict[str, int] = {}
     for record in records:

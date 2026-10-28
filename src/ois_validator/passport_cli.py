@@ -52,6 +52,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     building.add_argument("--release-outcome", choices=("approved", "passed"), default="approved")
     building.add_argument("--release-decision-id")
+    building.add_argument(
+        "--no-coverage",
+        action="store_true",
+        help="leave out the intent coverage of Appendix D (assessments)",
+    )
     building.add_argument("--at", help="issuedAt, RFC 3339 (default now)")
     building.add_argument("--output", type=Path, help="write the passport here instead of stdout")
     args = parser.parse_args(argv)
@@ -75,6 +80,7 @@ def main(argv: list[str] | None = None) -> int:
             approve_release_by=args.approve_release_by,
             release_outcome=args.release_outcome,
             release_decision_id=args.release_decision_id,
+            assess_coverage=not args.no_coverage,
         )
     except PassportError as error:
         print(f"ois-passport: {error}", file=sys.stderr)

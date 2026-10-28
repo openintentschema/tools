@@ -166,17 +166,10 @@ def r12_context_attestation(document: Document) -> Iterator[Report]:
     Signatures are not verified yet, so every context is reported as self-declared.
     """
     for entry in document.of_type("artifact"):
-        if "context" not in entry.record:
-            continue
-        recorder = entry.record.get("contextRecordedBy")
-        if recorder is None:
-            reason = "no contextRecordedBy"
-        elif _actor_id(recorder) == _actor_id(entry.record["producedBy"]):
-            reason = "recorded by its own producer"
-        else:
-            reason = f"no verified signature of {recorder}"
-        message = f"context is self-declared: {reason}"
-        yield Report(Level.WARNING, "R12", message, f"{entry.path}.context")
+        reason = self_declared(entry.record)
+        if reason is not None:
+            message = f"context is self-declared: {reason}"
+            yield Report(Level.WARNING, "R12", message, f"{entry.path}.context")
 
 
 def r13_open_findings(document: Document) -> Iterator[Report]:
@@ -307,6 +300,19 @@ def check(document: Document) -> Iterator[Report]:
     if document.container:
         for rule in CONTAINER_RULES:
             yield from rule(document)
+
+
+def self_declared(artifact: Record) -> str | None:
+    """R12: why an artifact's context is self-declared, or None if it has no context. Signatures
+    are not verified yet, so no context counts as attested."""
+    if "context" not in artifact:
+        return None
+    recorder = artifact.get("contextRecordedBy")
+    if recorder is None:
+        return "no contextRecordedBy"
+    if _actor_id(recorder) == _actor_id(artifact["producedBy"]):
+        return "recorded by its own producer"
+    return f"no verified signature of {recorder}"
 
 
 def criterion(record: Record, key: str) -> Record | None:
