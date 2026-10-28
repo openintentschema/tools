@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from ois_validator import Level, validate
+from ois_tools import Level, validate
 
 EXAMPLES = Path(__file__).parent / "examples"
 

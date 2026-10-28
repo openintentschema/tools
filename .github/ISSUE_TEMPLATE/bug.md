@@ -1,14 +1,13 @@
 ---
 name: Bug
-about: A command of ois-validator crashes, writes something wrong, or reports something the specification does not say
+about: An ois command crashes, writes something wrong, or reports something the specification does not say
 title: ""
 labels: bug
 ---
 
 ## Version and command
 
-Output of `ois-validator --version` and the exact command you ran (`ois-validator`, `ois-junit`,
-`ois-intent`, `ois-record`, `ois-passport` or `ois-coverage`).
+Output of `ois --version` and the exact command you ran, for example `ois validate …`.
 
 ## Input
 

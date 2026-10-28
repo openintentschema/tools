@@ -1,4 +1,4 @@
-"""Command line interface: ois-coverage PASSPORT | ois-coverage INPUT... --build REF
+"""Command line interface: ois coverage PASSPORT | ois coverage INPUT... --build REF
 
 Shows per criterion whether it is covered and, if not, why each piece of evidence does not count.
 For a passport it also compares the coverage the passport declares with the computed one.
@@ -6,13 +6,12 @@ For a passport it also compares the coverage the passport declares with the comp
 
 import argparse
 import sys
-from importlib.metadata import version
 from pathlib import Path
 
-from ois_validator.authoring import AuthoringError, files, load
-from ois_validator.coverage import METHOD, Coverage, CoverageError, coverage, passport_coverage
-from ois_validator.passports import PassportError, collect, latest_approved
-from ois_validator.schema import STATEMENT_TYPE
+from ois_tools.authoring import AuthoringError, files, load
+from ois_tools.coverage import METHOD, Coverage, CoverageError, coverage, passport_coverage
+from ois_tools.passports import PassportError, collect, latest_approved
+from ois_tools.schema import STATEMENT_TYPE
 
 EXIT_OK = 0
 EXIT_DIFFERS = 1
@@ -21,11 +20,10 @@ EXIT_USAGE = 2
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="ois-coverage",
+        prog="ois coverage",
         description="Intent coverage by the reference method of Appendix D, per criterion, and "
         "a check of the coverage a passport declares.",
     )
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     parser.add_argument(
         "inputs", nargs="+", type=Path, metavar="INPUT",
         help="a passport, or record and bundle files and directories such as .ois/",
@@ -58,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             )  # fmt: skip
             declared = {}
     except (OSError, AuthoringError, CoverageError, PassportError) as error:
-        print(f"ois-coverage: {error}", file=sys.stderr)
+        print(f"ois coverage: {error}", file=sys.stderr)
         return EXIT_USAGE
 
     _show(result)
@@ -71,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{name} {value} (declared {declared[name]})")
         if not _agrees(declared[name], value):
             print(
-                f"ois-coverage: declared {name} {declared[name]}, computed {value}", file=sys.stderr
+                f"ois coverage: declared {name} {declared[name]}, computed {value}", file=sys.stderr
             )
             differs = True
     return EXIT_DIFFERS if differs else EXIT_OK

@@ -1,0 +1,74 @@
+"""Command line interface: ois <command> [ARGS...]
+
+One entry point for every tool, like git or docker: `ois validate`, `ois junit`, `ois intent`,
+`ois record`, `ois passport`, `ois coverage`. Each command parses its own arguments.
+"""
+
+import sys
+from collections.abc import Callable
+from importlib.metadata import version
+
+from ois_tools import (
+    coverage_cli,
+    intent_cli,
+    junit_cli,
+    passport_cli,
+    record_cli,
+    validate_cli,
+)
+
+EXIT_USAGE = 2
+
+COMMANDS: dict[str, tuple[str, Callable[[list[str]], int]]] = {
+    "validate": (
+        "check records, bundles and passports against the specification",
+        validate_cli.main,
+    ),
+    "junit": ("turn JUnit XML into a Level 1 bundle", junit_cli.main),
+    "intent": ("seal, approve, version and compare intents", intent_cli.main),
+    "record": ("write actors, artifacts, evidence, decisions and findings", record_cli.main),
+    "passport": ("assemble a Quality Passport for a release", passport_cli.main),
+    "coverage": (
+        "show intent coverage per criterion, check what a passport declares",
+        coverage_cli.main,
+    ),
+}
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    if not args:
+        print(_usage(), file=sys.stderr)
+        return EXIT_USAGE
+    name, rest = args[0], args[1:]
+    if name in ("-h", "--help"):
+        print(_usage())
+        return 0
+    if name == "--version":
+        print(version("ois-tools"))
+        return 0
+    command = COMMANDS.get(name)
+    if command is None:
+        print(f"ois: unknown command {name!r}\n\n{_usage()}", file=sys.stderr)
+        return EXIT_USAGE
+    return command[1](rest)
+
+
+def _usage() -> str:
+    width = max(len(name) for name in COMMANDS)
+    lines = [f"  {name:<{width}}  {summary}" for name, (summary, _) in COMMANDS.items()]
+    return "\n".join(
+        [
+            "usage: ois <command> [ARGS...]",
+            "",
+            "Tools for the Open Intent Schema (OIS). Commands:",
+            "",
+            *lines,
+            "",
+            "ois <command> --help shows the options of a command; ois --version the version.",
+        ]
+    )
+
+
+if __name__ == "__main__":
+    sys.exit(main())

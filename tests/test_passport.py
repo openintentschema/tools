@@ -6,10 +6,10 @@ from typing import Any
 
 import pytest
 
-from ois_validator import validate
-from ois_validator.intents import approve, next_version
-from ois_validator.passport_cli import main
-from ois_validator.passports import PassportError, Release, build, collect
+from ois_tools import validate
+from ois_tools.intents import approve, next_version
+from ois_tools.passport_cli import main
+from ois_tools.passports import PassportError, Release, build, collect
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid"
 NS = "https://ois.acme.example"

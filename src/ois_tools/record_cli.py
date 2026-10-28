@@ -1,8 +1,8 @@
-"""Command line interface: ois-record artifact | actor | evidence | decision | finding | supersede |
+"""Command line interface: ois record artifact | actor | evidence | decision | finding | supersede |
 bundle (see --help)
 
 Each command writes one record to <output-dir>/<type>s/ and prints the reference other records use
-for it, so that a pipeline can pass it on: BUILD=$(ois-record artifact dist/app.whl ...).
+for it, so that a pipeline can pass it on: BUILD=$(ois record artifact dist/app.whl ...).
 """
 
 import argparse
@@ -10,15 +10,14 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
-from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from ois_validator import records
-from ois_validator.authoring import AuthoringError, files, load
-from ois_validator.passports import PassportError, collect
-from ois_validator.records import RecordError
-from ois_validator.validator import validate
+from ois_tools import records
+from ois_tools.authoring import AuthoringError, files, load
+from ois_tools.passports import PassportError, collect
+from ois_tools.records import RecordError
+from ois_tools.validator import validate
 
 EXIT_OK = 0
 EXIT_REFUSED = 1
@@ -41,7 +40,7 @@ def main(argv: list[str] | None = None) -> int:
                 namespace=args.namespace,
             )
             for report in validate(made).reports:
-                print(f"ois-record: {report.level} [{report.rule}] {report.path}: {report.message}",
+                print(f"ois record: {report.level} [{report.rule}] {report.path}: {report.message}",
                       file=sys.stderr)  # fmt: skip
             text = json.dumps(made, indent=2, ensure_ascii=False) + "\n"
             if args.output:
@@ -52,10 +51,10 @@ def main(argv: list[str] | None = None) -> int:
         record = COMMANDS[args.command](args, at)
         print(_store(record, args.output_dir))
     except RecordError as error:
-        print(f"ois-record: {error}", file=sys.stderr)
+        print(f"ois record: {error}", file=sys.stderr)
         return EXIT_REFUSED
     except (OSError, AuthoringError, PassportError, ValueError) as error:
-        print(f"ois-record: {error}", file=sys.stderr)
+        print(f"ois record: {error}", file=sys.stderr)
         return EXIT_USAGE
     return EXIT_OK
 
@@ -203,11 +202,11 @@ def _store(record: dict[str, Any], output_dir: Path) -> str:
                 f"{path} already holds {records.reference(record)} with other content; "
                 f"records never change: {advice}"
             )
-        print(f"ois-record: unchanged {path}", file=sys.stderr)
+        print(f"ois record: unchanged {path}", file=sys.stderr)
         return records.reference(existing)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"ois-record: wrote {path}", file=sys.stderr)
+    print(f"ois record: wrote {path}", file=sys.stderr)
     return records.reference(record)
 
 
@@ -219,11 +218,10 @@ def _known(args: argparse.Namespace) -> list[dict[str, Any]]:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="ois-record",
+        prog="ois record",
         description="Write OIS records: artifacts with their digests, actors, evidence, "
         "decisions, findings and bundles. Each command prints the reference of its record.",
     )
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     commands = parser.add_subparsers(dest="command", required=True)
 
     art = _command(commands, "artifact", "an artifact with the digest of a file, commit or image")

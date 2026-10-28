@@ -1,13 +1,12 @@
-"""Command line interface: ois-validator FILE..."""
+"""Command line interface: ois validate FILE..."""
 
 import argparse
 import json
 import sys
-from importlib.metadata import version
 from pathlib import Path
 
-from ois_validator.report import Level, Report, Result
-from ois_validator.validator import validate
+from ois_tools.report import Level, Report, Result
+from ois_tools.validator import validate
 
 EXIT_CONFORMS = 0
 EXIT_VIOLATION = 1
@@ -16,12 +15,11 @@ EXIT_USAGE = 2
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="ois-validator",
+        prog="ois validate",
         description="Validate OIS records, bundles and Quality Passports.",
     )
     parser.add_argument("files", nargs="+", metavar="FILE", help="JSON file, or - for stdin")
     parser.add_argument("--format", choices=("text", "json"), default="text")
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     args = parser.parse_args(argv)
 
     results: dict[str, Result] = {}
@@ -29,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             text = sys.stdin.read() if name == "-" else Path(name).read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as error:
-            print(f"ois-validator: {name}: {error}", file=sys.stderr)
+            print(f"ois validate: {name}: {error}", file=sys.stderr)
             return EXIT_USAGE
         results[name] = _validate_text(text)
 

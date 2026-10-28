@@ -7,11 +7,11 @@ from typing import Any
 
 import pytest
 
-from ois_validator import validate
-from ois_validator.intents import approve
-from ois_validator.passport_cli import main as passport_main
-from ois_validator.record_cli import main
-from ois_validator.records import (
+from ois_tools import validate
+from ois_tools.intents import approve
+from ois_tools.passport_cli import main as passport_main
+from ois_tools.record_cli import main
+from ois_tools.records import (
     RecordError,
     actor,
     artifact,

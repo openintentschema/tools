@@ -1,6 +1,6 @@
 # Development
 
-How to work on the validator. How it is built: [architecture.md](architecture.md). Rules for
+How to work on `ois-tools`. How it is built: [architecture.md](architecture.md). Rules for
 contributions: [CONTRIBUTING.md](../.github/CONTRIBUTING.md).
 
 ## Setup and checks
@@ -19,15 +19,15 @@ checks the copies from the specification (below) and one that builds the contain
 commands in it without network. Locally:
 
 ```bash
-docker build -t ois-validator:dev .
-docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-validator:dev \
-  ois-validator tests/fixtures/valid/passport.json
+docker build -t ois-tools:dev .
+docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-tools:dev \
+  validate tests/fixtures/valid/passport.json
 ```
 
 ## Layout
 
 ```
-src/ois_validator/   the package (modules: architecture.md)
+src/ois_tools/   the package (modules: architecture.md)
   schemas/           copy of Appendix B
 Dockerfile           the container image (.dockerignore keeps the build context small)
 tests/
@@ -85,19 +85,19 @@ The workflow `.github/workflows/release.yml` checks that tag and version match, 
 package, smoke-tests the installed wheel and publishes to PyPI with trusted publishing: no
 stored token, and PyPI records signed attestations of where the package was built. After the
 PyPI job, it builds the container image from the `Dockerfile` for linux/amd64 and linux/arm64,
-pushes it to `ghcr.io/openintentschema/ois-validator` (tags `<version>`, `<major>.<minor>`,
+pushes it to `ghcr.io/openintentschema/ois-tools` (tags `<version>`, `<major>.<minor>`,
 `latest`) with an SBOM, attests its build provenance and runs it once without network. The
 `pypi` environment asks a maintainer to approve each release and accepts only tags `v*`
 (*Settings → Environments → pypi*). A published version cannot be replaced; fix forward with a
 new version.
 
 The first image push creates the package on GitHub as private. Make it public once: organization
-*Packages → ois-validator → Package settings → Change visibility*, and check that it is linked to
+*Packages → ois-tools → Package settings → Change visibility*, and check that it is linked to
 this repository (the image label `org.opencontainers.image.source` does that).
 
 After a release, update the guides on the website (specification repository,
 `site/src/content/docs/`) that describe a changed command, and install the new version from PyPI
-once to check it (`uvx --refresh --from ois-validator==<version> …`; shields.io caches the PyPI
+once to check it (`uvx --refresh --from ois-tools==<version> ois --version`; shields.io caches the PyPI
 badge for up to six hours).
 
 ## Conventions

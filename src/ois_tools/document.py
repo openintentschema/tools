@@ -10,7 +10,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Any
 
-from ois_validator.schema import STATEMENT_TYPE
+from ois_tools.schema import STATEMENT_TYPE
 
 Record = dict[str, Any]
 

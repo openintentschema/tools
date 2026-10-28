@@ -8,9 +8,9 @@ unresolved reference skips it; R10 reports the reference once.
 from collections.abc import Callable, Iterator
 from datetime import datetime
 
-from ois_validator import digests
-from ois_validator.document import Document, Entry, Record
-from ois_validator.report import Level, Report
+from ois_tools import digests
+from ois_tools.document import Document, Entry, Record
+from ois_tools.report import Level, Report
 
 Rule = Callable[[Document], Iterator[Report]]
 

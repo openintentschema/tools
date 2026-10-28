@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from ois_validator.cli import EXIT_CONFORMS, EXIT_USAGE, EXIT_VIOLATION, main
+from ois_tools.cli import main as ois
+from ois_tools.validate_cli import EXIT_CONFORMS, EXIT_USAGE, EXIT_VIOLATION, main
 
 EXAMPLES = Path(__file__).parent / "examples"
 FIXTURES = Path(__file__).parent / "fixtures" / "valid"
@@ -45,10 +46,42 @@ def test_stdin(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[st
     assert capsys.readouterr().out == "-: conforms\n"
 
 
-@pytest.mark.parametrize("entry", ["ois_validator.cli", "ois_validator.junit_cli"])
-def test_version(entry: str, capsys: pytest.CaptureFixture[str]) -> None:
-    module = __import__(entry, fromlist=["main"])
+# --- the ois command --------------------------------------------------------------------------
+
+COMMANDS = ("validate", "junit", "intent", "record", "passport", "coverage")
+
+
+def test_ois_version(capsys: pytest.CaptureFixture[str]) -> None:
+    assert ois(["--version"]) == 0
+    assert capsys.readouterr().out.strip() == version("ois-tools")
+
+
+def test_ois_lists_its_commands(capsys: pytest.CaptureFixture[str]) -> None:
+    assert ois(["--help"]) == 0
+    out = capsys.readouterr().out
+    assert out.startswith("usage: ois <command>")
+    for name in COMMANDS:
+        assert f"\n  {name} " in out
+
+
+def test_ois_without_a_command(capsys: pytest.CaptureFixture[str]) -> None:
+    assert ois([]) == EXIT_USAGE
+    assert "usage: ois <command>" in capsys.readouterr().err
+
+
+def test_ois_runs_a_command(capsys: pytest.CaptureFixture[str]) -> None:
+    assert ois(["validate", str(FIXTURES / "intent.json")]) == EXIT_CONFORMS
+    assert capsys.readouterr().out.strip().endswith("intent.json: conforms")
+
+
+def test_ois_refuses_an_unknown_command(capsys: pytest.CaptureFixture[str]) -> None:
+    assert ois(["validator", "x.json"]) == EXIT_USAGE
+    assert "unknown command 'validator'" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("name", COMMANDS)
+def test_each_command_is_named_ois_command(name: str, capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exit_info:
-        module.main(["--version"])
+        ois([name, "--help"])
     assert exit_info.value.code == 0
-    assert capsys.readouterr().out.strip() == version("ois-validator")
+    assert capsys.readouterr().out.startswith(f"usage: ois {name}")

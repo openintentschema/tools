@@ -1,16 +1,15 @@
-"""Command line interface: ois-passport build INPUT... (see --help)"""
+"""Command line interface: ois passport build INPUT... (see --help)"""
 
 import argparse
 import json
 import sys
 from datetime import UTC, datetime
-from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from ois_validator.authoring import AuthoringError, files, load
-from ois_validator.passports import PassportError, Release, build, collect
-from ois_validator.validator import validate
+from ois_tools.authoring import AuthoringError, files, load
+from ois_tools.passports import PassportError, Release, build, collect
+from ois_tools.validator import validate
 
 EXIT_OK = 0
 EXIT_INVALID = 1
@@ -19,10 +18,9 @@ EXIT_USAGE = 2
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="ois-passport",
+        prog="ois passport",
         description="Assemble a Quality Passport (specification section 8) from OIS records.",
     )
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     commands = parser.add_subparsers(dest="command", required=True)
 
     building = commands.add_parser("build", help="assemble an unsigned passport")
@@ -65,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         documents = [load(path) for path in files(args.inputs)]
         issued_at = _moment(args.at)
     except (OSError, AuthoringError, ValueError) as error:
-        print(f"ois-passport: {error}", file=sys.stderr)
+        print(f"ois passport: {error}", file=sys.stderr)
         return EXIT_USAGE
     try:
         passport = build(
@@ -83,12 +81,12 @@ def main(argv: list[str] | None = None) -> int:
             assess_coverage=not args.no_coverage,
         )
     except PassportError as error:
-        print(f"ois-passport: {error}", file=sys.stderr)
+        print(f"ois passport: {error}", file=sys.stderr)
         return EXIT_INVALID
 
     for report in validate(passport).reports:
         print(
-            f"ois-passport: {report.level} [{report.rule}] {report.path}: {report.message}",
+            f"ois passport: {report.level} [{report.rule}] {report.path}: {report.message}",
             file=sys.stderr,
         )
     _emit(passport, args.output)

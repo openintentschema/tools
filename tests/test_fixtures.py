@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from ois_validator import validate
+from ois_tools import validate
 
 FIXTURES = Path(__file__).parent / "fixtures"
 IMPLEMENTED = {"schema", *(f"R{n}" for n in range(1, 18) if n not in (6, 7))}

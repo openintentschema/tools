@@ -1,7 +1,15 @@
 # Architecture
 
-How the validator and the JUnit adapter are built, and why. For setup, checks and releases see
+How `ois-tools` is built, and why. For setup, checks and releases see
 [development.md](development.md).
+
+## One command
+
+`ois` is a thin dispatcher (`cli.py`): the first argument names the command, the rest goes to
+that command's own `main(argv)` with its own argparse parser, whose `prog` is `ois <command>`.
+Each command stays a module that can be called and tested on its own. Up to 0.5.0 they were
+six separate console scripts in a package called `ois-validator`; one entry point is easier to
+discover (`ois --help`) and leaves room for further commands.
 
 ## The validator implements the specification
 
@@ -45,13 +53,14 @@ that passed it, so they can rely on its structure.
 | `rules.py` | One function per integrity rule, in rule order, registered in `RECORD_RULES` or `CONTAINER_RULES`. |
 | `digests.py` | Criterion and intent `sha256` over RFC 8785 (JCS), digest-set equality. |
 | `validator.py` | `validate()`: schema, then rules. |
-| `cli.py` | `ois-validator`: exit 0 conforms, 1 violation, 2 unreadable file. |
-| `junit.py`, `junit_cli.py` | `ois-junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
+| `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
+| `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
-| `intents.py`, `intent_cli.py` | `ois-intent`: seal, approve, next version, compare. |
-| `passports.py`, `passport_cli.py` | `ois-passport build`: collect records, assemble and validate a passport. |
-| `coverage.py`, `coverage_cli.py` | Intent coverage by the reference method of Appendix D and its variants; `ois-coverage`. |
-| `records.py`, `record_cli.py` | `ois-record`: artifacts, actors, evidence, decisions, findings, finding chains and bundles. |
+| `intents.py`, `intent_cli.py` | `ois intent`: seal, approve, next version, compare. |
+| `passports.py`, `passport_cli.py` | `ois passport build`: collect records, assemble and validate a passport. |
+| `coverage.py`, `coverage_cli.py` | Intent coverage by the reference method of Appendix D and its variants; `ois coverage`. |
+| `records.py`, `record_cli.py` | `ois record`: artifacts, actors, evidence, decisions, findings, finding chains and bundles. |
 | `schemas/ois-0.1.schema.json` | Copy of Appendix B, shipped in the package. |
 
 ## Design decisions
@@ -93,7 +102,7 @@ this validator follows.
 ## No network access
 
 None of the commands opens a network connection. The schema is bundled (`schemas/`) and loaded
-through a local `referencing` registry, so no `$ref` is fetched; `ois-junit` and `ois-record`
+through a local `referencing` registry, so no `$ref` is fetched; `ois junit` and `ois record`
 run local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This
 was verified by running every command and the whole test suite in a sandbox that blocks all
 network access, and the container image with `docker run --network none` in CI. A new
@@ -102,7 +111,7 @@ dependency or feature must keep it that way; the specification's
 
 ## Authoring intents
 
-`ois-intent` exists because digests by hand are error-prone. Design choices:
+`ois intent` exists because digests by hand are error-prone. Design choices:
 
 - **YAML without surprises.** PyYAML reads YAML 1.1, where `yes` is a boolean, `0123` an octal
   number and `2026-10-14T09:12:00Z` a datetime. `authoring.py` replaces its implicit resolvers
@@ -134,7 +143,7 @@ dependency or feature must keep it that way; the specification's
 
 The `Dockerfile` builds the wheel from source in one stage and installs it in a slim Python image
 with the runtime dependencies exported from `uv.lock` and checked by hash, so the image holds
-exactly what the lock file names. git is installed because `ois-junit` and `ois-record` read the
+exactly what the lock file names. git is installed because `ois junit` and `ois record` read the
 checkout; `safe.directory '*'` lets git read a checkout mounted from the host, which belongs to
 another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker run --user`
 with the host's ids works and written files belong to the host user. It has no entrypoint:
@@ -143,12 +152,12 @@ the command is named on each run, as on the command line.
 ## Intent coverage
 
 `coverage.py` implements the reference method of Appendix D, which is informative: no rule and no
-fixture requires it, and `ois-validator` does not report on declared coverage. `ois-coverage`
+fixture requires it, and `ois validate` does not report on declared coverage. `ois coverage`
 compares instead.
 
 - **One function per condition.** For each criterion in scope, every evidence record for the same
   intent and key is either counted or given the first condition it fails, in the order of
-  Appendix D. That reason is what `ois-coverage` prints, so a missing figure can be traced.
+  Appendix D. That reason is what `ois coverage` prints, so a missing figure can be traced.
 - **Stale evidence** is read as R4 reads context: evidence for an earlier version counts if that
   version is among the records and its criterion with the same key has the same digest
   (section 6.3). Evidence for a later version never counts.
@@ -167,12 +176,12 @@ compares instead.
 
 ## Recording the other records
 
-`ois-record` closes the gap between `ois-intent` and `ois-passport`: without it, artifacts,
+`ois record` closes the gap between `ois intent` and `ois passport`: without it, artifacts,
 actors, decisions and findings were written by hand. Design choices:
 
 - **One record per command, its reference on stdout.** A pipeline captures it
-  (`BUILD=$(ois-record artifact …)`) and passes it to the next command; what was written goes to
-  stderr. Records go to `.ois/<type>s/`, next to what `ois-intent` writes, so `ois-passport build
+  (`BUILD=$(ois record artifact …)`) and passes it to the next command; what was written goes to
+  stderr. Records go to `.ois/<type>s/`, next to what `ois intent` writes, so `ois passport build
   .ois/` finds them.
 - **Ids that do not depend on the moment.** Actors are named (`actors/ci-build`, versioned by
   `--version`); artifacts take a readable name and the start of their digest; evidence, decisions
@@ -188,13 +197,13 @@ actors, decisions and findings were written by hand. Design choices:
   validators do, copies the subject's digest (R1, R16) and checks the well-known gates of section
   4.6. For `finding-resolution` and `supersede` it applies R14: one successor per finding and a
   confirming actor who did not produce, record or decide any part of the resolution. Everything
-  across records that this cannot see is left to `ois-validator` and `ois-passport`.
+  across records that this cannot see is left to `ois validate` and `ois passport`.
 - **Bundles are self-contained.** `bundle` reuses `passports.collect` and refuses a bundle with a
   violation, typically an unresolved reference (R10).
 
 ## JUnit adapter
 
-`ois-junit` builds what the quick start of spec section 11.4 asks for and validates it before
+`ois junit` builds what the quick start of spec section 11.4 asks for and validates it before
 writing.
 
 - **Stable ids.** Criterion keys are `TC-` plus a hash of class and test name, valid for any

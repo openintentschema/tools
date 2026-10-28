@@ -12,10 +12,10 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from ois_validator.coverage import coverage
-from ois_validator.rules import content
-from ois_validator.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
-from ois_validator.validator import validate
+from ois_tools.coverage import coverage
+from ois_tools.rules import content
+from ois_tools.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
+from ois_tools.validator import validate
 
 Record = dict[str, Any]
 

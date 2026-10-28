@@ -1,15 +1,14 @@
-"""Command line interface: ois-junit REPORT... --namespace URI --suite NAME"""
+"""Command line interface: ois junit REPORT... --namespace URI --suite NAME"""
 
 import argparse
 import json
 import sys
 from datetime import UTC, datetime
-from importlib.metadata import version
 from pathlib import Path
 from xml.etree.ElementTree import ParseError
 
-from ois_validator.junit import JUnitReport, Options, to_bundle
-from ois_validator.validator import validate
+from ois_tools.junit import JUnitReport, Options, to_bundle
+from ois_tools.validator import validate
 
 EXIT_OK = 0
 EXIT_INVALID = 1
@@ -18,7 +17,7 @@ EXIT_USAGE = 2
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="ois-junit",
+        prog="ois junit",
         description="Turn JUnit XML reports into an OIS bundle (Level 1, spec section 11.4).",
     )
     parser.add_argument("reports", nargs="+", metavar="REPORT", help="JUnit XML file, or -")
@@ -32,7 +31,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--location", help="artifact location (default git+<origin>@<HEAD>)")
     parser.add_argument("--run", help="URI of the pipeline run")
     parser.add_argument("--output", type=Path, help="write the bundle here instead of stdout")
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     args = parser.parse_args(argv)
 
     try:
@@ -46,14 +44,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         bundle = to_bundle(reports, options)
     except (OSError, ParseError, ValueError) as error:
-        print(f"ois-junit: {error}", file=sys.stderr)
+        print(f"ois junit: {error}", file=sys.stderr)
         return EXIT_USAGE
 
     result = validate(bundle)
     if not result.conforms:
         for report in result.reports:
             print(
-                f"ois-junit: {report.level} [{report.rule}] {report.path}: {report.message}",
+                f"ois junit: {report.level} [{report.rule}] {report.path}: {report.message}",
                 file=sys.stderr,
             )
         return EXIT_INVALID

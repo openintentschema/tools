@@ -5,10 +5,10 @@ from typing import Any
 
 import pytest
 
-from ois_validator import digests, validate
-from ois_validator.authoring import AuthoringError, loads_yaml
-from ois_validator.intent_cli import main
-from ois_validator.intents import IntentError, approve, compare, next_version, seal
+from ois_tools import digests, validate
+from ois_tools.authoring import AuthoringError, loads_yaml
+from ois_tools.intent_cli import main
+from ois_tools.intents import IntentError, approve, compare, next_version, seal
 
 NS = "https://ois.acme.example"
 PO = f"{NS}/actors/po-7f3a"

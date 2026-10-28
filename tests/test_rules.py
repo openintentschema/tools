@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ois_validator import validate
+from ois_tools import validate
 
 FIXTURES = Path(__file__).parent / "fixtures"
 NS = "https://ois.acme.example"

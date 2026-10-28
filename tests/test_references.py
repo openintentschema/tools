@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ois_validator import Level, validate
+from ois_tools import Level, validate
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

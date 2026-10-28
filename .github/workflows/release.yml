@@ -21,8 +21,8 @@ jobs:
       - run: uv build
       - name: Installed wheel validates a fixture
         run: |
-          uvx --from dist/*.whl ois-validator tests/fixtures/valid/level-1-bundle.json
-          uvx --from dist/*.whl ois-junit --help > /dev/null
+          uvx --from dist/*.whl ois validate tests/fixtures/valid/level-1-bundle.json
+          uvx --from dist/*.whl ois junit --help > /dev/null
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/ois-validator/
+      url: https://pypi.org/project/ois-tools/
     permissions:
       id-token: write
     steps:
@@ -54,7 +54,7 @@ jobs:
       id-token: write
       attestations: write
     env:
-      IMAGE: ghcr.io/openintentschema/ois-validator
+      IMAGE: ghcr.io/openintentschema/ois-tools
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
@@ -87,5 +87,5 @@ jobs:
           push-to-registry: true
       - name: Published image runs without network
         run: |
-          docker run --rm --network none "$IMAGE@${{ steps.push.outputs.digest }}" ois-validator --version \
+          docker run --rm --network none "$IMAGE@${{ steps.push.outputs.digest }}" --version \
             | grep -Fx "${GITHUB_REF_NAME#v}"

@@ -12,8 +12,8 @@ from typing import Any
 
 import pytest
 
-from ois_validator import rules
-from ois_validator.document import Document
+from ois_tools import rules
+from ois_tools.document import Document
 
 VALID = sorted((Path(__file__).parent / "fixtures" / "valid").glob("*.json"))
 

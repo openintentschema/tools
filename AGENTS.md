@@ -4,9 +4,10 @@ Guidance for coding agents and new contributors. Start with [README.md](README.m
 
 ## What this repository is
 
-The reference validator of the Open Intent Schema (OIS) and the commands that write OIS records
-(`ois-junit`, `ois-intent`, `ois-record`, `ois-passport`, `ois-coverage`), published on PyPI as
-`ois-validator` (Python 3.13+, Apache-2.0).
+The reference tools of the Open Intent Schema (OIS): one command, `ois`, with `validate` (the
+reference validator) and the tools that write records (`junit`, `intent`, `record`, `passport`,
+`coverage`). Published on PyPI as `ois-tools` (Python 3.13+, Apache-2.0) and as the container image
+`ghcr.io/openintentschema/ois-tools`. Up to 0.5.0 it was called `ois-validator`.
 
 The standard lives in [openintentschema/openintentschema](https://github.com/openintentschema/openintentschema),
 usually checked out next to this one as `../openintentschema`. **The validator implements the
@@ -19,10 +20,10 @@ depend on, name or favour a product or vendor.
 
 | Path | Content |
 | --- | --- |
-| `src/ois_validator/` | the package; one module per concern, see [docs/architecture.md](docs/architecture.md) |
+| `src/ois_tools/` | the package; one module per concern, see [docs/architecture.md](docs/architecture.md) |
 | `tests/` | unit tests per module; `fixtures/` and `examples/` are copies from the specification |
 | `scripts/sync_spec.py`, `spec.lock` | copy schema, examples and fixtures; the specification commit they come from |
-| `Dockerfile` | the container image `ghcr.io/openintentschema/ois-validator`, published by `release.yml` |
+| `Dockerfile` | the container image `ghcr.io/openintentschema/ois-tools`, published by `release.yml` |
 | `docs/` | [architecture.md](docs/architecture.md) (design decisions), [development.md](docs/development.md) (setup, adding a rule, releases) |
 | `.github/` | CI and release workflows, templates, contributing guide, Code of Conduct, security policy |
 
@@ -38,7 +39,7 @@ uv run scripts/sync_spec.py ../openintentschema # update the copies from a clean
 
 ## Rules for changes
 
-- Never edit the copies in `tests/fixtures/`, `tests/examples/` or `src/ois_validator/schemas/`;
+- Never edit the copies in `tests/fixtures/`, `tests/examples/` or `src/ois_tools/schemas/`;
   change the specification repository and sync.
 - A new or changed rule starts as an RFC there; then fixtures, sync, implementation, and the rule
   in `IMPLEMENTED` of `tests/test_fixtures.py` (see docs/development.md).

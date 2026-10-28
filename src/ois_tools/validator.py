@@ -1,8 +1,8 @@
 """Validate a parsed OIS document: Appendix B first, then the integrity rules of section 5."""
 
-from ois_validator import rules, schema
-from ois_validator.document import Document
-from ois_validator.report import Result
+from ois_tools import rules, schema
+from ois_tools.document import Document
+from ois_tools.report import Result
 
 
 def validate(document: object) -> Result:

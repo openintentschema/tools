@@ -6,12 +6,12 @@ from typing import Any
 
 import pytest
 
-from ois_validator import digests
-from ois_validator.coverage import METHOD, CoverageError, coverage, passport_coverage
-from ois_validator.coverage_cli import main
-from ois_validator.intents import approve, next_version
-from ois_validator.passport_cli import main as passport_main
-from ois_validator.passports import Release, build, collect
+from ois_tools import digests
+from ois_tools.coverage import METHOD, CoverageError, coverage, passport_coverage
+from ois_tools.coverage_cli import main
+from ois_tools.intents import approve, next_version
+from ois_tools.passport_cli import main as passport_main
+from ois_tools.passports import Release, build, collect
 
 FIXTURES = Path(__file__).parent / "fixtures" / "valid"
 NS = "https://ois.acme.example"

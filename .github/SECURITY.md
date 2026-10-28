@@ -8,7 +8,7 @@ you expected.
 
 Relevant here are, for example:
 
-- input that makes `ois-validator` or `ois-junit` crash, hang or read files it should not;
+- input that makes an `ois` command crash, hang or read files it should not;
 - input that the validator reports as conforming although it breaks a rule, so that forged or
   tampered evidence would pass;
 - anything that affects the integrity of the published package or its release workflow.

@@ -1,17 +1,16 @@
-"""Command line interface: ois-intent seal | approve | next | compare"""
+"""Command line interface: ois intent seal | approve | next | compare"""
 
 import argparse
 import json
 import sys
 from datetime import UTC, datetime
-from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from ois_validator.authoring import AuthoringError, load
-from ois_validator.intents import IntentError, approve, compare, file_stem, next_version, seal
+from ois_tools.authoring import AuthoringError, load
+from ois_tools.intents import IntentError, approve, compare, file_stem, next_version, seal
 
 EXIT_OK = 0
 EXIT_ERROR = 2
@@ -26,10 +25,9 @@ MEANING = {
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="ois-intent",
+        prog="ois intent",
         description="Seal, approve and version OIS intents written in YAML or JSON.",
     )
-    parser.add_argument("--version", action="version", version=version("ois-validator"))
     commands = parser.add_subparsers(dest="command", required=True)
 
     sealing = commands.add_parser("seal", help="compute criterion and intent digests")
@@ -79,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
             for key, change in compare(load(args.old), load(args.new)):
                 print(f"{key}: {MEANING[change]}")
     except (OSError, AuthoringError, IntentError) as error:
-        print(f"ois-intent: {error}", file=sys.stderr)
+        print(f"ois intent: {error}", file=sys.stderr)
         return EXIT_ERROR
     return EXIT_OK
 

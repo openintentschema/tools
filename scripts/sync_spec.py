@@ -19,7 +19,7 @@ LOCK = ROOT / "spec.lock"
 REPOSITORY = "https://github.com/openintentschema/openintentschema"
 
 # source in the spec repository -> copy in this repository
-FILES = {"schema/ois.schema.json": "src/ois_validator/schemas/ois-0.1.schema.json"}
+FILES = {"schema/ois.schema.json": "src/ois_tools/schemas/ois-0.1.schema.json"}
 TREES = {"examples": "tests/examples", "fixtures": "tests/fixtures"}
 
 

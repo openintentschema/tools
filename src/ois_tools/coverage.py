@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from ois_validator import digests
-from ois_validator.document import Document, Entry
-from ois_validator.rules import criterion as criterion_of
-from ois_validator.rules import self_declared
-from ois_validator.schema import STATEMENT_TYPE
+from ois_tools import digests
+from ois_tools.document import Document, Entry
+from ois_tools.rules import criterion as criterion_of
+from ois_tools.rules import self_declared
+from ois_tools.schema import STATEMENT_TYPE
 
 Record = dict[str, Any]
 

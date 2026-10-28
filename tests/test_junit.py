@@ -8,9 +8,9 @@ from typing import Any
 
 import pytest
 
-from ois_validator import validate
-from ois_validator.junit import JUnitReport, Options, location_of, to_bundle
-from ois_validator.junit_cli import main
+from ois_tools import validate
+from ois_tools.junit import JUnitReport, Options, location_of, to_bundle
+from ois_tools.junit_cli import main
 
 NS = "https://ois.acme.example"
 NOW = datetime(2026, 10, 28, 12, 0, tzinfo=UTC)

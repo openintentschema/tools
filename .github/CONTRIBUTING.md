@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping to build the reference validator for the Open Intent Schema.
+Thank you for helping to build the reference tools for the Open Intent Schema.
 
 ## Before you start
 

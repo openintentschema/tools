@@ -52,11 +52,11 @@ jobs:
         with:
           context: .
           load: true
-          tags: ois-validator:check
+          tags: ois-tools:check
       - name: Commands run offline on a mounted checkout as the runner's user
         run: |
-          run() { docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-validator:check "$@"; }
-          run ois-validator tests/fixtures/valid/passport.json
-          run ois-coverage tests/fixtures/valid/passport.json
-          run ois-record artifact --commit . --kind code --namespace https://ois.acme.example \
+          run() { docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-tools:check "$@"; }
+          run validate tests/fixtures/valid/passport.json
+          run coverage tests/fixtures/valid/passport.json
+          run record artifact --commit . --kind code --namespace https://ois.acme.example \
             --produced-by https://ois.acme.example/actors/dev@1 --output-dir /tmp/ois

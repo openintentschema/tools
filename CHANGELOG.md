@@ -1,9 +1,25 @@
 # Changelog
 
-All notable changes to `ois-validator`. Versions follow [Semantic Versioning](https://semver.org/);
-during 0.x any release may change behaviour.
+All notable changes to `ois-tools`, called `ois-validator` up to 0.5.0. Versions follow
+[Semantic Versioning](https://semver.org/); during 0.x any release may change behaviour.
 
 ## Unreleased
+
+## 0.6.0 (2026-10-28)
+
+- **Renamed** from `ois-validator` to `ois-tools`: the package holds the validator and the tools
+  that write records. `pip install ois-tools`; the Python module is `ois_tools`; the repository
+  is `openintentschema/tools`. `ois-validator` stays at 0.5.0.
+- **One command, `ois`,** with subcommands replaces the six commands: `ois validate`
+  (was `ois-validator`), `ois junit`, `ois intent`, `ois record`, `ois passport` and
+  `ois coverage`. Their options are unchanged; `ois --version` replaces the per-command option.
+- Container image `ghcr.io/openintentschema/ois-tools` with `ois` as its entrypoint and git, for
+  projects in any language (linux/amd64 and linux/arm64, with build provenance and SBOM).
+  Published by the release workflow after the PyPI release.
+- `ois record artifact --commit` names the artifact after the origin repository instead of the
+  checkout's folder, which differs between clones and containers.
+- The JUnit adapter's actor is named "ois junit (JUnit XML adapter of ois-tools)"; its id stays
+  `<namespace>/actors/ois-junit`.
 
 ## 0.5.0 (2026-10-28)
 
@@ -15,11 +31,6 @@ during 0.x any release may change behaviour.
   on a context (R12).
 - `ois-coverage`: per criterion, what counts and why other evidence does not; for a passport, a
   check of the coverage it declares (exit code 1 if it differs).
-- Container image `ghcr.io/openintentschema/ois-validator` with every command and git, for
-  projects in any language (linux/amd64 and linux/arm64, with build provenance and SBOM).
-  Published by the release workflow after the PyPI release.
-- `ois-record artifact --commit` names the artifact after the origin repository instead of the
-  checkout's folder, which differs between clones and containers.
 
 ## 0.4.0 (2026-10-28)
 

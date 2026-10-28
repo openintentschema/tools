@@ -64,8 +64,8 @@ def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
         f"{ns}/actors/ois-junit",
         now,
         kind="tool",
-        name="ois-junit (JUnit XML adapter)",
-        version=package_version("ois-validator"),
+        name="ois junit (JUnit XML adapter of ois-tools)",
+        version=package_version("ois-tools"),
     )
     suite = _record(
         "actor",

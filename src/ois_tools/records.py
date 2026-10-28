@@ -23,10 +23,10 @@ from typing import Any
 
 import rfc8785
 
-from ois_validator import digests
-from ois_validator.junit import location_of
-from ois_validator.passports import PassportError, collect
-from ois_validator.validator import validate
+from ois_tools import digests
+from ois_tools.junit import location_of
+from ois_tools.passports import PassportError, collect
+from ois_tools.validator import validate
 
 Record = dict[str, Any]
 
@@ -245,7 +245,7 @@ def decision(
     policy_version: str | None = None,
 ) -> Record:
     """A gate outcome. Its subject digest is taken from the subject among `records` unless given;
-    for an intent approval `ois-intent approve` also seals the intent."""
+    for an intent approval `ois intent approve` also seals the intent."""
     known = GATES.get(gate)
     outcomes = known[2] if known else ()
     if outcome is None:
@@ -422,7 +422,7 @@ def _check_resolution(finding: Record, decided_by: str, records: list[Record]) -
     if not finding.get("resolvedBy"):
         raise RecordError(
             f"{finding['id']} lists no resolution in resolvedBy; record it first with "
-            "ois-record supersede --resolved-by"
+            "ois record supersede --resolved-by"
         )
     involved = set()
     for resolution in finding["resolvedBy"]:

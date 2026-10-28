@@ -17,7 +17,7 @@ from jsonschema.exceptions import ValidationError, best_match
 from jsonschema.protocols import Validator
 from referencing import Registry, Resource
 
-from ois_validator.report import Level, Report, Result
+from ois_tools.report import Level, Report, Result
 
 SCHEMA_FILE = "ois-0.1.schema.json"
 STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
@@ -27,7 +27,7 @@ RECORD_TYPES = ("intent", "artifact", "actor", "evidence", "decision", "finding"
 
 @cache
 def schema() -> dict[str, Any]:
-    text = files("ois_validator").joinpath("schemas", SCHEMA_FILE).read_text(encoding="utf-8")
+    text = files("ois_tools").joinpath("schemas", SCHEMA_FILE).read_text(encoding="utf-8")
     loaded: dict[str, Any] = json.loads(text)
     return loaded
 

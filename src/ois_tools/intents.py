@@ -10,8 +10,8 @@ import copy
 from datetime import UTC, datetime
 from typing import Any
 
-from ois_validator import digests
-from ois_validator.validator import validate
+from ois_tools import digests
+from ois_tools.validator import validate
 
 Record = dict[str, Any]
 

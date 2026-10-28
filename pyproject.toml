@@ -1,7 +1,7 @@
 [project]
-name = "ois-validator"
-version = "0.5.0"
-description = "Reference validator for the Open Intent Schema (OIS)"
+name = "ois-tools"
+version = "0.6.0"
+description = "Reference tools for the Open Intent Schema (OIS): validate, record and attest what was required, built and proven"
 keywords = ["ois", "open-intent-schema", "requirements", "traceability", "evidence", "in-toto", "junit", "coverage"]
 readme = "README.md"
 license = "Apache-2.0"
@@ -22,18 +22,13 @@ classifiers = [
 ]
 
 [project.scripts]
-ois-validator = "ois_validator.cli:main"
-ois-junit = "ois_validator.junit_cli:main"
-ois-intent = "ois_validator.intent_cli:main"
-ois-passport = "ois_validator.passport_cli:main"
-ois-record = "ois_validator.record_cli:main"
-ois-coverage = "ois_validator.coverage_cli:main"
+ois = "ois_tools.cli:main"
 
 [project.urls]
-Repository = "https://github.com/openintentschema/validator"
-Documentation = "https://github.com/openintentschema/validator/tree/main/docs"
-Changelog = "https://github.com/openintentschema/validator/blob/main/CHANGELOG.md"
-Issues = "https://github.com/openintentschema/validator/issues"
+Repository = "https://github.com/openintentschema/tools"
+Documentation = "https://github.com/openintentschema/tools/tree/main/docs"
+Changelog = "https://github.com/openintentschema/tools/blob/main/CHANGELOG.md"
+Issues = "https://github.com/openintentschema/tools/issues"
 Specification = "https://github.com/openintentschema/openintentschema"
 
 [dependency-groups]
