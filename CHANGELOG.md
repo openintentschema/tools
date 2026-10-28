@@ -19,7 +19,8 @@ All notable changes to `ois-tools`, called `ois-validator` up to 0.5.0. Versions
 - `ois passport build --keyless-signer ISSUER=SUBJECT` counts a signer that signs the passport
   afterwards, for example with `actions/attest`, in the attested coverage.
 - Optional dependency: `pip install ois-tools[sigstore]`; the container image includes it.
-- Passes the keyless conformance fixtures once they are recorded in the specification repository.
+- Passes the keyless conformance fixtures: a passport signed by GitHub Actions through the
+  public-good Sigstore instance, recorded in the specification repository, and a tampered copy.
 
 ## 0.7.0 (2026-10-28)
 

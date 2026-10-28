@@ -155,8 +155,9 @@ with the runtime dependencies exported from `uv.lock` and checked by hash, so th
 exactly what the lock file names. git is installed because `ois junit` and `ois record` read the
 checkout; `safe.directory '*'` lets git read a checkout mounted from the host, which belongs to
 another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker run --user`
-with the host's ids works and written files belong to the host user. It has no entrypoint:
-the command is named on each run, as on the command line.
+with the host's ids works and written files belong to the host user. Its entrypoint is `ois`,
+so the arguments after the image name are those of the command line; CI systems that run a
+script in the image override it (GitLab: `entrypoint: [""]`).
 
 ## Signatures
 

@@ -11,6 +11,9 @@ Relevant here are, for example:
 - input that makes an `ois` command crash, hang or read files it should not;
 - input that the validator reports as conforming although it breaks a rule, so that forged or
   tampered evidence would pass;
+- a signature, DSSE envelope or Sigstore bundle that `ois validate` accepts although it was
+  forged, tampered with or made with a key or trusted root that was not given as trusted;
+- a private key written readable by others, or a signing command that leaks key material;
 - anything that affects the integrity of the published package or its release workflow.
 
 A weakness in the specification itself, such as a rule that lets forged evidence pass in every

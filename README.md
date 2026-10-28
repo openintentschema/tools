@@ -14,9 +14,12 @@ between. One command, `ois`, records that evidence along the delivery lifecycle 
 | Implementation | code artifact, the context an agent was given | `ois record artifact` |
 | Test | evidence per criterion | `ois junit`, `ois record evidence` |
 | Merge | merge decision | `ois record decision --gate merge` |
-| Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport --sign` |
+| Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport build --sign` |
 | Operation | findings, their classification and resolution | `ois record finding`, `ois record supersede` |
 | Review by others | check a passport and recompute its coverage | `ois validate`, `ois coverage` |
+
+Along the way, `ois key`, `ois sign` and `ois trust` sign and verify: DSSE with your own keys, or
+keylessly through Sigstore, for example with GitHub Actions (below).
 
 The tools record and check; they do not enforce. Whether a merge or a release is blocked, for
 example below a coverage threshold or with an open critical finding, is the policy of the
@@ -32,8 +35,9 @@ its rule and level (specification section 11.1):
 **Status:** pre-alpha, targets specification v0.1. `ois validate` checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
 conformance fixtures, signed ones included. Signatures are verified with keys you trust (Ed25519
-or ECDSA P-256) or, for keyless Sigstore signatures, against the trusted roots you choose. Up to version 0.5.0 the package was called `ois-validator`, with one command per
-tool (`ois-validator`, `ois-junit`, …).
+or ECDSA P-256) or, for keyless Sigstore signatures, against the trusted roots you choose. Up to
+version 0.5.0 the package was called `ois-validator`, with one command per tool
+(`ois-validator`, `ois-junit`, …).
 
 ## Install
 
@@ -283,6 +287,7 @@ ois validate passport.dsse.json --trusted-key keys/       # a .pub file, a direc
   envelope then counts as unsigned; a warning for a key that is not trusted.
 - Private keys are written readable by you only and are never needed for verification. Keep them
   in a secret store; an encrypted key is opened with `OIS_KEY_PASSPHRASE`.
+
 ### Keyless with Sigstore, for example on GitHub
 
 In a pipeline, no key needs to be kept: GitHub Actions (or GitLab CI, Google Cloud, Buildkite)
@@ -291,7 +296,7 @@ signature publicly. On GitHub, `actions/attest` signs the passport:
 
 ```bash
 ois passport build .ois/ … --keyless-signer \
-  "https://token.actions.githubusercontent.com=https://github.com/$GITHUB_WORKFLOW_REF" \
+  "https://token.actions.githubusercontent.com=$GITHUB_SERVER_URL/$GITHUB_WORKFLOW_REF" \
   --output passport.json                      # attested coverage counts the workflow
 jq .predicate passport.json > predicate.json  # actions/attest builds the statement itself
 ```

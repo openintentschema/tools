@@ -33,6 +33,7 @@ Dockerfile           the container image (.dockerignore keeps the build context 
 tests/
   fixtures/          copy of the conformance fixtures, run by test_fixtures.py
   examples/          copy of the Appendix A examples
+  sigstore/          a real Sigstore bundle and a frozen trusted root, for the keyless tests
   test_*.py          unit tests per module; test_robustness.py points references anywhere
 scripts/sync_spec.py copies schema, examples and fixtures from the specification
 spec.lock            the specification commit the copies come from
