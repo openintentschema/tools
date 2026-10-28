@@ -39,9 +39,10 @@ class Reference:
 
 @dataclass
 class Document:
-    """A bundle or the predicate of a passport, after the schema check has passed."""
+    """The records of a single record, a bundle or a passport, after the schema check passed."""
 
     entries: list[Entry]
+    container: bool = True  # False for a single record: no rules across records apply
     passport: Record | None = None  # the predicate, for passports
     _by_id: dict[str, list[Entry]] = field(default_factory=dict, repr=False)
 
@@ -50,16 +51,13 @@ class Document:
             self._by_id.setdefault(entry.record["id"], []).append(entry)
 
     @classmethod
-    def of(cls, document: object) -> "Document | None":
-        """The records of a bundle or passport, or None for a single record."""
-        if not isinstance(document, dict):
-            return None
+    def of(cls, document: Record) -> "Document":
         if document.get("_type") == STATEMENT_TYPE:
             predicate: Record = document["predicate"]
-            return cls(_entries(predicate["records"], "$.predicate.records"), predicate)
-        if document.get("type") == "bundle":
+            return cls(_entries(predicate["records"], "$.predicate.records"), passport=predicate)
+        if document["type"] == "bundle":
             return cls(_entries(document["records"], "$.records"))
-        return None
+        return cls([Entry(document, "$")], container=False)
 
     def resolve(self, reference: str) -> list[Entry]:
         """Every record a reference names; more than one only for records in several states."""

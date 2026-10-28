@@ -39,9 +39,13 @@ def _content(record: Record) -> Record:
     return {k: v for k, v in record.items() if k not in ("status", "digest")}
 
 
-RULES: tuple[Rule, ...] = (r10_resolution,)
+RECORD_RULES: tuple[Rule, ...] = ()  # also for a single record
+CONTAINER_RULES: tuple[Rule, ...] = (r10_resolution,)  # bundles and passports only
 
 
 def check(document: Document) -> Iterator[Report]:
-    for rule in RULES:
+    for rule in RECORD_RULES:
         yield from rule(document)
+    if document.container:
+        for rule in CONTAINER_RULES:
+            yield from rule(document)

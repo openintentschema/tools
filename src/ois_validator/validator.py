@@ -9,11 +9,9 @@ def validate(document: object) -> Result:
     """Check a record, a bundle or a Quality Passport statement.
 
     The integrity rules run only on input that passed the schema, so they can rely on its
-    structure. They relate records to each other and therefore apply to bundles and passports.
+    structure. Rules that relate records to each other apply to bundles and passports only.
     """
     result = schema.check(document)
-    if result.conforms:
-        container = Document.of(document)
-        if container is not None:
-            result.reports.extend(rules.check(container))
+    if result.conforms and isinstance(document, dict):
+        result.reports.extend(rules.check(Document.of(document)))
     return result
