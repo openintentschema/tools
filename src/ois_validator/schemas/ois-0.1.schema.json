@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ois.example/schema/v0.1/ois.schema.json",
+  "title": "Open Intent Schema v0.1",
+  "oneOf": [
+    { "$ref": "#/$defs/record" },
+    { "$ref": "#/$defs/bundle" }
+  ],
+  "$defs": {
+    "uri": { "type": "string", "format": "uri" },
+    "id": { "type": "string", "format": "uri", "pattern": "^[^@#]+$" },
+    "ref": { "type": "string", "format": "uri" },
+    "intentRef": { "type": "string", "format": "uri", "pattern": "^[^@#]+@[1-9][0-9]*$" },
+    "criterionRef": { "type": "string", "format": "uri", "pattern": "^[^@#]+@[1-9][0-9]*#[A-Za-z0-9._-]{1,64}$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "language": { "type": "string", "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$" },
+    "digest": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[A-Za-z0-9]+$" },
+      "additionalProperties": { "type": "string", "pattern": "^[0-9a-f]+$" },
+      "anyOf": [ { "required": ["sha256"] }, { "required": ["gitCommit"] } ]
+    },
+    "measurement": {
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "value": { "type": ["number", "string", "boolean"] },
+        "unit": { "type": "string" },
+        "method": { "$ref": "#/$defs/uri" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["metric", "operator", "value"],
+      "properties": {
+        "metric": { "type": "string", "minLength": 1 },
+        "operator": { "enum": ["lt", "lte", "gt", "gte", "eq"] },
+        "value": { "type": "number" },
+        "unit": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "required": ["provider", "name", "version"],
+      "properties": {
+        "provider": { "type": "string" },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "issuer": { "$ref": "#/$defs/uri" },
+        "subject": { "type": "string", "minLength": 1 },
+        "keyId": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [ { "required": ["issuer", "subject"] }, { "required": ["keyId"] } ],
+      "additionalProperties": false
+    },
+    "common": {
+      "type": "object",
+      "required": ["ois", "type", "id", "createdAt"],
+      "properties": {
+        "ois": { "const": "0.1" },
+        "id": { "$ref": "#/$defs/id" },
+        "createdAt": { "$ref": "#/$defs/timestamp" },
+        "profiles": { "type": "array", "items": { "$ref": "#/$defs/uri" } },
+        "trace": {
+          "type": "object",
+          "required": ["traceId"],
+          "properties": {
+            "traceId": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+            "spanId": { "type": "string", "pattern": "^[0-9a-f]{16}$" }
+          },
+          "additionalProperties": false
+        },
+        "extensions": {
+          "type": "object",
+          "propertyNames": {
+            "anyOf": [
+              { "pattern": "^([a-z0-9-]+\\.)+[a-z0-9-]+$" },
+              { "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:\\S+$" }
+            ]
+          }
+        }
+      }
+    },
+    "criterion": {
+      "type": "object",
+      "required": ["key", "statement", "notation", "kind"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+        "statement": { "type": "string", "minLength": 1 },
+        "notation": { "enum": ["gherkin", "ears", "text"] },
+        "kind": { "enum": ["functional", "non-functional"] },
+        "language": { "$ref": "#/$defs/language" },
+        "target": { "$ref": "#/$defs/target" },
+        "criticality": { "enum": ["low", "medium", "high"] },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "intent": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "if": { "properties": { "status": { "const": "approved" } } },
+          "then": {
+            "required": ["digest"],
+            "properties": { "criteria": { "items": { "required": ["digest"] } } }
+          }
+        }
+      ],
+      "required": ["version", "title", "status", "criteria"],
+      "properties": {
+        "type": { "const": "intent" },
+        "version": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["draft", "approved", "withdrawn"] },
+        "language": { "$ref": "#/$defs/language" },
+        "criteria": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/criterion" } },
+        "producedBy": { "$ref": "#/$defs/ref" },
+        "source": { "$ref": "#/$defs/uri" },
+        "supersedes": { "$ref": "#/$defs/intentRef" },
+        "risk": { "enum": ["low", "medium", "high", "critical"] },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "unevaluatedProperties": false
+    },
+    "artifact": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "if": { "properties": { "kind": { "const": "dataset" } } },
+          "then": { "required": ["classification"] }
+        }
+      ],
+      "required": ["kind", "location", "digest", "producedBy"],
+      "properties": {
+        "type": { "const": "artifact" },
+        "kind": { "enum": ["code", "test", "contract", "dataset", "document", "build", "other"] },
+        "location": { "$ref": "#/$defs/uri" },
+        "path": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "producedBy": { "$ref": "#/$defs/ref" },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/ref" } },
+        "context": { "type": "array", "items": { "$ref": "#/$defs/ref" } },
+        "contextRecordedBy": { "$ref": "#/$defs/ref" },
+        "classification": { "enum": ["synthetic", "anonymized", "production"] },
+        "mediaType": { "type": "string" }
+      },
+      "unevaluatedProperties": false
+    },
+    "actor": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "if": { "properties": { "kind": { "enum": ["agent", "tool"] } } },
+          "then": { "required": ["version"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "agent" } } },
+          "then": { "required": ["model"] }
+        }
+      ],
+      "required": ["kind", "name"],
+      "properties": {
+        "type": { "const": "actor" },
+        "kind": { "enum": ["human", "agent", "tool"] },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[^@#]+$" },
+        "model": {
+          "oneOf": [
+            { "$ref": "#/$defs/model" },
+            { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/model" } }
+          ]
+        },
+        "identity": { "$ref": "#/$defs/identity" },
+        "operator": { "type": "string" },
+        "autonomyLevel": { "type": "integer", "minimum": 0, "maximum": 3 }
+      },
+      "unevaluatedProperties": false
+    },
+    "evidence": {
+      "allOf": [ { "$ref": "#/$defs/common" } ],
+      "required": ["criterion", "test", "derivedFrom", "result", "observedAt", "recordedBy"],
+      "properties": {
+        "type": { "const": "evidence" },
+        "criterion": { "$ref": "#/$defs/criterionRef" },
+        "test": { "$ref": "#/$defs/ref" },
+        "subject": { "$ref": "#/$defs/ref" },
+        "inputs": { "type": "array", "items": { "$ref": "#/$defs/ref" } },
+        "derivedFrom": { "enum": ["intent", "implementation", "unknown"] },
+        "result": { "enum": ["pass", "fail", "skipped", "error"] },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "recordedBy": { "$ref": "#/$defs/ref" },
+        "measures": { "type": "array", "items": { "$ref": "#/$defs/measurement" } },
+        "run": { "$ref": "#/$defs/uri" }
+      },
+      "unevaluatedProperties": false
+    },
+    "decision": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        {
+          "if": { "properties": { "outcome": { "const": "waived" } } },
+          "then": { "required": ["rationale"] }
+        },
+        {
+          "if": { "properties": { "gate": { "const": "evidence-revocation" } } },
+          "then": { "required": ["rationale"], "properties": { "outcome": { "const": "rejected" } } }
+        },
+        {
+          "if": { "properties": { "gate": { "enum": ["intent-approval", "release"] } } },
+          "then": { "required": ["subjectDigest"] }
+        }
+      ],
+      "required": ["gate", "subject", "outcome", "decidedBy", "decidedAt"],
+      "properties": {
+        "type": { "const": "decision" },
+        "gate": { "type": "string", "minLength": 1 },
+        "subject": { "$ref": "#/$defs/ref" },
+        "subjectDigest": { "$ref": "#/$defs/digest" },
+        "outcome": { "enum": ["approved", "rejected", "passed", "blocked", "waived"] },
+        "decidedBy": { "$ref": "#/$defs/ref" },
+        "decidedAt": { "$ref": "#/$defs/timestamp" },
+        "policy": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "$ref": "#/$defs/uri" },
+            "version": { "type": "string" },
+            "digest": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/ref" } },
+        "assessments": { "type": "array", "items": { "$ref": "#/$defs/measurement" } },
+        "rationale": { "type": "string" }
+      },
+      "unevaluatedProperties": false
+    },
+    "finding": {
+      "allOf": [
+        { "$ref": "#/$defs/common" },
+        { "anyOf": [ { "required": ["criterion"] }, { "required": ["intent"] }, { "required": ["subject"] } ] }
+      ],
+      "required": ["source", "severity", "summary", "observedAt", "reportedBy"],
+      "properties": {
+        "type": { "const": "finding" },
+        "criterion": { "$ref": "#/$defs/criterionRef" },
+        "intent": { "$ref": "#/$defs/intentRef" },
+        "subject": { "$ref": "#/$defs/ref" },
+        "source": { "enum": ["production", "test", "review", "customer", "other"] },
+        "severity": { "enum": ["low", "medium", "high", "critical"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "reportedBy": { "$ref": "#/$defs/ref" },
+        "ticket": { "$ref": "#/$defs/uri" },
+        "cause": { "enum": ["spec-gap", "implementation", "test-gap", "gate-gap", "review", "unknown"] },
+        "resolvedBy": { "type": "array", "items": { "$ref": "#/$defs/ref" } },
+        "supersedes": { "$ref": "#/$defs/ref" }
+      },
+      "unevaluatedProperties": false
+    },
+    "record": {
+      "oneOf": [
+        { "$ref": "#/$defs/intent" },
+        { "$ref": "#/$defs/artifact" },
+        { "$ref": "#/$defs/actor" },
+        { "$ref": "#/$defs/evidence" },
+        { "$ref": "#/$defs/decision" },
+        { "$ref": "#/$defs/finding" }
+      ]
+    },
+    "bundle": {
+      "allOf": [ { "$ref": "#/$defs/common" } ],
+      "required": ["records"],
+      "properties": {
+        "type": { "const": "bundle" },
+        "records": { "type": "array", "items": { "$ref": "#/$defs/record" } }
+      },
+      "unevaluatedProperties": false
+    },
+    "passportPredicate": {
+      "type": "object",
+      "required": ["ois", "release", "intents", "records", "issuedBy", "issuedAt"],
+      "properties": {
+        "ois": { "const": "0.1" },
+        "release": {
+          "type": "object",
+          "required": ["name", "version"],
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "location": { "$ref": "#/$defs/uri" }
+          },
+          "additionalProperties": false
+        },
+        "intents": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/intentRef" } },
+        "scope": { "type": "array", "items": { "$ref": "#/$defs/criterionRef" } },
+        "records": { "type": "array", "items": { "$ref": "#/$defs/record" } },
+        "bundles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["location", "digest"],
+            "properties": {
+              "location": { "$ref": "#/$defs/uri" },
+              "digest": { "$ref": "#/$defs/digest" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "assessments": { "type": "array", "items": { "$ref": "#/$defs/measurement" } },
+        "issuedBy": { "$ref": "#/$defs/ref" },
+        "issuedAt": { "$ref": "#/$defs/timestamp" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
