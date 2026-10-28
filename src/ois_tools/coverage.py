@@ -1,14 +1,5 @@
-"""Intent coverage by the reference method of Appendix D (informative), with its variants.
-
-For each intent version listed and each criterion in scope, the evidence that counts is the
-evidence for that criterion, or for an earlier version under the stale evidence rule (section 6.3),
-that passed, was derived from the intent, concerns the release subject or one of its inputs, is not
-revoked (R11) and was observed after its subject was created. A criterion with a target also needs
-a measure that meets it.
-
-Appendix D defines coverage for one intent version. A passport that lists several intents counts
-the criteria in scope of all of them together, as section 8.2 reads `scope` for the passport.
-"""
+"""Intent coverage by the reference method of Appendix D and its variants. Several listed intents
+are counted together (section 8.2)."""
 
 import operator
 from collections.abc import Callable, Iterable

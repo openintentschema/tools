@@ -1,15 +1,5 @@
-"""Write the records around intents: artifacts, actors, evidence, decisions, findings and bundles
-(specification section 4).
-
-What is error-prone by hand is done here: digests of files and commits, the location of a file in
-Git, the subject digest of a decision, the next record of a finding chain, ids and timestamps.
-Every record is checked against Appendix B and R17 before it is returned. Records without a natural
-name get an id derived from their content, so recording the same thing twice gives the same id.
-
-Rules across records are checked where the records at hand make that possible: a well-known gate's
-subject and outcome (section 4.6), at most one successor per finding and an independent
-finding resolution (R14).
-"""
+"""Write artifact, actor, evidence, decision and finding records and bundles (section 4), each
+checked against Appendix B and R17. Content-derived ids keep recording idempotent."""
 
 import copy
 import hashlib

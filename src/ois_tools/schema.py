@@ -1,10 +1,5 @@
-"""Schema check against the normative JSON Schema of the specification (Appendix B).
-
-The schema accepts a record or a bundle at its root and answers a broken record inside a
-bundle with a bare `oneOf` failure. To report something useful, every record is checked
-against the definition for its own `type`, and the bundle or passport predicate around it
-only for its own members.
-"""
+"""Schema check against Appendix B. Each record is checked against its own type's definition,
+because the root `oneOf` reports only a bare failure."""
 
 import json
 from collections.abc import Iterable, Iterator

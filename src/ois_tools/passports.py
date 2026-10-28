@@ -1,10 +1,5 @@
-"""Assemble a Quality Passport (specification section 8) from the records behind a release.
-
-The passport is an in-toto Statement v1: its subject is the released build, its predicate lists
-the intents the release delivers, embeds every record it relies on and reports intent coverage by
-the reference method of Appendix D. It is validated before it is returned; signing (DSSE) is a
-separate step.
-"""
+"""Assemble a Quality Passport (section 8): an in-toto Statement for the released build with its
+records and intent coverage, validated before it is returned."""
 
 import copy
 from collections.abc import Iterable

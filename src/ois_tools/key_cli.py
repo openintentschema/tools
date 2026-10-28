@@ -1,9 +1,6 @@
 """Command line interface: ois key generate NAME | ois key id FILE
 
-`generate` writes an Ed25519 key pair, NAME.key (private, readable by you only) and NAME.pub, and
-prints the key id an actor's `identity.keyId` takes. The private key is not encrypted: keep it in
-a secret store, for example as a CI secret.
-"""
+The private key is written unencrypted and readable by its owner only."""
 
 import argparse
 import os

@@ -1,8 +1,4 @@
-"""Command line interface: ois <command> [ARGS...]
-
-One entry point for every tool, like git or docker: `ois validate`, `ois junit`, `ois intent`,
-`ois record`, `ois passport`, `ois coverage`. Each command parses its own arguments.
-"""
+"""Command line interface: ois <command> [ARGS...]; each command parses its own arguments."""
 
 import sys
 from collections.abc import Callable

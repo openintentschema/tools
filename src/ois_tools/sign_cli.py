@@ -1,9 +1,7 @@
 """Command line interface: ois sign FILE --key KEY... [--output FILE]
 
-Wraps a bundle or a passport in a DSSE envelope signed with each key, or adds signatures to an
-existing envelope, for example when the runtime that recorded the contexts signs a bundle too
-(Level 3, R12). An encrypted private key is opened with the passphrase in $OIS_KEY_PASSPHRASE.
-"""
+Wraps a bundle or passport in a DSSE envelope or adds signatures to one; $OIS_KEY_PASSPHRASE opens
+an encrypted key."""
 
 import argparse
 import json

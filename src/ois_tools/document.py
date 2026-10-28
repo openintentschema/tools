@@ -1,10 +1,6 @@
-"""The records of an input document (a record, bundle or passport) and how references resolve.
-
-Resolution follows the conformance fixtures (fixtures/README.md in the specification repository):
-`<id>@<version>` resolves to the intent or actor with that id and version, `<id>` to a record
-with that id and no version, and `<id>@<version>#<key>` to the intent version (the key is R2's
-concern). Only Ref-typed fields are references.
-"""
+"""The records of an input document and reference resolution as fixtures/README.md fixes it:
+`<id>@<version>` to that intent or actor version, `<id>` to the record without version,
+`<id>@<version>#<key>` to the intent version."""
 
 from collections.abc import Iterator
 from dataclasses import dataclass, field

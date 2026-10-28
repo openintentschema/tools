@@ -1,13 +1,6 @@
 """Command line interface: ois trust update [--tuf-url URL --tuf-root FILE] --output FILE
 
-Fetches a Sigstore trusted root through TUF, Sigstore's secure update protocol, which checks
-what it downloads against signed metadata, and writes it for `--trusted-root`. This is the only
-command that opens a network connection, and only when it is run: verifying stays offline.
-
-Without options it fetches the public-good instance's root, whose TUF root metadata ships with
-sigstore-python. An organization's own instance needs its TUF URL and, the first time, its TUF
-root metadata (`--tuf-root`). TUF keeps its metadata in the user's cache directory.
-"""
+Fetches a Sigstore trusted root through TUF; the only command with network access."""
 
 import argparse
 import json

@@ -1,8 +1,7 @@
 """Command line interface: ois coverage PASSPORT | ois coverage INPUT... --build REF
 
-Shows per criterion whether it is covered and, if not, why each piece of evidence does not count.
-For a passport it also compares the coverage the passport declares with the computed one.
-"""
+Shows per criterion what counts and why other evidence does not; for a passport, checks the declared
+coverage."""
 
 import argparse
 import sys

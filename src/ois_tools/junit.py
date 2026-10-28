@@ -1,12 +1,5 @@
-"""Level 1 adapter: turn JUnit XML reports into an OIS bundle (spec section 11.4).
-
-The bundle holds what the quick start asks for: an actor for this adapter, an actor for the
-existing test suite, one characterization intent in draft with a criterion per test case, an
-artifact per test file and an evidence record per test result with derivedFrom unknown.
-
-JUnit XML comes from the producer's own pipeline. It is parsed with the standard library, whose
-Expat (2.4.1 and later) refuses entity expansion attacks and does not load external entities.
-"""
+"""Level 1 adapter: JUnit XML to an OIS bundle (section 11.4). The standard library's Expat refuses
+entity expansion and external entities."""
 
 import hashlib
 import re

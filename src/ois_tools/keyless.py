@@ -1,17 +1,5 @@
-"""Sigstore bundles: keyless signatures on passports (specification section 8.3).
-
-A Sigstore bundle, as `actions/attest`, cosign and sigstore-python write it, carries a DSSE
-envelope, the short-lived signing certificate and its transparency log entry. It is verified
-offline against trusted roots the verifier chooses: the public-good instance's, GitHub's
-(`gh attestation trusted-root`) or an organization's own. Nothing is provider-specific: a provider
-is a trusted root and the OIDC issuer named in its certificates.
-
-A verified signature counts for the certificate identity, the OIDC issuer and the subject
-alternative name (for GitHub Actions the workflow, `https://github.com/<repo>/.github/workflows/
-<file>@<ref>`), which an actor names in `identity.issuer` and `identity.subject`.
-
-Verification needs the optional dependency `sigstore`: `pip install ois-tools[sigstore]`.
-"""
+"""Sigstore bundles (section 8.3): verified offline against chosen trusted roots; the signer is the
+certificate identity (OIDC issuer, subject). Needs the `sigstore` extra."""
 
 import json
 from collections.abc import Iterable

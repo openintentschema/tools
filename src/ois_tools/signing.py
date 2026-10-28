@@ -1,15 +1,6 @@
-"""DSSE envelopes for bundles and passports (specification section 8.3).
-
-A passport is signed with payload type `application/vnd.in-toto+json`, a bundle with
-`application/vnd.ois+json`. Keys are Ed25519 or ECDSA P-256. A key id is the lowercase hex SHA-256
-of the key's DER SubjectPublicKeyInfo, so a verifier derives it from the key it trusts. Which keys
-are trusted is the verifier's decision; nothing in a document can add one.
-
-`open_envelope` reports under the rule ID `signature` (fixtures/README.md in the specification
-repository): a violation for an envelope without signatures, with the wrong payload type or with a
-signature under a trusted key that does not verify, a warning for a key that is not trusted. An
-envelope with a violation counts as unsigned.
-"""
+"""DSSE envelopes for bundles and passports (section 8.3) with Ed25519 or ECDSA P-256 keys; a key id
+is the SHA-256 of the DER public key. Reports use the rule ID `signature`; an envelope with a
+violation counts as unsigned."""
 
 import base64
 import binascii

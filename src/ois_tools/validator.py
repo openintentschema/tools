@@ -1,5 +1,4 @@
-"""Validate a parsed OIS document: its signatures if it is a DSSE envelope, then Appendix B, then
-the integrity rules of section 5."""
+"""Validate a parsed OIS document: signatures, then Appendix B, then the rules of section 5."""
 
 from collections.abc import Iterable
 from typing import Any
@@ -17,14 +16,9 @@ def validate(
     trusted_keys: Iterable[TrustedKey] = (),
     trusted_roots: Iterable[Any] = (),
 ) -> Result:
-    """Check a record, a bundle, a Quality Passport statement, a DSSE envelope around a bundle or
-    passport (signatures verified with `trusted_keys`), or a Sigstore bundle (verified against
-    `trusted_roots`, see `keyless.load_trusted_roots`).
-
-    The integrity rules run only on input that passed the schema, so they can rely on its
-    structure. Rules that relate records to each other apply to bundles and passports only. Paths
-    of reports on the payload are relative to the payload.
-    """
+    """Check a record, bundle, passport, DSSE envelope (`trusted_keys`) or Sigstore bundle
+    (`trusted_roots`). Integrity rules run only after the schema passes; report paths on a
+    payload are relative to it."""
     signers = Signers()
     reports = []
     if is_envelope(document) or is_sigstore_bundle(document):

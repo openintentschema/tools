@@ -1,10 +1,5 @@
-"""Read authored records: JSON, or YAML as specification section 7 allows it.
-
-YAML must convert to JSON without loss, so it is read with the JSON schema of YAML 1.2:
-`2026-10-14T09:12:00Z` stays a string, `yes` and `on` stay strings, `0123` is 123. Features with no
-JSON equivalent are refused: tags, merge keys, non-string keys and duplicate keys. Otherwise a
-digest would depend on what a YAML library made of the text.
-"""
+"""Read authored JSON, or YAML as section 7 allows: the JSON schema of YAML 1.2, without tags, merge
+keys, non-string or duplicate keys, so digests do not depend on the YAML library."""
 
 import json
 import re

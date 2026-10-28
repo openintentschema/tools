@@ -1,9 +1,7 @@
 """Command line interface: ois record artifact | actor | evidence | decision | finding | supersede |
-bundle (see --help)
+bundle
 
-Each command writes one record to <output-dir>/<type>s/ and prints the reference other records use
-for it, so that a pipeline can pass it on: BUILD=$(ois record artifact dist/app.whl ...).
-"""
+Each command writes one record to <output-dir>/<type>s/ and prints its reference."""
 
 import argparse
 import json

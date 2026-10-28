@@ -1,10 +1,4 @@
-"""Author intents: digests, approval, the next version and what changed between two.
-
-An approved intent never changes (specification section 6.3). Its digest covers everything but
-`status` and `digest` (section 6.4), and its intent-approval decision binds that digest (R1). A new
-version supersedes the previous one; evidence carries over only for criteria whose digest is
-unchanged.
-"""
+"""Seal, approve, version and compare intents (sections 6.3 and 6.4, R1)."""
 
 import copy
 from datetime import UTC, datetime
