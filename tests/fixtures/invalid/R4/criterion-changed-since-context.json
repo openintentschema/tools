@@ -1,0 +1,333 @@
+{
+  "ois": "0.1",
+  "type": "bundle",
+  "id": "https://ois.acme.example/bundles/B-2026-10-20-01",
+  "createdAt": "2026-10-20T15:00:00Z",
+  "records": [
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/po-7f3a",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "human",
+      "name": "PO 7f3a",
+      "operator": "Team Portal"
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/requirement-agent",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "agent",
+      "name": "Requirement agent",
+      "version": "1.4",
+      "model": {
+        "provider": "ExampleAI",
+        "name": "model-a",
+        "version": "2026-09"
+      },
+      "autonomyLevel": 1
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/dev-agent",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "agent",
+      "name": "Developer agent",
+      "version": "3.0",
+      "model": {
+        "provider": "ExampleAI",
+        "name": "model-a",
+        "version": "2026-09"
+      },
+      "autonomyLevel": 2
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/qe-agent",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "agent",
+      "name": "QE agent",
+      "version": "2.1",
+      "model": {
+        "provider": "OtherAI",
+        "name": "model-b",
+        "version": "2026-09"
+      },
+      "autonomyLevel": 2
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/agent-runtime",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "tool",
+      "name": "Agent runtime and gateway",
+      "version": "4.3",
+      "identity": {
+        "issuer": "https://oidc.acme.example",
+        "subject": "spiffe://acme.example/agent-runtime"
+      }
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/testdata-generator",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "tool",
+      "name": "Synthetic test data generator",
+      "version": "5.2"
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/ci-recorder",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "tool",
+      "name": "CI evidence recorder",
+      "version": "1.2"
+    },
+    {
+      "ois": "0.1",
+      "type": "intent",
+      "id": "https://ois.acme.example/intents/INT-142",
+      "createdAt": "2026-10-14T09:12:00Z",
+      "version": 1,
+      "title": "Customers change their address in the portal",
+      "status": "approved",
+      "language": "en",
+      "producedBy": "https://ois.acme.example/actors/requirement-agent@1.4",
+      "source": "https://jira.acme.example/browse/PORTAL-1187",
+      "risk": "high",
+      "criteria": [
+        {
+          "key": "AC-1",
+          "statement": "Given a logged-in customer, when they submit a valid Swiss address, then the new address is saved with the chosen effective date",
+          "notation": "gherkin",
+          "kind": "functional",
+          "criticality": "high",
+          "digest": {
+            "sha256": "c6aa1922fdd002acc1087b24060aa2a20650536b8693725f5c74761660df1d3a"
+          }
+        },
+        {
+          "key": "AC-2",
+          "statement": "WHEN an address cannot be assigned to a canton, THE portal SHALL flag the premium region for manual review",
+          "notation": "ears",
+          "kind": "functional",
+          "criticality": "high",
+          "digest": {
+            "sha256": "ebd6350ec92d58cc7c77e62ebf40ea2d26922f8ec95ad85c626ff6b39f8599f6"
+          }
+        },
+        {
+          "key": "NFR-1",
+          "statement": "THE portal SHALL confirm an address change within 500 milliseconds at the 95th percentile",
+          "notation": "ears",
+          "kind": "non-functional",
+          "target": {
+            "metric": "responseTimeP95",
+            "operator": "lte",
+            "value": 500,
+            "unit": "ms"
+          },
+          "criticality": "medium",
+          "digest": {
+            "sha256": "eccddffcc90a273e6f6663b1f4bd31de390acd914bfb076f8d4cf54ca443904b"
+          }
+        }
+      ],
+      "digest": {
+        "sha256": "1358302ab5174e32bff0df5c244bac5eca011e9d0b6c2cd3d4166db2f0223552"
+      }
+    },
+    {
+      "ois": "0.1",
+      "type": "artifact",
+      "id": "https://ois.acme.example/artifacts/ART-301",
+      "createdAt": "2026-10-15T11:20:00Z",
+      "kind": "contract",
+      "location": "git+https://git.acme.example/portal.git@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "mediaType": "application/yaml",
+      "path": "api/address.openapi.yaml",
+      "context": [
+        "https://ois.acme.example/intents/INT-142@1"
+      ],
+      "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+      "digest": {
+        "sha256": "0a0e6e8233833c97c44c0c53f28cc8cfc23c8052cab50bfbe8b1f1658f625695"
+      },
+      "producedBy": "https://ois.acme.example/actors/dev-agent@3.0"
+    },
+    {
+      "ois": "0.1",
+      "type": "artifact",
+      "id": "https://ois.acme.example/artifacts/ART-302",
+      "createdAt": "2026-10-18T16:40:00Z",
+      "kind": "code",
+      "location": "git+https://git.acme.example/portal.git@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "context": [
+        "https://ois.acme.example/intents/INT-142@1",
+        "https://ois.acme.example/artifacts/ART-301"
+      ],
+      "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+      "digest": {
+        "sha256": "42efbb1914bfd2ebb87f814a2c36d2ed7772d130292f06038477e5647a38778c"
+      },
+      "producedBy": "https://ois.acme.example/actors/dev-agent@3.0"
+    },
+    {
+      "ois": "0.1",
+      "type": "artifact",
+      "id": "https://ois.acme.example/artifacts/ART-303",
+      "createdAt": "2026-10-16T08:05:00Z",
+      "kind": "dataset",
+      "location": "https://testdata.acme.example/sets/addresses-without-canton-v1",
+      "classification": "synthetic",
+      "context": [
+        "https://ois.acme.example/intents/INT-142@1#AC-2"
+      ],
+      "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+      "digest": {
+        "sha256": "facd922f00fb12930e0289cc2bd8231202939621f109d77731f8901ed8fe5b7d"
+      },
+      "producedBy": "https://ois.acme.example/actors/testdata-generator@5.2"
+    },
+    {
+      "ois": "0.1",
+      "type": "artifact",
+      "id": "https://ois.acme.example/artifacts/ART-304",
+      "createdAt": "2026-10-18T17:05:00Z",
+      "kind": "test",
+      "location": "git+https://git.acme.example/portal.git@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+      "path": "tests/address.spec.ts",
+      "context": [
+        "https://ois.acme.example/intents/INT-142@1",
+        "https://ois.acme.example/artifacts/ART-301",
+        "https://ois.acme.example/artifacts/ART-303"
+      ],
+      "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+      "digest": {
+        "sha256": "6dc79ee9b63855b8a2790744cd53aac4aaa2a963dcc9aa7913080e8971304711"
+      },
+      "producedBy": "https://ois.acme.example/actors/qe-agent@2.1"
+    },
+    {
+      "ois": "0.1",
+      "type": "evidence",
+      "id": "https://ois.acme.example/evidence/EV-9021",
+      "createdAt": "2026-10-20T14:31:59Z",
+      "criterion": "https://ois.acme.example/intents/INT-142@2#AC-2",
+      "test": "https://ois.acme.example/artifacts/ART-304",
+      "subject": "https://ois.acme.example/artifacts/ART-302",
+      "inputs": [
+        "https://ois.acme.example/artifacts/ART-303"
+      ],
+      "measures": [
+        {
+          "name": "mutationScore",
+          "value": 0.84,
+          "method": "https://ois.acme.example/methods/mutation-score"
+        }
+      ],
+      "derivedFrom": "intent",
+      "result": "pass",
+      "observedAt": "2026-10-20T14:31:58Z",
+      "recordedBy": "https://ois.acme.example/actors/ci-recorder@1.2",
+      "run": "https://ci.acme.example/pipelines/portal/runs/5531"
+    },
+    {
+      "ois": "0.1",
+      "type": "decision",
+      "id": "https://ois.acme.example/decisions/DEC-77",
+      "createdAt": "2026-10-14T10:05:00Z",
+      "gate": "intent-approval",
+      "subject": "https://ois.acme.example/intents/INT-142@1",
+      "outcome": "approved",
+      "decidedBy": "https://ois.acme.example/actors/po-7f3a",
+      "decidedAt": "2026-10-14T10:05:00Z",
+      "subjectDigest": {
+        "sha256": "1358302ab5174e32bff0df5c244bac5eca011e9d0b6c2cd3d4166db2f0223552"
+      },
+      "policy": {
+        "id": "https://ois.acme.example/policies/definition-of-ready",
+        "version": "4"
+      }
+    },
+    {
+      "ois": "0.1",
+      "type": "intent",
+      "id": "https://ois.acme.example/intents/INT-142",
+      "createdAt": "2026-10-19T09:00:00Z",
+      "version": 2,
+      "title": "Customers change their address in the portal",
+      "status": "approved",
+      "language": "en",
+      "producedBy": "https://ois.acme.example/actors/requirement-agent@1.4",
+      "source": "https://jira.acme.example/browse/PORTAL-1187",
+      "supersedes": "https://ois.acme.example/intents/INT-142@1",
+      "risk": "high",
+      "criteria": [
+        {
+          "key": "AC-1",
+          "statement": "Given a logged-in customer, when they submit a valid Swiss address, then the new address is saved with the chosen effective date",
+          "notation": "gherkin",
+          "kind": "functional",
+          "criticality": "high",
+          "digest": {
+            "sha256": "c6aa1922fdd002acc1087b24060aa2a20650536b8693725f5c74761660df1d3a"
+          }
+        },
+        {
+          "key": "AC-2",
+          "statement": "WHEN an address cannot be assigned to a canton, THE portal SHALL flag the premium region for manual review and notify the customer",
+          "notation": "ears",
+          "kind": "functional",
+          "criticality": "high",
+          "digest": {
+            "sha256": "70266336b82786944cb06c9972f6f172c09f19bc106eea1fa6ee5fd6f5855f57"
+          }
+        },
+        {
+          "key": "NFR-1",
+          "statement": "THE portal SHALL confirm an address change within 500 milliseconds at the 95th percentile",
+          "notation": "ears",
+          "kind": "non-functional",
+          "target": {
+            "metric": "responseTimeP95",
+            "operator": "lte",
+            "value": 500,
+            "unit": "ms"
+          },
+          "criticality": "medium",
+          "digest": {
+            "sha256": "eccddffcc90a273e6f6663b1f4bd31de390acd914bfb076f8d4cf54ca443904b"
+          }
+        }
+      ],
+      "digest": {
+        "sha256": "a4ece2d011d7e2449457067187c42cb87cfe332336bec3691b04db7e8549d2ff"
+      }
+    },
+    {
+      "ois": "0.1",
+      "type": "decision",
+      "id": "https://ois.acme.example/decisions/DEC-78",
+      "createdAt": "2026-10-19T10:00:00Z",
+      "gate": "intent-approval",
+      "subject": "https://ois.acme.example/intents/INT-142@2",
+      "outcome": "approved",
+      "decidedBy": "https://ois.acme.example/actors/po-7f3a",
+      "decidedAt": "2026-10-19T10:00:00Z",
+      "subjectDigest": {
+        "sha256": "a4ece2d011d7e2449457067187c42cb87cfe332336bec3691b04db7e8549d2ff"
+      },
+      "policy": {
+        "id": "https://ois.acme.example/policies/definition-of-ready",
+        "version": "4"
+      }
+    }
+  ]
+}

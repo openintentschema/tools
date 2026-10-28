@@ -1,0 +1,14 @@
+{
+  "ois": "0.1",
+  "type": "finding",
+  "id": "https://ois.acme.example/findings/FND-18",
+  "createdAt": "2026-10-20T18:30:00Z",
+  "intent": "https://ois.acme.example/intents/INT-142@1",
+  "subject": "https://ois.acme.example/artifacts/ART-302",
+  "source": "test",
+  "severity": "high",
+  "summary": "Address change to a Liechtenstein postcode aborts the premium calculation",
+  "observedAt": "2026-10-20T18:12:00Z",
+  "reportedBy": "https://ois.acme.example/actors/support-4b1e",
+  "score": 7
+}

@@ -1,0 +1,54 @@
+{
+  "ois": "0.1",
+  "type": "intent",
+  "id": "https://ois.acme.example/intents/INT-142",
+  "createdAt": "2026-10-14T09:12:00Z",
+  "version": 1,
+  "title": "Customers change their address in the portal",
+  "status": "approved",
+  "language": "en",
+  "producedBy": "https://ois.acme.example/actors/requirement-agent@1.4",
+  "source": "https://jira.acme.example/browse/PORTAL-1187",
+  "risk": "high",
+  "criteria": [
+    {
+      "key": "AC-1",
+      "statement": "Given a logged-in customer, when they submit a valid Swiss address, then the new address is saved with the chosen effective date",
+      "notation": "gherkin",
+      "kind": "functional",
+      "criticality": "high",
+      "digest": {
+        "sha256": "c6aa1922fdd002acc1087b24060aa2a20650536b8693725f5c74761660df1d3a"
+      }
+    },
+    {
+      "key": "AC-2",
+      "statement": "WHEN an address cannot be assigned to a canton, THE portal SHALL flag the premium region for manual review",
+      "notation": "ears",
+      "kind": "functional",
+      "criticality": "high",
+      "digest": {
+        "sha256": "ebd6350ec92d58cc7c77e62ebf40ea2d26922f8ec95ad85c626ff6b39f8599f6"
+      }
+    },
+    {
+      "key": "NFR-1",
+      "statement": "THE portal SHALL confirm an address change within 500 milliseconds at the 95th percentile",
+      "notation": "ears",
+      "kind": "non-functional",
+      "target": {
+        "metric": "responseTimeP95",
+        "operator": "lte",
+        "value": 500,
+        "unit": "ms"
+      },
+      "criticality": "medium",
+      "digest": {
+        "sha256": "eccddffcc90a273e6f6663b1f4bd31de390acd914bfb076f8d4cf54ca443904b"
+      }
+    }
+  ],
+  "digest": {
+    "sha256": "01df4c4e782e24106dbaee15afc0ea95727982eea3b035892d14d25c1701ab25"
+  }
+}

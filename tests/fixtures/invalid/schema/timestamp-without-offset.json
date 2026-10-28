@@ -1,0 +1,24 @@
+{
+  "ois": "0.1",
+  "type": "evidence",
+  "id": "https://ois.acme.example/evidence/EV-9021",
+  "createdAt": "2026-10-20T14:31:59Z",
+  "criterion": "https://ois.acme.example/intents/INT-142@1#AC-2",
+  "test": "https://ois.acme.example/artifacts/ART-304",
+  "subject": "https://ois.acme.example/artifacts/ART-302",
+  "inputs": [
+    "https://ois.acme.example/artifacts/ART-303"
+  ],
+  "measures": [
+    {
+      "name": "mutationScore",
+      "value": 0.84,
+      "method": "https://ois.acme.example/methods/mutation-score"
+    }
+  ],
+  "derivedFrom": "intent",
+  "result": "pass",
+  "observedAt": "2026-10-20T14:31:58",
+  "recordedBy": "https://ois.acme.example/actors/ci-recorder@1.2",
+  "run": "https://ci.acme.example/pipelines/portal/runs/5531"
+}

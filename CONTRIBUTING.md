@@ -23,8 +23,8 @@ git commit -s -m "Describe your change"
 ## Pull requests
 
 - One topic per pull request.
-- Do not edit the copies of the schema, examples or fixtures; update them from the
-  specification repository.
+- Do not edit the copies of the schema, examples or fixtures; update them with
+  `uv run scripts/sync_spec.py` from a clean checkout of the specification repository.
 - CI must pass: lint, format, strict type check and tests on every supported Python version.
 
 ## License

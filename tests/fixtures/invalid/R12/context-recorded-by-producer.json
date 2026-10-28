@@ -1,0 +1,91 @@
+{
+  "ois": "0.1",
+  "type": "bundle",
+  "id": "https://ois.acme.example/bundles/B-2026-10-20-01",
+  "createdAt": "2026-10-20T15:00:00Z",
+  "records": [
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/junit-adapter",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "tool",
+      "name": "JUnit XML adapter",
+      "version": "0.3"
+    },
+    {
+      "ois": "0.1",
+      "type": "actor",
+      "id": "https://ois.acme.example/actors/billing-test-suite",
+      "createdAt": "2026-09-01T08:00:00Z",
+      "kind": "tool",
+      "name": "Team Billing test suite",
+      "version": "legacy"
+    },
+    {
+      "ois": "0.1",
+      "type": "intent",
+      "id": "https://ois.acme.example/intents/INT-900",
+      "createdAt": "2026-10-20T06:00:00Z",
+      "version": 1,
+      "title": "Characterization of the billing test suite",
+      "status": "draft",
+      "producedBy": "https://ois.acme.example/actors/junit-adapter@0.3",
+      "criteria": [
+        {
+          "key": "TC-1",
+          "statement": "InvoiceTest.roundsToFiveRappen",
+          "notation": "text",
+          "kind": "functional"
+        },
+        {
+          "key": "TC-2",
+          "statement": "InvoiceTest.rejectsNegativeAmounts",
+          "notation": "text",
+          "kind": "functional"
+        }
+      ]
+    },
+    {
+      "ois": "0.1",
+      "type": "artifact",
+      "id": "https://ois.acme.example/artifacts/ART-501",
+      "createdAt": "2026-10-20T06:00:00Z",
+      "kind": "test",
+      "location": "git+https://git.acme.example/billing.git@9f8e7d6c5b4a39281706f5e4d3c2b1a098765432",
+      "path": "src/test/java/InvoiceTest.java",
+      "digest": {
+        "sha256": "a465d98114746492c1b45bd93ccf3fcf030f4e81c5bd633d72034f43a9f2c4bd"
+      },
+      "producedBy": "https://ois.acme.example/actors/billing-test-suite@legacy",
+      "context": [
+        "https://ois.acme.example/intents/INT-900@1"
+      ],
+      "contextRecordedBy": "https://ois.acme.example/actors/billing-test-suite@legacy"
+    },
+    {
+      "ois": "0.1",
+      "type": "evidence",
+      "id": "https://ois.acme.example/evidence/EV-501",
+      "createdAt": "2026-10-20T06:00:05Z",
+      "criterion": "https://ois.acme.example/intents/INT-900@1#TC-1",
+      "test": "https://ois.acme.example/artifacts/ART-501",
+      "derivedFrom": "unknown",
+      "result": "pass",
+      "observedAt": "2026-10-20T05:59:58Z",
+      "recordedBy": "https://ois.acme.example/actors/junit-adapter@0.3"
+    },
+    {
+      "ois": "0.1",
+      "type": "evidence",
+      "id": "https://ois.acme.example/evidence/EV-502",
+      "createdAt": "2026-10-20T06:00:05Z",
+      "criterion": "https://ois.acme.example/intents/INT-900@1#TC-2",
+      "test": "https://ois.acme.example/artifacts/ART-501",
+      "derivedFrom": "unknown",
+      "result": "fail",
+      "observedAt": "2026-10-20T05:59:58Z",
+      "recordedBy": "https://ois.acme.example/actors/junit-adapter@0.3"
+    }
+  ]
+}

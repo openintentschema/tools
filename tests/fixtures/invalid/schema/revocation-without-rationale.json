@@ -1,0 +1,11 @@
+{
+  "ois": "0.1",
+  "type": "decision",
+  "id": "https://ois.acme.example/decisions/DEC-95",
+  "createdAt": "2026-10-22T09:00:00Z",
+  "gate": "evidence-revocation",
+  "subject": "https://ois.acme.example/evidence/EV-9021",
+  "outcome": "rejected",
+  "decidedBy": "https://ois.acme.example/actors/po-7f3a",
+  "decidedAt": "2026-10-22T09:00:00Z"
+}

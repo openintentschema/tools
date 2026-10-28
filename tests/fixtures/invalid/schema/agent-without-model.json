@@ -1,0 +1,10 @@
+{
+  "ois": "0.1",
+  "type": "actor",
+  "id": "https://ois.acme.example/actors/dev-agent",
+  "createdAt": "2026-09-01T08:00:00Z",
+  "kind": "agent",
+  "name": "Developer agent",
+  "version": "3.0",
+  "autonomyLevel": 2
+}

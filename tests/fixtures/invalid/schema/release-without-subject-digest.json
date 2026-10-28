@@ -1,0 +1,14 @@
+{
+  "ois": "0.1",
+  "type": "decision",
+  "id": "https://ois.acme.example/decisions/DEC-81",
+  "createdAt": "2026-10-21T08:45:00Z",
+  "gate": "release",
+  "subject": "https://ois.acme.example/artifacts/ART-305",
+  "outcome": "approved",
+  "decidedBy": "https://ois.acme.example/actors/qe-2c9d",
+  "decidedAt": "2026-10-21T08:45:00Z",
+  "evidence": [
+    "https://ois.acme.example/evidence/EV-9021"
+  ]
+}

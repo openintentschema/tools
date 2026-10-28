@@ -1,0 +1,19 @@
+{
+  "ois": "0.1",
+  "type": "artifact",
+  "id": "https://ois.acme.example/artifacts/ART-304@1",
+  "createdAt": "2026-10-18T17:05:00Z",
+  "kind": "test",
+  "location": "git+https://git.acme.example/portal.git@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678",
+  "path": "tests/address.spec.ts",
+  "context": [
+    "https://ois.acme.example/intents/INT-142@1",
+    "https://ois.acme.example/artifacts/ART-301",
+    "https://ois.acme.example/artifacts/ART-303"
+  ],
+  "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+  "digest": {
+    "sha256": "6dc79ee9b63855b8a2790744cd53aac4aaa2a963dcc9aa7913080e8971304711"
+  },
+  "producedBy": "https://ois.acme.example/actors/qe-agent@2.1"
+}

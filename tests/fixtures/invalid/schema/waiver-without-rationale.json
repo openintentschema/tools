@@ -1,0 +1,11 @@
+{
+  "ois": "0.1",
+  "type": "decision",
+  "id": "https://ois.acme.example/decisions/DEC-80",
+  "createdAt": "2026-10-19T12:00:00Z",
+  "gate": "merge",
+  "subject": "https://ois.acme.example/artifacts/ART-302",
+  "outcome": "waived",
+  "decidedBy": "https://ois.acme.example/actors/po-7f3a",
+  "decidedAt": "2026-10-19T12:00:00Z"
+}

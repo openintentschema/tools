@@ -1,0 +1,16 @@
+{
+  "ois": "0.1",
+  "type": "artifact",
+  "id": "https://ois.acme.example/artifacts/ART-303",
+  "createdAt": "2026-10-16T08:05:00Z",
+  "kind": "dataset",
+  "location": "https://testdata.acme.example/sets/addresses-without-canton-v1",
+  "context": [
+    "https://ois.acme.example/intents/INT-142@1#AC-2"
+  ],
+  "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
+  "digest": {
+    "sha256": "facd922f00fb12930e0289cc2bd8231202939621f109d77731f8901ed8fe5b7d"
+  },
+  "producedBy": "https://ois.acme.example/actors/testdata-generator@5.2"
+}

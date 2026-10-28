@@ -1,0 +1,742 @@
+{
+  "ois": "0.1",
+  "fixtures": [
+    {
+      "path": "valid/bundle.json",
+      "description": "The Appendix A bundle, made consistent: approved intent, approval, artifacts, evidence. Unsigned, so the recorded contexts are self-declared.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/passport.json",
+      "description": "A self-contained Quality Passport for the bundle above, with build and release decision.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/level-1-bundle.json",
+      "description": "The Level 1 quick start (section 11.4): a characterization intent in draft, one test file and two results with derivedFrom unknown. Nothing to report.",
+      "expect": []
+    },
+    {
+      "path": "valid/intent.json",
+      "description": "A single approved intent with correct digests.",
+      "expect": []
+    },
+    {
+      "path": "valid/finding.json",
+      "description": "A single finding from production (section 4.7).",
+      "expect": []
+    },
+    {
+      "path": "valid/carry-over-unchanged-criterion.json",
+      "description": "Version 2 changes AC-2 only. Evidence for version 2 AC-1 rests on a test whose context names version 1, which is fine because AC-1 has the same digest in both (R4).",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/draft-and-approved-intent.json",
+      "description": "The same intent version as draft and as approved record. They differ only in status, so they count as one record in two states (R10).",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/evidence-revocation.json",
+      "description": "Evidence withdrawn by an evidence-revocation decision with rationale (R11).",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/passport-resolved-finding.json",
+      "description": "A high finding whose successor is resolved by new evidence and confirmed by an actor that produced none of it (R14), so R13 has nothing to report.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/passport-low-finding.json",
+      "description": "An open finding with severity low does not trigger R13.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/unknown-top-level-field.json",
+      "description": "A top-level field that the record type does not define (section 4).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/wrong-ois-version.json",
+      "description": "ois is not \"0.1\".",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/id-with-version.json",
+      "description": "An id that contains @, which is reserved for references (section 6.1).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/timestamp-without-offset.json",
+      "description": "observedAt has no time zone offset (section 2).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/agent-without-model.json",
+      "description": "An agent without model (section 4.4).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/approved-intent-without-digest.json",
+      "description": "An approved intent without digest (section 4.2).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/unversioned-criterion-reference.json",
+      "description": "A criterion reference without intent version (section 6.2).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/criterion-with-unknown-field.json",
+      "description": "A criterion with a field that section 4.2 does not define.",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/dataset-without-classification.json",
+      "description": "A dataset artifact without classification (section 4.3).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/release-without-subject-digest.json",
+      "description": "A release decision without subjectDigest (section 4.6).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/finding-without-target.json",
+      "description": "A finding with none of criterion, intent or subject (section 4.7).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/bundle-with-nested-bundle.json",
+      "description": "A bundle whose records contain another bundle (section 4.8).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/passport-without-intents.json",
+      "description": "A passport predicate with an empty intents list (section 8.2).",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/waiver-without-rationale.json",
+      "description": "A waived decision without rationale. This is the MUST of R9, enforced by the schema.",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/schema/revocation-without-rationale.json",
+      "description": "An evidence revocation without rationale. This is the rationale MUST of R11, enforced by the schema.",
+      "expect": [
+        {
+          "rule": "schema",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R1/approved-intent-without-approval.json",
+      "description": "An approved intent without intent-approval decision.",
+      "expect": [
+        {
+          "rule": "R1",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R1/approval-digest-mismatch.json",
+      "description": "The approval's subjectDigest differs from the intent's digest.",
+      "expect": [
+        {
+          "rule": "R1",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R1/approval-rejected.json",
+      "description": "The only intent-approval decision has outcome rejected.",
+      "expect": [
+        {
+          "rule": "R1",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R1/approval-by-agent.json",
+      "description": "The intent is approved by an agent; R1 says the approver SHOULD be human.",
+      "expect": [
+        {
+          "rule": "R1",
+          "level": "info"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R2/unknown-criterion-key.json",
+      "description": "Evidence references a criterion key that the intent version does not have.",
+      "expect": [
+        {
+          "rule": "R2",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R2/passport-scope-unknown-key.json",
+      "description": "The passport scope names a criterion key that the intent version does not have.",
+      "expect": [
+        {
+          "rule": "R2",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R3/test-is-not-a-test.json",
+      "description": "Evidence names a dataset artifact as its test.",
+      "expect": [
+        {
+          "rule": "R3",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R3/subject-is-a-contract.json",
+      "description": "Evidence names a contract artifact as its subject.",
+      "expect": [
+        {
+          "rule": "R3",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R4/context-includes-code.json",
+      "description": "derivedFrom intent, but the test's context includes the code artifact.",
+      "expect": [
+        {
+          "rule": "R4",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R4/context-without-criterion.json",
+      "description": "derivedFrom intent, but the test's context includes neither the intent nor the criterion.",
+      "expect": [
+        {
+          "rule": "R4",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R4/test-without-context.json",
+      "description": "derivedFrom intent, but the test artifact has no context at all.",
+      "expect": [
+        {
+          "rule": "R4",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R4/criterion-changed-since-context.json",
+      "description": "Evidence for version 2 AC-2 rests on a test whose context names version 1, where AC-2 had a different digest.",
+      "expect": [
+        {
+          "rule": "R4",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R5/same-producer.json",
+      "description": "derivedFrom intent, but the developer agent produced both the test and the code.",
+      "expect": [
+        {
+          "rule": "R5",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R5/same-producer-other-version.json",
+      "description": "derivedFrom intent, but test and code come from two versions of the same agent.",
+      "expect": [
+        {
+          "rule": "R5",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R8/production-dataset.json",
+      "description": "Evidence lists an input dataset classified as production.",
+      "expect": [
+        {
+          "rule": "R8",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R9/waiver-by-agent.json",
+      "description": "A merge waiver with rationale, decided by an agent; R9 says it SHOULD be a human.",
+      "expect": [
+        {
+          "rule": "R9",
+          "level": "info"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/unresolved-reference.json",
+      "description": "recordedBy names an actor version that is not in the bundle.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/unversioned-agent-reference.json",
+      "description": "producedBy references an agent in plain form; agents need the versioned form (section 6.2), so the reference resolves to nothing.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/conflicting-records.json",
+      "description": "Two artifact records share an id but differ in content.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R10/passport-missing-record.json",
+      "description": "The release decision lists evidence that the passport does not carry.",
+      "expect": [
+        {
+          "rule": "R10",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R11/revocation-of-an-artifact.json",
+      "description": "An evidence-revocation decision whose subject is an artifact, not evidence.",
+      "expect": [
+        {
+          "rule": "R11",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R12/context-without-recorder.json",
+      "description": "A context without contextRecordedBy is self-declared.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R12/context-recorded-by-producer.json",
+      "description": "A context recorded by its own producer is self-declared.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R12/recorder-did-not-sign.json",
+      "description": "A context recorded by another actor, but the bundle is not signed by that actor.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R13/open-high-finding.json",
+      "description": "The passport lists an intent that an open high finding references.",
+      "expect": [
+        {
+          "rule": "R13",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R13/open-critical-finding-on-criterion.json",
+      "description": "An open critical finding references a criterion of a listed intent.",
+      "expect": [
+        {
+          "rule": "R13",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R13/resolution-not-independent.json",
+      "description": "The finding-resolution decision is made by the actor that recorded the resolving evidence, so the finding is not resolved (R14) and stays open.",
+      "expect": [
+        {
+          "rule": "R13",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R14/fork.json",
+      "description": "Two findings supersede the same finding.",
+      "expect": [
+        {
+          "rule": "R14",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R15/draft-intent-listed.json",
+      "description": "The passport lists an intent version in draft.",
+      "expect": [
+        {
+          "rule": "R15",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R15/withdrawn-intent-listed.json",
+      "description": "The passport lists version 1, but version 2 withdraws the intent.",
+      "expect": [
+        {
+          "rule": "R15",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R15/not-latest-approved.json",
+      "description": "The passport lists version 1, but version 2 was approved before issuedAt; the listed version SHOULD be the latest.",
+      "expect": [
+        {
+          "rule": "R15",
+          "level": "info"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R16/no-release-decision.json",
+      "description": "The passport carries no release decision.",
+      "expect": [
+        {
+          "rule": "R16",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R16/release-rejected.json",
+      "description": "The only release decision has outcome rejected.",
+      "expect": [
+        {
+          "rule": "R16",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R16/release-of-another-build.json",
+      "description": "The release decision approves a build whose digest matches no subject of the statement.",
+      "expect": [
+        {
+          "rule": "R16",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R17/intent-digest-mismatch.json",
+      "description": "The intent digest does not match its canonical form. The approval binds the same wrong value, so R1 holds.",
+      "expect": [
+        {
+          "rule": "R17",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R17/criterion-digest-mismatch.json",
+      "description": "A criterion digest does not match its canonical form. The intent digest is computed over the record as it is, so only the criterion is wrong.",
+      "expect": [
+        {
+          "rule": "R17",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/R17/single-intent-digest-mismatch.json",
+      "description": "A single approved intent whose digest does not match its canonical form.",
+      "expect": [
+        {
+          "rule": "R17",
+          "level": "violation"
+        }
+      ]
+    }
+  ]
+}

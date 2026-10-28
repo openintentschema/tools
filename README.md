@@ -8,7 +8,8 @@ every problem with its rule ID and level (spec section 11.1):
 - **warning**: R8, R12 and R13 ask for a report; the input still conforms.
 - **info**: a SHOULD is not followed.
 
-Status: pre-alpha. The schema check (Appendix B) works. The integrity rules R1–R5 and R8–R15,
+Status: pre-alpha. The schema check (Appendix B) works and passes the schema part of the
+conformance fixtures. The integrity rules R1–R5 and R8–R15,
 digests (JCS, RFC 8785) and DSSE signatures follow.
 
 ## Usage
@@ -41,12 +42,21 @@ Requires [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run pytest
 uv run ruff check && uv run ruff format --check
-uv run mypy src tests
+uv run mypy src tests scripts
 ```
 
-The schema in `src/ois_validator/schemas/` and the examples in `tests/examples/` are copies from
-the specification repository. Update them together with the specification and never edit them
-here.
+The schema in `src/ois_validator/schemas/`, the examples in `tests/examples/` and the conformance
+fixtures in `tests/fixtures/` are copies from the
+[specification repository](https://github.com/openintentschema/openintentschema). `spec.lock`
+names the commit they come from, and CI fails if a copy differs from that commit. Never edit them
+here; update them from a clean checkout of the specification:
+
+```bash
+uv run scripts/sync_spec.py ../openintentschema
+```
+
+`tests/test_fixtures.py` runs every fixture and compares the reports for the rules listed in
+`IMPLEMENTED`. Add a rule there once the validator checks it.
 
 ## License
 
