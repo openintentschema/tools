@@ -161,12 +161,9 @@ def r11_revocation(document: Document) -> Iterator[Report]:
 
 def r12_context_attestation(document: Document) -> Iterator[Report]:
     """R12: a context counts as attested only if another actor recorded it and signed the bundle
-    or passport that carries it. Otherwise it is self-declared (warning).
-
-    Signatures are not verified yet, so every context is reported as self-declared.
-    """
+    or passport that carries it. Otherwise it is self-declared (warning)."""
     for entry in document.of_type("artifact"):
-        reason = self_declared(entry.record)
+        reason = self_declared(entry.record, document)
         if reason is not None:
             message = f"context is self-declared: {reason}"
             yield Report(Level.WARNING, "R12", message, f"{entry.path}.context")
@@ -302,9 +299,10 @@ def check(document: Document) -> Iterator[Report]:
             yield from rule(document)
 
 
-def self_declared(artifact: Record) -> str | None:
-    """R12: why an artifact's context is self-declared, or None if it has no context. Signatures
-    are not verified yet, so no context counts as attested."""
+def self_declared(artifact: Record, document: Document) -> str | None:
+    """R12: why an artifact's context is self-declared, or None if it has none or it is attested:
+    recorded by another actor whose `identity.keyId` signed the document under a trusted key.
+    Certificate identities (Sigstore keyless) are not verified yet."""
     if "context" not in artifact:
         return None
     recorder = artifact.get("contextRecordedBy")
@@ -312,7 +310,17 @@ def self_declared(artifact: Record) -> str | None:
         return "no contextRecordedBy"
     if _actor_id(recorder) == _actor_id(artifact["producedBy"]):
         return "recorded by its own producer"
-    return f"no verified signature of {recorder}"
+    actor = document.record(recorder)
+    keyid = (
+        (actor or {}).get("identity", {}).get("keyId")
+        if actor and actor["type"] == "actor"
+        else None
+    )
+    if keyid is not None and keyid in document.signers:
+        return None
+    if not document.signers:
+        return f"the document is not signed by {recorder}"
+    return f"no verified signature by {recorder} among the document's signatures"
 
 
 def criterion(record: Record, key: str) -> Record | None:

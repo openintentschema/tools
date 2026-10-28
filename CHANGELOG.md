@@ -5,6 +5,24 @@ All notable changes to `ois-tools`, called `ois-validator` up to 0.5.0. Versions
 
 ## Unreleased
 
+## 0.7.0 (2026-10-28)
+
+- DSSE signatures (specification section 8.3). `ois key generate` writes an Ed25519 key pair and
+  prints its key id; `ois sign` wraps a bundle or passport in a DSSE envelope or adds a signature;
+  `ois passport build --sign KEY` builds and signs in one step, so the attested coverage inside
+  the passport counts the keys that sign it. Ed25519 and ECDSA P-256 keys.
+- `ois validate`, `ois coverage` and `ois passport build` read DSSE envelopes. `--trusted-key`
+  names the public keys to verify with (a file, a directory of `*.pub`, or `KEYID=FILE`).
+  Signatures are reported under the proposed rule ID `signature`: a violation for an envelope
+  without signatures, with the wrong payload type or with a signature that does not verify; a
+  warning for a key that is not trusted.
+- R12 counts a context as attested when its recorder's `identity.keyId` signed the document under
+  a trusted key; `intentCoverageAttested` follows. Certificate identities (Sigstore keyless) are
+  not verified yet.
+- `ois record actor --public-key FILE` sets the actor's key id from its public key.
+- Passes the signed conformance fixtures; `scripts/sync_spec.py` copies their public test keys.
+- New dependency: `cryptography`.
+
 ## 0.6.0 (2026-10-28)
 
 - **Renamed** from `ois-validator` to `ois-tools`: the package holds the validator and the tools

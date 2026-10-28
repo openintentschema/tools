@@ -1,6 +1,6 @@
 [project]
 name = "ois-tools"
-version = "0.6.0"
+version = "0.7.0"
 description = "Reference tools for the Open Intent Schema (OIS): validate, record and attest what was required, built and proven"
 keywords = ["ois", "open-intent-schema", "requirements", "traceability", "evidence", "in-toto", "junit", "coverage"]
 readme = "README.md"
@@ -8,6 +8,7 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
+    "cryptography>=50.0.2",
     "jsonschema[format-nongpl]>=4.26.0",
     "pyyaml>=6.0.3",
     "rfc8785>=0.1.4",

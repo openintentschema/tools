@@ -5,8 +5,8 @@ Guidance for coding agents and new contributors. Start with [README.md](README.m
 ## What this repository is
 
 The reference tools of the Open Intent Schema (OIS): one command, `ois`, with `validate` (the
-reference validator) and the tools that write records (`junit`, `intent`, `record`, `passport`,
-`coverage`). Published on PyPI as `ois-tools` (Python 3.13+, Apache-2.0) and as the container image
+reference validator), the tools that write records (`junit`, `intent`, `record`, `passport`,
+`coverage`) and DSSE signing (`sign`, `key`). Published on PyPI as `ois-tools` (Python 3.13+, Apache-2.0) and as the container image
 `ghcr.io/openintentschema/ois-tools`. Up to 0.5.0 it was called `ois-validator`.
 
 The standard lives in [openintentschema/openintentschema](https://github.com/openintentschema/openintentschema),

@@ -66,7 +66,7 @@ def test_the_worked_example_has_coverage_one_half() -> None:
 def test_the_variants_of_the_worked_example() -> None:
     assert values(records(), scope=SCOPE) == {
         "intentCoverage": 0.5,
-        # signatures are not verified yet, so every context is self-declared (R12)
+        # the passport is unsigned, so every context is self-declared (R12)
         "intentCoverageAttested": 0.0,
         "intentCoverageWeighted": 0.5,  # AC-1 and AC-2 are both high
         # the QE agent runs on another provider's model than the developer agent

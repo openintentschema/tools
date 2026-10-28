@@ -12,6 +12,7 @@ from ois_tools.authoring import AuthoringError, files, load
 from ois_tools.coverage import METHOD, Coverage, CoverageError, coverage, passport_coverage
 from ois_tools.passports import PassportError, collect, latest_approved
 from ois_tools.schema import STATEMENT_TYPE
+from ois_tools.signing import SigningError, is_envelope, load_trusted, open_envelope
 
 EXIT_OK = 0
 EXIT_DIFFERS = 1
@@ -34,16 +35,29 @@ def main(argv: list[str] | None = None) -> int:
         help="versioned intent (default: latest approved of each)",
     )  # fmt: skip
     parser.add_argument("--scope", action="append", help="criterion reference in scope")
+    parser.add_argument(
+        "--trusted-key",
+        action="append",
+        default=[],
+        metavar="KEY",
+        help="public key for a signed passport (attested coverage); a directory, or KEYID=FILE",
+    )
     args = parser.parse_args(argv)
 
     try:
         documents = [load(path) for path in files(args.inputs)]
         single = documents[0] if len(documents) == 1 else None
-        if isinstance(single, dict) and single.get("_type") == STATEMENT_TYPE:
-            result = passport_coverage(single)
+        statement = (
+            open_envelope(single, []).payload
+            if isinstance(single, dict) and is_envelope(single)
+            else single
+        )
+        if isinstance(statement, dict) and statement.get("_type") == STATEMENT_TYPE:
+            assert isinstance(single, dict)
+            result = passport_coverage(single, load_trusted(args.trusted_key))
             declared = {
                 a["name"]: a["value"]
-                for a in single["predicate"].get("assessments", [])
+                for a in statement["predicate"].get("assessments", [])
                 if a.get("method") == METHOD
             }
         else:
@@ -55,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
                 scope=args.scope,
             )  # fmt: skip
             declared = {}
-    except (OSError, AuthoringError, CoverageError, PassportError) as error:
+    except (OSError, AuthoringError, CoverageError, PassportError, SigningError) as error:
         print(f"ois coverage: {error}", file=sys.stderr)
         return EXIT_USAGE
 

@@ -12,8 +12,10 @@ from ois_tools import (
     coverage_cli,
     intent_cli,
     junit_cli,
+    key_cli,
     passport_cli,
     record_cli,
+    sign_cli,
     validate_cli,
 )
 
@@ -32,6 +34,8 @@ COMMANDS: dict[str, tuple[str, Callable[[list[str]], int]]] = {
         "show intent coverage per criterion, check what a passport declares",
         coverage_cli.main,
     ),
+    "sign": ("sign a bundle or passport with DSSE, or add a signature", sign_cli.main),
+    "key": ("create signing keys and show their key ids", key_cli.main),
 }
 
 

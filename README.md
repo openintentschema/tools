@@ -14,7 +14,7 @@ between. One command, `ois`, records that evidence along the delivery lifecycle 
 | Implementation | code artifact, the context an agent was given | `ois record artifact` |
 | Test | evidence per criterion | `ois junit`, `ois record evidence` |
 | Merge | merge decision | `ois record decision --gate merge` |
-| Release | build, release decision, passport with intent coverage | `ois record`, `ois passport` |
+| Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport --sign` |
 | Operation | findings, their classification and resolution | `ois record finding`, `ois record supersede` |
 | Review by others | check a passport and recompute its coverage | `ois validate`, `ois coverage` |
 
@@ -31,8 +31,8 @@ its rule and level (specification section 11.1):
 
 **Status:** pre-alpha, targets specification v0.1. `ois validate` checks Appendix B and every rule
 of section 5 that can be checked from the records at hand (R1–R5, R8–R17) and passes all
-conformance fixtures. Signatures are not verified yet, so R12 reports every recorded context as
-self-declared. Up to version 0.5.0 the package was called `ois-validator`, with one command per
+conformance fixtures, signed ones included. Signatures are verified with keys you trust (Ed25519
+or ECDSA P-256); Sigstore keyless signatures are not verified yet. Up to version 0.5.0 the package was called `ois-validator`, with one command per
 tool (`ois-validator`, `ois-junit`, …).
 
 ## Install
@@ -58,8 +58,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 - `--network none` is optional and shows that no command needs the network.
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.6.0`, `0.6` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.6.0 --owner openintentschema`.
+- Tags: `0.7.0`, `0.7` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.7.0 --owner openintentschema`.
 
 ## Validate
 
@@ -223,7 +223,8 @@ ois passport build .ois/ ci-bundles/ \
   R12 are printed and the passport is written.
 - The passport reports intent coverage by the reference method of Appendix D in `assessments`
   (below); `--no-coverage` leaves it out.
-- The passport is not signed yet; DSSE signing follows.
+- `--sign KEY` signs the passport with DSSE as it is built (below); the attested coverage inside
+  it then counts these keys.
 
 ## Measure intent coverage
 
@@ -247,13 +248,41 @@ intentCoverage 0.5 (declared 0.5)
 | Measurement | Counts |
 | --- | --- |
 | `intentCoverage` | covered criteria in scope / criteria in scope |
-| `intentCoverageAttested` | only evidence whose test context is attested (R12); 0 until signatures are verified |
+| `intentCoverageAttested` | only evidence whose test context is attested: recorded by another actor who signed the passport (R12) |
 | `intentCoverageWeighted` | criteria weighted by `criticality`: high 3, medium 2, low 1 |
 | `intentCoverageDiverse` | only evidence whose test and subject come from a human, or from agents on different models |
 
 A passport that lists several intents counts the criteria in scope of all of them together.
 Exit code 1 means a declared value differs from the computed one, compared at the precision the
 passport declares; 2 means a file could not be read or the release subject is missing.
+
+## Sign bundles and passports
+
+Signing makes records attributable (specification section 8.3, Level 3). A signature counts for an
+actor whose `identity.keyId` is the key's id, and only for a verifier that trusts the key:
+
+```bash
+ois key generate agent-runtime            # writes agent-runtime.key (secret) and .pub, prints the key id
+ois record actor --kind tool --name "Agent runtime" --version 4.3 --public-key agent-runtime.pub
+
+ois sign bundle.json --key agent-runtime.key --output bundle.dsse.json   # or add to an envelope
+ois passport build .ois/ … --sign issuer.key --sign agent-runtime.key --output passport.dsse.json
+
+ois validate passport.dsse.json --trusted-key keys/       # a .pub file, a directory, or KEYID=FILE
+```
+
+- A **key id** is the hex SHA-256 of the public key (DER SubjectPublicKeyInfo), so a verifier
+  derives it from the key it trusts. `ois key id FILE` prints it.
+- **Trust** is the verifier's decision: only `--trusted-key` counts, never a key a document names.
+- **R12:** a recorded context is attested when its `contextRecordedBy` actor signed the document.
+  The runtime that ran an agent therefore signs the bundle or passport next to the producer;
+  a DSSE envelope holds several signatures.
+- **Reports** under the rule ID `signature` (proposed): a violation for an envelope without
+  signatures, with the wrong payload type, or with a signature that does not verify, and the
+  envelope then counts as unsigned; a warning for a key that is not trusted.
+- Private keys are written readable by you only and are never needed for verification. Keep them
+  in a secret store; an encrypted key is opened with `OIS_KEY_PASSPHRASE`.
+- Sigstore keyless signing and transparency logs follow later.
 
 ## Privacy
 

@@ -17,6 +17,7 @@ from ois_tools import records
 from ois_tools.authoring import AuthoringError, files, load
 from ois_tools.passports import PassportError, collect
 from ois_tools.records import RecordError
+from ois_tools.signing import SigningError, load_public_key
 from ois_tools.validator import validate
 
 EXIT_OK = 0
@@ -53,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     except RecordError as error:
         print(f"ois record: {error}", file=sys.stderr)
         return EXIT_REFUSED
-    except (OSError, AuthoringError, PassportError, ValueError) as error:
+    except (OSError, AuthoringError, PassportError, SigningError, ValueError) as error:
         print(f"ois record: {error}", file=sys.stderr)
         return EXIT_USAGE
     return EXIT_OK
@@ -91,6 +92,8 @@ def _actor(args: argparse.Namespace, at: datetime) -> dict[str, Any]:
         identity = {"issuer": args.identity_issuer, "subject": args.identity_subject}
     if args.key_id:
         identity["keyId"] = args.key_id
+    if args.public_key:
+        identity["keyId"] = load_public_key(args.public_key.read_bytes()).keyid
     return records.actor(
         kind=args.kind,
         name=args.name,
@@ -250,6 +253,9 @@ def _parser() -> argparse.ArgumentParser:
     act.add_argument("--identity-issuer", metavar="URI")
     act.add_argument("--identity-subject", help="pseudonymous for humans, never an e-mail")
     act.add_argument("--key-id")
+    act.add_argument(
+        "--public-key", type=Path, metavar="FILE", help="PEM public key; sets the key id from it"
+    )
     act.add_argument("--operator", help="team or organization responsible")
     act.add_argument("--autonomy-level", type=int, choices=range(4))
 

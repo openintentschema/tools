@@ -21,13 +21,18 @@ REPOSITORY = "https://github.com/openintentschema/openintentschema"
 # source in the spec repository -> copy in this repository
 FILES = {"schema/ois.schema.json": "src/ois_tools/schemas/ois-0.1.schema.json"}
 TREES = {"examples": "tests/examples", "fixtures": "tests/fixtures"}
+COPIED = ("*.json", "*.pub")  # documents and the fixtures' public test keys
+
+
+def _files(tree: Path) -> list[Path]:
+    return sorted(path for pattern in COPIED for path in tree.rglob(pattern))
 
 
 def pairs(spec: Path) -> dict[Path, Path]:
     """Every copy in this repository mapped to its source in the spec checkout."""
     result = {ROOT / copy: spec / source for source, copy in FILES.items()}
     for source, copy in TREES.items():
-        for path in sorted((spec / source).rglob("*.json")):
+        for path in _files(spec / source):
             result[ROOT / copy / path.relative_to(spec / source)] = path
     return result
 
@@ -40,7 +45,7 @@ def check(spec: Path) -> list[str]:
         if not copy.exists() or copy.read_bytes() != source.read_bytes()
     ]
     for tree in TREES.values():
-        for stray in sorted((ROOT / tree).rglob("*.json")):
+        for stray in _files(ROOT / tree):
             if stray not in expected:
                 problems.append(f"{stray.relative_to(ROOT)}: not in the specification")
     return problems

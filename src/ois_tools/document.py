@@ -45,6 +45,7 @@ class Document:
     container: bool = True  # False for a single record: no rules across records apply
     passport: Record | None = None  # the predicate, for passports
     subjects: list[dict[str, str]] = field(default_factory=list)  # statement subject digests
+    signers: frozenset[str] = frozenset()  # key ids whose signatures verified under trusted keys
     _by_id: dict[str, list[Entry]] = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -52,7 +53,9 @@ class Document:
             self._by_id.setdefault(entry.record["id"], []).append(entry)
 
     @classmethod
-    def of(cls, document: Record) -> "Document":
+    def of(cls, document: Record, *, signers: frozenset[str] = frozenset()) -> "Document":
+        """The records of a single record, bundle or passport; `signers` are the key ids whose
+        signatures on its envelope verified under trusted keys."""
         if document.get("_type") == STATEMENT_TYPE:
             predicate: Record = document["predicate"]
             # Appendix B covers only the predicate, so the statement's subject is read defensively.
@@ -63,10 +66,10 @@ class Document:
                 if isinstance(s, dict) and isinstance(s.get("digest"), dict)
             ]
             entries = _entries(predicate["records"], "$.predicate.records")
-            return cls(entries, passport=predicate, subjects=subjects)
+            return cls(entries, passport=predicate, subjects=subjects, signers=signers)
         if document["type"] == "bundle":
-            return cls(_entries(document["records"], "$.records"))
-        return cls([Entry(document, "$")], container=False)
+            return cls(_entries(document["records"], "$.records"), signers=signers)
+        return cls([Entry(document, "$")], container=False, signers=signers)
 
     def resolve(self, reference: str) -> list[Entry]:
         """Every record a reference names; more than one only for records in several states."""

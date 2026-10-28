@@ -1,5 +1,10 @@
 {
   "ois": "0.1",
+  "trustedKeys": [
+    "keys/agent-runtime.pub",
+    "keys/ci-recorder.pub",
+    "keys/passport-issuer.pub"
+  ],
   "fixtures": [
     {
       "path": "valid/bundle.json",
@@ -777,6 +782,82 @@
         {
           "rule": "R17",
           "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "valid/signed-bundle.json",
+      "description": "The bundle as a DSSE envelope, signed by the agent runtime, which recorded every context, and by the CI recorder. Both keys are trusted, so every context is attested and R12 stays silent.",
+      "expect": []
+    },
+    {
+      "path": "valid/signed-passport.json",
+      "description": "The passport as a DSSE envelope with payload type application/vnd.in-toto+json, signed by the passport issuer and the agent runtime.",
+      "expect": []
+    },
+    {
+      "path": "valid/signed-without-recorder.json",
+      "description": "Signed by the CI recorder only. The signature is valid, but the agent runtime that recorded the contexts did not sign, so they stay self-declared.",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "valid/signed-by-untrusted-key.json",
+      "description": "Signed by a key the verifier does not trust. The signature cannot be checked, so the envelope counts as unsigned.",
+      "expect": [
+        {
+          "rule": "signature",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/signature/tampered-payload.json",
+      "description": "The payload was changed after the agent runtime signed it: the signature does not verify, and the envelope counts as unsigned.",
+      "expect": [
+        {
+          "rule": "signature",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/signature/wrong-payload-type.json",
+      "description": "A bundle signed with the payload type of an in-toto Statement. Section 8.3 gives bundles application/vnd.ois+json.",
+      "expect": [
+        {
+          "rule": "signature",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/signature/no-signature.json",
+      "description": "A DSSE envelope without any signature.",
+      "expect": [
+        {
+          "rule": "signature",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
         }
       ]
     }

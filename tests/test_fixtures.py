@@ -12,20 +12,21 @@ from typing import Any
 import pytest
 
 from ois_tools import validate
+from ois_tools.signing import load_public_key
 
 FIXTURES = Path(__file__).parent / "fixtures"
-IMPLEMENTED = {"schema", *(f"R{n}" for n in range(1, 18) if n not in (6, 7))}
+IMPLEMENTED = {"schema", "signature", *(f"R{n}" for n in range(1, 18) if n not in (6, 7))}
 
-MANIFEST: list[dict[str, Any]] = json.loads(
-    (FIXTURES / "manifest.json").read_text(encoding="utf-8")
-)["fixtures"]
+_MANIFEST: dict[str, Any] = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
+MANIFEST: list[dict[str, Any]] = _MANIFEST["fixtures"]
+TRUSTED = [load_public_key((FIXTURES / path).read_bytes()) for path in _MANIFEST["trustedKeys"]]
 
 
 @pytest.mark.parametrize("entry", MANIFEST, ids=[entry["path"] for entry in MANIFEST])
 def test_fixture(entry: dict[str, Any]) -> None:
     document = json.loads((FIXTURES / entry["path"]).read_text(encoding="utf-8"))
     expected = {(e["rule"], e["level"]) for e in entry["expect"] if e["rule"] in IMPLEMENTED}
-    reported = {(r.rule, str(r.level)) for r in validate(document).reports}
+    reported = {(r.rule, str(r.level)) for r in validate(document, trusted_keys=TRUSTED).reports}
     assert reported == expected, entry["description"]
 
 

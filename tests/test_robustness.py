@@ -14,6 +14,7 @@ import pytest
 
 from ois_tools import rules
 from ois_tools.document import Document
+from ois_tools.signing import is_envelope, open_envelope
 
 VALID = sorted((Path(__file__).parent / "fixtures" / "valid").glob("*.json"))
 
@@ -30,7 +31,11 @@ def replace_at(document: Any, path: str, value: str) -> None:
 @pytest.mark.parametrize("path", VALID, ids=[p.name for p in VALID])
 def test_references_to_any_record_never_crash(path: Path) -> None:
     document = json.loads(path.read_text(encoding="utf-8"))
-    parsed = Document.of(document)
+    signers: frozenset[str] = frozenset()
+    if is_envelope(document):  # signed fixtures: the payload, with every key id as a signer
+        signers = frozenset(s["keyid"] for s in document["signatures"])
+        document = open_envelope(document, []).payload
+    parsed = Document.of(document, signers=signers)
     targets = sorted(
         e.record["id"] + (f"@{e.record['version']}" if "version" in e.record else "")
         for e in parsed.entries
@@ -40,4 +45,4 @@ def test_references_to_any_record_never_crash(path: Path) -> None:
         for target in targets:
             mutated = copy.deepcopy(document)
             replace_at(mutated, reference.path, target)
-            list(rules.check(Document.of(mutated)))
+            list(rules.check(Document.of(mutated, signers=signers)))

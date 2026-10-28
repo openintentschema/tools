@@ -15,6 +15,7 @@ from typing import Any
 from ois_tools.coverage import coverage
 from ois_tools.rules import content
 from ois_tools.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
+from ois_tools.signing import is_envelope, open_envelope
 from ois_tools.validator import validate
 
 Record = dict[str, Any]
@@ -68,9 +69,11 @@ def build(
     release_outcome: str = "approved",
     release_decision_id: str | None = None,
     assess_coverage: bool = True,
+    signers: frozenset[str] = frozenset(),
 ) -> Record:
-    """A conforming, unsigned passport for the release of `build`, with its intent coverage by
-    the reference method of Appendix D unless `assess_coverage` is false."""
+    """A conforming passport, not yet signed, for the release of `build`, with its intent
+    coverage by the reference method of Appendix D unless `assess_coverage` is false. `signers`
+    are the key ids that will sign it, which the attested coverage counts (R12)."""
     records = copy.deepcopy(records)
     artifact = next((r for r in records if r["id"] == build and r["type"] == "artifact"), None)
     if artifact is None:
@@ -108,7 +111,9 @@ def build(
         predicate["scope"] = scope
     predicate["records"] = records
     if assess_coverage:
-        measured = coverage(records, subject=build, intents=listed, scope=scope).measurements()
+        measured = coverage(
+            records, subject=build, intents=listed, scope=scope, signers=signers
+        ).measurements()
         if measured:
             predicate["assessments"] = measured
     predicate |= {"issuedBy": issued_by, "issuedAt": _timestamp(issued_at)}
@@ -128,6 +133,9 @@ def build(
 
 
 def _records(document: object) -> list[Record]:
+    if is_envelope(document):  # a signed bundle or passport: its records, not its signatures
+        assert isinstance(document, dict)
+        document = open_envelope(document, []).payload
     if not isinstance(document, dict):
         raise PassportError("expected a JSON object: a record, a bundle or a passport")
     if document.get("_type") == STATEMENT_TYPE:

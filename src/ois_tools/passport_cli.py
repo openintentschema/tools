@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 
 from ois_tools.authoring import AuthoringError, files, load
 from ois_tools.passports import PassportError, Release, build, collect
+from ois_tools.signing import TrustedKey, key_id, load_private_key, sign
 from ois_tools.validator import validate
 
 EXIT_OK = 0
@@ -23,7 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     commands = parser.add_subparsers(dest="command", required=True)
 
-    building = commands.add_parser("build", help="assemble an unsigned passport")
+    building = commands.add_parser("build", help="assemble a passport, signed with --sign")
     building.add_argument(
         "inputs",
         nargs="+",
@@ -55,6 +57,14 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="leave out the intent coverage of Appendix D (assessments)",
     )
+    building.add_argument(
+        "--sign",
+        action="append",
+        default=[],
+        type=Path,
+        metavar="KEY",
+        help="sign with this private key (DSSE); repeatable. Attested coverage counts these keys",
+    )
     building.add_argument("--at", help="issuedAt, RFC 3339 (default now)")
     building.add_argument("--output", type=Path, help="write the passport here instead of stdout")
     args = parser.parse_args(argv)
@@ -62,6 +72,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         documents = [load(path) for path in files(args.inputs)]
         issued_at = _moment(args.at)
+        passphrase = os.environ.get("OIS_KEY_PASSPHRASE")
+        keys = [
+            load_private_key(path.read_bytes(), passphrase.encode() if passphrase else None)
+            for path in args.sign
+        ]
     except (OSError, AuthoringError, ValueError) as error:
         print(f"ois passport: {error}", file=sys.stderr)
         return EXIT_USAGE
@@ -79,12 +94,16 @@ def main(argv: list[str] | None = None) -> int:
             release_outcome=args.release_outcome,
             release_decision_id=args.release_decision_id,
             assess_coverage=not args.no_coverage,
+            signers=frozenset(key_id(key.public_key()) for key in keys),
         )
     except PassportError as error:
         print(f"ois passport: {error}", file=sys.stderr)
         return EXIT_INVALID
 
-    for report in validate(passport).reports:
+    trusted = [TrustedKey(key_id(key.public_key()), key.public_key()) for key in keys]
+    for key in keys:
+        passport = sign(passport, key)
+    for report in validate(passport, trusted_keys=trusted).reports:
         print(
             f"ois passport: {report.level} [{report.rule}] {report.path}: {report.message}",
             file=sys.stderr,

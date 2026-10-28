@@ -55,6 +55,7 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
 | `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois intent`: seal, approve, next version, compare. |
@@ -90,14 +91,15 @@ every reference of every valid fixture at every other record to make sure no rul
 **Rule scope.** R17 also applies to a single record. All other rules relate records to each
 other and run on bundles and passports only; R13, R15 and R16 only on passports.
 
-**R12 without signatures.** Signatures are not verified yet, so every recorded `context` is
-reported as self-declared (warning), with the reason: no recorder, recorded by its own
-producer, or no verified signature.
+**R12 and signatures.** A recorded `context` is attested when the document's envelope carries a
+verified signature by the recorder (see Signatures). Otherwise it is reported as self-declared
+(warning), with the reason: no recorder, recorded by its own producer, or no verified signature
+by the recorder.
 
-**Proposed rules.** R16 (release decision), R17 (digests), the rule ID `schema` and the
-narrower R10 comparison (only intents ignore `status` and `digest`) are proposed in RFCs #1,
-#2, #3 and #5. The fixtures already use them; if an RFC is rejected, the fixtures change and
-this validator follows.
+**Proposed rules.** R16 (release decision), R17 (digests), the rule IDs `schema` and
+`signature` and the narrower R10 comparison (only intents ignore `status` and `digest`) are
+proposed in RFCs #1, #2, #3, #5 and one pending for `signature`. The fixtures already use
+them; if an RFC is rejected, the fixtures change and this validator follows.
 
 ## No network access
 
@@ -137,7 +139,9 @@ dependency or feature must keep it that way; the specification's
 - **Coverage by default.** `assessments` carries the four measurements of Appendix D, computed
   from the passport's own records, intents and scope; `--no-coverage` leaves them out for producers
   who report their own method.
-- **Unsigned.** Signing wraps the finished statement in DSSE and is a separate step.
+- **Signed as built.** `--sign` wraps the finished statement in DSSE. The attested coverage is
+  part of the signed content, so it is computed with the key ids of exactly these keys as
+  signers; a signature added later cannot change it.
 
 ## Container image
 
@@ -148,6 +152,27 @@ checkout; `safe.directory '*'` lets git read a checkout mounted from the host, w
 another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker run --user`
 with the host's ids works and written files belong to the host user. It has no entrypoint:
 the command is named on each run, as on the command line.
+
+## Signatures
+
+`signing.py` implements DSSE (section 8.3) with `cryptography`; the specification repository's
+`fixtures/README.md` fixes the reading, and its signed fixtures were generated independently.
+
+- **Envelope first.** `validate()` opens an envelope before anything else: the signature reports,
+  then the usual checks on the payload with the set of key ids whose signatures verified
+  (`Document.signers`). An envelope with a `signature` violation passes an empty set, so it
+  counts as unsigned and R12 reports its contexts.
+- **Key ids** are the hex SHA-256 of the DER SubjectPublicKeyInfo, so `--trusted-key file.pub`
+  needs no separate key id; `KEYID=FILE` covers keys with other ids, such as KMS aliases.
+- **Trust comes from the command line only.** Keys in a document are never trusted; otherwise a
+  producer could attest its own contexts.
+- **Attribution** follows section 8.3: a signer key id counts for the actor whose
+  `identity.keyId` equals it. Certificate identities (`issuer`, `subject`) need Sigstore and are
+  not verified yet, so they never attest.
+- **Algorithms:** Ed25519 (`ois key generate`) and ECDSA P-256 with SHA-256, the usual choices
+  for DSSE and Sigstore. Ed25519 signs deterministically, which the fixtures rely on.
+- **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
+  gets a signature; adding a signature keeps the payload bytes unchanged.
 
 ## Intent coverage
 
@@ -166,8 +191,8 @@ compares instead.
   reads `scope` for the passport. With one intent both readings agree.
 - **The release subject** of a passport is the build of its approved or passed release decision
   whose digest matches the statement subject, as R16 finds it.
-- **Attested** uses `rules.self_declared`, the reason R12 reports. Until signatures are verified
-  it never counts, so `intentCoverageAttested` is 0 wherever evidence rests on a context.
+- **Attested** uses `rules.self_declared`, the reason R12 reports, with the key ids that signed
+  the passport under trusted keys.
 - **Diverse** follows the text literally: a human producer counts, two agents count if no model of
   one shares provider and name with a model of the other, and a tool does not count.
 - **Values** are rounded to four decimals. A declared value agrees if it is equal at its own
