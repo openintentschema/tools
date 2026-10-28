@@ -1,4 +1,5 @@
 import json
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
@@ -42,3 +43,12 @@ def test_stdin(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[st
     monkeypatch.setattr("sys.stdin.read", lambda: text)
     assert main(["-"]) == EXIT_CONFORMS
     assert capsys.readouterr().out == "-: conforms\n"
+
+
+@pytest.mark.parametrize("entry", ["ois_validator.cli", "ois_validator.junit_cli"])
+def test_version(entry: str, capsys: pytest.CaptureFixture[str]) -> None:
+    module = __import__(entry, fromlist=["main"])
+    with pytest.raises(SystemExit) as exit_info:
+        module.main(["--version"])
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out.strip() == version("ois-validator")

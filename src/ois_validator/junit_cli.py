@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 from datetime import UTC, datetime
+from importlib.metadata import version
 from pathlib import Path
 from xml.etree.ElementTree import ParseError
 
@@ -31,6 +32,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--location", help="artifact location (default git+<origin>@<HEAD>)")
     parser.add_argument("--run", help="URI of the pipeline run")
     parser.add_argument("--output", type=Path, help="write the bundle here instead of stdout")
+    parser.add_argument("--version", action="version", version=version("ois-validator"))
     args = parser.parse_args(argv)
 
     try:

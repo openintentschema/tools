@@ -101,13 +101,13 @@ in draft with one criterion per test case, an artifact per test file (pinned by 
 validates the bundle before writing it: exit code 0 writes it, 1 means it would not conform and
 nothing is written, 2 means a report or the Git checkout could not be read.
 
-The [getting started guide](https://github.com/openintentschema/openintentschema/blob/main/site/getting-started.md)
+The [getting started guide](https://openintentschema.io/getting-started/)
 walks through it step by step, including a CI example.
 
 ## Documentation
 
 - [Specification, schema and conformance fixtures](https://github.com/openintentschema/openintentschema)
-- [Getting started](https://github.com/openintentschema/openintentschema/blob/main/site/getting-started.md): first OIS bundle from JUnit XML
+- [Getting started](https://openintentschema.io/getting-started/): first OIS bundle from JUnit XML
 - [Architecture](docs/architecture.md): how the validator and `ois-junit` are built, and why
 - [Development](docs/development.md): setup, checks, specification sync, adding a rule, releases
 - [Changelog](CHANGELOG.md)

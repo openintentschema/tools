@@ -3,6 +3,7 @@
 import argparse
 import json
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 from ois_validator.report import Level, Report, Result
@@ -20,6 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("files", nargs="+", metavar="FILE", help="JSON file, or - for stdin")
     parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--version", action="version", version=version("ois-validator"))
     args = parser.parse_args(argv)
 
     results: dict[str, Result] = {}

@@ -7,6 +7,9 @@ during 0.x any release may change behaviour.
 
 - Docs: `docs/architecture.md` and `docs/development.md`; the README covers usage only.
 - Tests: `test_robustness.py` points every reference of every valid fixture at every record.
+- `ois-validator --version` and `ois-junit --version`.
+- Issue and pull request templates; changes to what the validator reports link to the
+  specification repository.
 
 ## 0.1.0 (2026-10-28)
 
