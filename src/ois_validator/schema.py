@@ -43,8 +43,8 @@ def _validator(definition: str) -> Validator:
     )
 
 
-def validate(document: object) -> Result:
-    """Check one parsed document: a record, a bundle or a Quality Passport statement."""
+def check(document: object) -> Result:
+    """Check one parsed document against Appendix B: a record, a bundle or a passport statement."""
     result = Result()
     if isinstance(document, dict) and document.get("_type") == STATEMENT_TYPE:
         _check_statement(document, result)

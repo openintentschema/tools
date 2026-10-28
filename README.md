@@ -8,9 +8,9 @@ every problem with its rule ID and level (spec section 11.1):
 - **warning**: R8, R12 and R13 ask for a report; the input still conforms.
 - **info**: a SHOULD is not followed.
 
-Status: pre-alpha. The schema check (Appendix B) works and passes the schema part of the
-conformance fixtures. The integrity rules R1–R5 and R8–R15,
-digests (JCS, RFC 8785) and DSSE signatures follow.
+Status: pre-alpha. The schema check (Appendix B) and R10 (reference resolution) pass their part
+of the conformance fixtures. The other integrity rules, digests (JCS, RFC 8785)
+and DSSE signatures follow.
 
 ## Usage
 

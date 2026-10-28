@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from ois_validator.report import Level, Report, Result
-from ois_validator.schema import validate
+from ois_validator.validator import validate
 
 EXIT_CONFORMS = 0
 EXIT_VIOLATION = 1

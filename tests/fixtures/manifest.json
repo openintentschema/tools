@@ -490,7 +490,7 @@
     },
     {
       "path": "invalid/R10/conflicting-records.json",
-      "description": "Two artifact records share an id but differ in content.",
+      "description": "Two artifact records share an id but differ in content: one dataset is synthetic, the other anonymized.",
       "expect": [
         {
           "rule": "R10",

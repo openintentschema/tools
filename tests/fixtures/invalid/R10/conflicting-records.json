@@ -202,13 +202,13 @@
       "createdAt": "2026-10-16T08:05:00Z",
       "kind": "dataset",
       "location": "https://testdata.acme.example/sets/addresses-without-canton-v1",
-      "classification": "synthetic",
+      "classification": "anonymized",
       "context": [
         "https://ois.acme.example/intents/INT-142@1#AC-2"
       ],
       "contextRecordedBy": "https://ois.acme.example/actors/agent-runtime@4.3",
       "digest": {
-        "sha256": "a223554ef1581618d924cf3e15dcf96ff13835d3a285b1fe1ac17a248c18b520"
+        "sha256": "facd922f00fb12930e0289cc2bd8231202939621f109d77731f8901ed8fe5b7d"
       },
       "producedBy": "https://ois.acme.example/actors/testdata-generator@5.2"
     },

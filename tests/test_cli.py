@@ -6,10 +6,12 @@ import pytest
 from ois_validator.cli import EXIT_CONFORMS, EXIT_USAGE, EXIT_VIOLATION, main
 
 EXAMPLES = Path(__file__).parent / "examples"
+FIXTURES = Path(__file__).parent / "fixtures" / "valid"
 
 
 def test_conforming_files(capsys: pytest.CaptureFixture[str]) -> None:
-    files = [str(EXAMPLES / name) for name in ("bundle.json", "passport.json", "finding.json")]
+    names = ("level-1-bundle.json", "intent.json", "finding.json")
+    files = [str(FIXTURES / name) for name in names]
     assert main(files) == EXIT_CONFORMS
     assert capsys.readouterr().out.splitlines() == [f"{name}: conforms" for name in files]
 
