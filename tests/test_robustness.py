@@ -1,9 +1,5 @@
-"""No rule crashes when a reference names a record of an unexpected type.
-
-Every reference of every valid fixture is pointed at every record in the same document, and at
-a criterion of it. Such references keep the schema's reference syntax, so the rules are called
-directly; they must report or skip, never raise.
-"""
+"""No rule raises when a reference names a record of an unexpected type: every reference of every
+valid fixture, pointed at every record of its document and at a criterion of it."""
 
 import copy
 import json

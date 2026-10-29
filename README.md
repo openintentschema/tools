@@ -45,7 +45,11 @@ version 0.5.0 the package was called `ois-validator`, with one command per tool
 uvx --from ois-tools ois validate bundle.json    # run without installing
 pip install ois-tools                            # or install; Python 3.13 or later
 ois --help                                       # the commands
+export OIS_NAMESPACE=https://ois.acme.example    # the namespace of derived ids
 ```
+
+`ois junit` takes the namespace with `--namespace`; the commands that write records into `.ois/`
+read `OIS_NAMESPACE` when `--namespace` is not given.
 
 The commands work for projects in any language: they read JSON, YAML, test reports and the local
 Git checkout, not the code. Without Python, use [uv](https://docs.astral.sh/uv/) alone (`uvx`
@@ -161,7 +165,7 @@ recognizes by content the native reports of Playwright (JSON), Jest and Vitest (
 (`go test -json`) and .NET (TRX). Run it in the Git checkout the tests ran in:
 
 ```bash
-ois junit build/test-results/*.xml \
+ois junit build/test-results/test/*.xml \
   --namespace https://ois.acme.example \
   --suite "Team Billing" \
   --run "$CI_PIPELINE_URL" \
@@ -192,7 +196,7 @@ Tests that name a criterion key such as `AC-1` give evidence for that criterion 
 intent, from any of these reports:
 
 ```bash
-ois junit build/test-results/*.xml --namespace https://ois.acme.example \
+ois junit build/test-results/test/*.xml --namespace https://ois.acme.example \
   --intent https://ois.acme.example/intents/INT-7@1 --test-producer "$QE" \
   --subject "$BUILD" --written-from-intent
 ```
@@ -272,8 +276,9 @@ ois measure summary.json --intent https://ois.acme.example/intents/INT-9@1 \
   `Connect`, …), `samples` or `errors`, filtered with `{label:NAME}`; statistics `avg`, `min`,
   `med`, `max`, `p(N)`, `count` and `rate`.
 - **Evidence** per criterion, with the value as the measure the target names (`ms` for times),
-  `pass` if it meets the target, otherwise `fail`. A criterion without target, or a unit that
-  differs from the target's, is refused. The test artifact and `derivedFrom` work as with
+  `pass` if it meets the target, otherwise `fail`. A criterion without target is refused, and so
+  is a unit the results state that differs from the target's; a value without unit, such as a
+  count, is compared as it is. The test artifact and `derivedFrom` work as with
   `ois junit --intent`.
 
 ## Record artifacts, actors, evidence, decisions and findings
@@ -302,7 +307,7 @@ ois record decision --gate merge --subject "$CODE" --outcome passed --by "$CI"
 | `evidence` | one result of one test for one criterion | id; measures from `--measure responseTimeP95=420ms` |
 | `decision` | a gate outcome | `subjectDigest` from the subject among the records (R1, R16) |
 | `finding` | a defect or incident | id |
-| `supersede FILE` | the next record of a finding chain | id (`FND-18-r2`), `supersedes`, the unchanged fields |
+| `supersede FILE` | the next record of a finding chain | id (the finding's id with `-r2`), `supersedes`, the unchanged fields |
 | `bundle INPUT...` | a self-contained bundle, to stdout or `--output` | each record once, validated |
 
 - **Records never change.** Recording the same thing again prints its reference and keeps the
@@ -358,9 +363,12 @@ ois coverage .ois/ --build "$BUILD"               # before the passport: what is
 
 ```
 https://ois.acme.example/intents/INT-142@1#AC-1  not covered
-    https://ois.acme.example/evidence/EV-9022: derivedFrom is unknown
+    no evidence
 https://ois.acme.example/intents/INT-142@1#AC-2  covered  https://ois.acme.example/evidence/EV-9021
 intentCoverage 0.5 (declared 0.5)
+intentCoverageAttested 0.0
+intentCoverageWeighted 0.5
+intentCoverageDiverse 0.5
 ```
 
 | Measurement | Counts |

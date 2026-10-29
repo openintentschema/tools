@@ -1,7 +1,6 @@
 """Test reports read by ois junit, recognized by content: JUnit XML, TRX (.NET), Playwright JSON,
 Jest and Vitest JSON, and go test -json. Only names, results, times, tags and file paths are read;
-messages and output are not. The standard library's Expat refuses entity expansion and external
-entities."""
+messages and output are not."""
 
 import hashlib
 import json

@@ -226,11 +226,8 @@ def _located(
 
 
 def _test_file(tracked: list[str], case: TestCase, repo: Path) -> str | None:
-    """The tracked file a test case comes from: its file, also as an absolute path or one from
-    another checkout; its class name as a path; the Go package and function; or the longest
-    prefix of its class name, or its last part, that names exactly one file
-    (com.acme.InvoiceTest -> .../com/acme/InvoiceTest.java, tests.test_invoice ->
-    tests/test_invoice.py, Billing.Tests.RoundingTests -> .../RoundingTests.cs)."""
+    """The tracked file of a test case: its file (also absolute or from another checkout), its
+    class name as a path, its Go package and function, or a part of its class name naming one."""
     if case.file:
         if case.file in tracked:
             return case.file
