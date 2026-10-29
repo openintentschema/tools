@@ -123,6 +123,11 @@ def record_run(
         metric = results.metric(spec)
         if target.get("unit") and metric.unit and target["unit"] != metric.unit:
             raise MeasureError(f"{key}: {spec} is in {metric.unit}, the target in {target['unit']}")
+        if target.get("unit") and not metric.unit:
+            recorded.notes.append(
+                f"{key}: {spec} has no unit, the target is in {target['unit']}; "
+                "check that it is the metric you mean"
+            )
         measure: Record = {"name": target["metric"], "value": metric.value}
         if metric.unit:
             measure["unit"] = metric.unit

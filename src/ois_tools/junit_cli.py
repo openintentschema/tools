@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -31,8 +32,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("reports", nargs="+", metavar="REPORT", help="JUnit XML file, or -")
     parser.add_argument(
         "--namespace",
-        required=True,
-        help="URI under your domain for record ids, e.g. https://ois.acme.example",
+        default=os.environ.get("OIS_NAMESPACE"),
+        help="URI under your domain for record ids, e.g. https://ois.acme.example "
+        "(default: $OIS_NAMESPACE)",
     )
     parser.add_argument("--suite", help="team or suite that owns the tests (without --intent)")
     parser.add_argument("--repo", type=Path, default=Path("."), help="Git working tree (default .)")
@@ -54,6 +56,8 @@ def main(argv: list[str] | None = None) -> int:
     intent.add_argument("--output-dir", type=Path, default=Path(".ois"))
     args = parser.parse_args(argv)
 
+    if not args.namespace:
+        parser.error("pass --namespace or set OIS_NAMESPACE")
     if args.intent is None:
         if args.suite is None:
             parser.error("pass --suite, or --intent for evidence of an approved intent")
@@ -134,7 +138,8 @@ def _evidence(args: argparse.Namespace) -> int:
         file=sys.stderr,
     )
     if recorded.without_key:
-        print(f"ois junit: {recorded.without_key} tests without a criterion key", file=sys.stderr)
+        tests = "test" if recorded.without_key == 1 else "tests"
+        print(f"ois junit: {recorded.without_key} {tests} without a criterion key", file=sys.stderr)
     for item in [*recorded.notes, *(f"no evidence: {u}" for u in recorded.unmatched)]:
         print(f"ois junit: {item}", file=sys.stderr)
     return EXIT_OK

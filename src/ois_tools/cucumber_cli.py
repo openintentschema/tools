@@ -36,6 +36,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--location", help="location of the feature files (default: Git)")
     parser.add_argument("--run", metavar="URI", help="link to the pipeline run")
     parser.add_argument("--key-pattern", default=KEY_PATTERN, help="regex on a tag without @")
+    parser.add_argument(
+        "--context-recorded-by",
+        metavar="ACTOR",
+        help="the actor that ran this run and signs, so the context counts as attested",
+    )
     parser.add_argument("--records", action="append", default=[], type=Path, metavar="PATH")
     parser.add_argument("--at", help="createdAt, RFC 3339 (default now)")
     parser.add_argument("--output-dir", type=Path, default=Path(".ois"))
@@ -61,6 +66,7 @@ def main(argv: list[str] | None = None) -> int:
             run=args.run,
             location=args.location,
             key_pattern=args.key_pattern,
+            context_recorded_by=args.context_recorded_by,
         )
         for record in recorded.records:
             path, written = records.store(record, args.output_dir)

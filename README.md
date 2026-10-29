@@ -48,8 +48,7 @@ ois --help                                       # the commands
 export OIS_NAMESPACE=https://ois.acme.example    # the namespace of derived ids
 ```
 
-`ois junit` takes the namespace with `--namespace`; the commands that write records into `.ois/`
-read `OIS_NAMESPACE` when `--namespace` is not given.
+Every command that writes records reads `OIS_NAMESPACE` when `--namespace` is not given.
 
 The commands work for projects in any language: they read JSON, YAML, test reports and the local
 Git checkout, not the code. Without Python, use [uv](https://docs.astral.sh/uv/) alone (`uvx`
@@ -67,8 +66,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
   aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.12.0`, `0.12` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.12.0 --owner openintentschema`.
+- Tags: `0.13.0`, `0.13` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.13.0 --owner openintentschema`.
 
 ## Use in CI
 
@@ -76,7 +75,7 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 Sigstore verification included:
 
 ```yaml
-- uses: openintentschema/tools/.github/actions/setup@v0.12.0   # pin the tag's commit SHA in production
+- uses: openintentschema/tools/.github/actions/setup@v0.13.0   # pin the tag's commit SHA in production
 - run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
 ```
 
@@ -85,7 +84,7 @@ command:
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.12.0/.gitlab/ci/ois.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.13.0/.gitlab/ci/ois.gitlab-ci.yml
 
 ois:
   extends: .ois-junit
@@ -174,7 +173,7 @@ ois junit build/test-results/test/*.xml \
 
 | Option | Meaning |
 | --- | --- |
-| `--namespace` | URI under your organization's domain; every record id starts with it. Never requested. |
+| `--namespace` | URI under your organization's domain; every record id starts with it. Never requested. Default `$OIS_NAMESPACE`. |
 | `--suite` | Team or suite that owns the tests; names the test suite actor. |
 | `--repo` | Git working tree the tests ran in (default `.`). |
 | `--location` | Artifact location (default `git+<origin>@<HEAD>`, credentials removed). |
@@ -252,8 +251,9 @@ ois cucumber cucumber.ndjson --intent https://ois.acme.example/intents/INT-7@1 \
 - **Evidence:** one per executed scenario, written to `.ois/` with a test artifact per feature
   file. Results: passed, failed, skipped or pending, and `error` for undefined steps.
 - **`derivedFrom: intent`** only where the scenario is worded exactly as its approved criterion;
-  `ois cucumber` checks this and records itself as `contextRecordedBy`. A scenario that differs
-  is recorded with `derivedFrom: unknown`.
+  `ois cucumber` checks this and records itself as `contextRecordedBy`, or the actor given with
+  `--context-recorded-by`: the pipeline that runs it and signs the bundle, so that the context
+  counts as attested (R12). A scenario that differs is recorded with `derivedFrom: unknown`.
 - Step definitions are code written for the scenarios; the independence of R5 covers the
   scenario text, not them.
 - Error messages and stack traces from the run are not copied.
@@ -278,7 +278,7 @@ ois measure summary.json --intent https://ois.acme.example/intents/INT-9@1 \
 - **Evidence** per criterion, with the value as the measure the target names (`ms` for times),
   `pass` if it meets the target, otherwise `fail`. A criterion without target is refused, and so
   is a unit the results state that differs from the target's; a value without unit, such as a
-  count, is compared as it is. The test artifact and `derivedFrom` work as with
+  count, is compared as it is, with a note. The test artifact and `derivedFrom` work as with
   `ois junit --intent`.
 
 ## Record artifacts, actors, evidence, decisions and findings

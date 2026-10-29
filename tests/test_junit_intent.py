@@ -365,3 +365,31 @@ def test_cli_intent_mode_needs_a_test_producer_and_no_output(
             ois([*base, *args])
         assert exit_info.value.code == 2
         assert message in capsys.readouterr().err
+
+
+def test_cli_takes_the_namespace_from_the_environment(
+    repo: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("OIS_NAMESPACE", NS)
+    out = tmp_path / "ois"
+    write_intent(out)
+    args = ["junit", str(HERE / "pytest.xml"), "--intent", f"{INTENT}@1", "--test-producer", QE]
+    assert ois([*args, "--repo", str(repo), "--output-dir", str(out)]) == 0
+    level1 = ["junit", str(HERE / "surefire.xml"), "--suite", "Team Billing", "--repo", str(repo)]
+    assert ois(level1) == 0
+    assert json.loads(capsys.readouterr().out)["id"].startswith(f"{NS}/bundles/")
+    monkeypatch.delenv("OIS_NAMESPACE")
+    with pytest.raises(SystemExit) as exit_info:
+        ois(level1)
+    assert exit_info.value.code == 2
+    assert "pass --namespace or set OIS_NAMESPACE" in capsys.readouterr().err
+
+
+def test_one_test_without_a_key_is_singular(
+    repo: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    out = tmp_path / "ois"
+    write_intent(out)
+    args = ["junit", str(HERE / "vitest.xml"), "--intent", f"{INTENT}@1", "--test-producer", QE]
+    assert ois([*args, "--namespace", NS, "--repo", str(repo), "--output-dir", str(out)]) == 0
+    assert "ois junit: 1 test without a criterion key\n" in capsys.readouterr().err

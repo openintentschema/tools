@@ -5,6 +5,12 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.13.0 (2026-10-29)
+
+- `ois junit` reads the namespace from `OIS_NAMESPACE`, as the other commands do.
+- `ois cucumber --context-recorded-by`: the signing pipeline as recorder, so contexts count as
+  attested.
+- `ois measure` notes a value without unit measured against a target with one.
 - The setup action leaves the uv cache off; it no longer warns in repositories without Python files.
 
 ## 0.12.0 (2026-10-29)
