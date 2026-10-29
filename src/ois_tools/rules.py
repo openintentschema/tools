@@ -1,9 +1,5 @@
-"""Integrity rules of spec section 5, checked on input that passed the schema.
-
-How each rule is read, and which rules apply to which input, is fixed by the conformance fixtures
-(fixtures/README.md in the specification repository). A check that needs the record behind an
-unresolved reference skips it; R10 reports the reference once.
-"""
+"""Integrity rules of spec section 5 on input that passed the schema, read as fixtures/README.md in
+the specification fixes. A check skips what an unresolved reference hides; R10 reports it."""
 
 from collections.abc import Callable, Iterator
 from datetime import datetime
@@ -433,9 +429,7 @@ def _kind(record: Record) -> str:
 
 
 def content(record: Record) -> Record:
-    """What R10 compares. A draft intent and its approved record differ in status and in the
-    digests approval adds, which follow from the content; intents leave them out. For every other
-    record the digest pins the content and is compared."""
+    """What R10 compares: intents without status and digests, every other record in full."""
     if record["type"] != "intent":
         return record
     compared = {k: v for k, v in record.items() if k not in ("status", "digest")}

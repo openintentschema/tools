@@ -1,9 +1,5 @@
-"""The conformance fixtures of the specification (section 11.3).
-
-Each fixture lists the exact (rule, level) pairs a validator must report. Only the rules this
-validator implements are compared, so a fixture for R5 already proves that its document passes
-the schema check. Add a rule to IMPLEMENTED once it is checked.
-"""
+"""The conformance fixtures (section 11.3): exactly the (rule, level) pairs of the manifest, for the
+rules in IMPLEMENTED."""
 
 import json
 from pathlib import Path
