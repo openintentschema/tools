@@ -5,6 +5,13 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.14.0 (2026-10-29)
+
+- `ois cucumber` reads Cucumber JSON (cucumber-jvm, Godog, pytest-bdd) and behave JSON, with the
+  scenarios taken from the feature files, so their runs can count as derived from the intent.
+- `ois cucumber` finds the feature files that cucumber-jvm names on the class path; Cucumber
+  Messages of cucumber-jvm were refused before.
+
 ## 0.13.0 (2026-10-29)
 
 - `ois junit` reads the namespace from `OIS_NAMESPACE`, as the other commands do.

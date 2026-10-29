@@ -1,0 +1,435 @@
+[
+  {
+    "elements": [
+      {
+        "keyword": "Background",
+        "location": "features/rounding.feature:3",
+        "name": "",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "name": "the currency is CHF",
+            "step_type": "given"
+          }
+        ],
+        "type": "background"
+      },
+      {
+        "keyword": "Scenario",
+        "location": "features/rounding.feature:7",
+        "name": "Round down",
+        "status": "passed",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 0.00014901161193847656,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:8",
+            "match": {
+              "arguments": [
+                {
+                  "name": "total",
+                  "original": "10.02",
+                  "value": 10.02
+                }
+              ],
+              "location": "features/steps/steps.py:11"
+            },
+            "name": "an invoice total of CHF 10.02",
+            "result": {
+              "duration": 4.38690185546875e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:9",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:16"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 4.291534423828125e-05,
+              "status": "passed"
+            },
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:10",
+            "match": {
+              "arguments": [
+                {
+                  "name": "due",
+                  "original": "10.00",
+                  "value": 10.0
+                }
+              ],
+              "location": "features/steps/steps.py:21"
+            },
+            "name": "the amount due is CHF 10.00",
+            "result": {
+              "duration": 2.7894973754882812e-05,
+              "status": "passed"
+            },
+            "step_type": "then"
+          }
+        ],
+        "tags": [
+          "AC-1",
+          "smoke"
+        ],
+        "type": "scenario"
+      },
+      {
+        "keyword": "Scenario Outline",
+        "location": "features/rounding.feature:19",
+        "name": "Reject negative amounts -- @1.1 ",
+        "status": "passed",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 3.886222839355469e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:14",
+            "match": {
+              "arguments": [
+                {
+                  "name": "amount",
+                  "original": "-1",
+                  "value": -1.0
+                }
+              ],
+              "location": "features/steps/steps.py:26"
+            },
+            "name": "an amount of -1 is entered",
+            "result": {
+              "duration": 3.719329833984375e-05,
+              "status": "passed"
+            },
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:15",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:31"
+            },
+            "name": "the invoice is rejected",
+            "result": {
+              "duration": 2.7894973754882812e-05,
+              "status": "passed"
+            },
+            "step_type": "then"
+          }
+        ],
+        "tags": [
+          "AC-2"
+        ],
+        "type": "scenario"
+      },
+      {
+        "keyword": "Scenario Outline",
+        "location": "features/rounding.feature:20",
+        "name": "Reject negative amounts -- @1.2 ",
+        "status": "passed",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 3.910064697265625e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:14",
+            "match": {
+              "arguments": [
+                {
+                  "name": "amount",
+                  "original": "-0.05",
+                  "value": -0.05
+                }
+              ],
+              "location": "features/steps/steps.py:26"
+            },
+            "name": "an amount of -0.05 is entered",
+            "result": {
+              "duration": 3.504753112792969e-05,
+              "status": "passed"
+            },
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:15",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:31"
+            },
+            "name": "the invoice is rejected",
+            "result": {
+              "duration": 4.887580871582031e-05,
+              "status": "passed"
+            },
+            "step_type": "then"
+          }
+        ],
+        "tags": [
+          "AC-2"
+        ],
+        "type": "scenario"
+      },
+      {
+        "keyword": "Scenario",
+        "location": "features/rounding.feature:23",
+        "name": "Round up",
+        "status": "failed",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 3.695487976074219e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:24",
+            "match": {
+              "arguments": [
+                {
+                  "name": "total",
+                  "original": "10.03",
+                  "value": 10.03
+                }
+              ],
+              "location": "features/steps/steps.py:11"
+            },
+            "name": "an invoice total of CHF 10.03",
+            "result": {
+              "duration": 3.409385681152344e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:25",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:16"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 3.695487976074219e-05,
+              "status": "passed"
+            },
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:26",
+            "match": {
+              "arguments": [
+                {
+                  "name": "due",
+                  "original": "10.05",
+                  "value": 10.05
+                }
+              ],
+              "location": "features/steps/steps.py:21"
+            },
+            "name": "the amount due is CHF 10.05",
+            "result": {
+              "duration": 4.076957702636719e-05,
+              "error_message": "ASSERT FAILED:",
+              "status": "failed"
+            },
+            "step_type": "then"
+          }
+        ],
+        "tags": [
+          "AC-3"
+        ],
+        "type": "scenario"
+      },
+      {
+        "keyword": "Scenario",
+        "location": "features/rounding.feature:29",
+        "name": "Credit notes",
+        "status": "error",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 4.696846008300781e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:30",
+            "name": "a credit note of CHF 5.02",
+            "result": {
+              "duration": 0,
+              "status": "undefined"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:31",
+            "name": "the credit note is issued",
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:32",
+            "name": "the amount credited is CHF 5.00",
+            "step_type": "then"
+          }
+        ],
+        "tags": [
+          "AC-4"
+        ],
+        "type": "scenario"
+      },
+      {
+        "keyword": "Scenario",
+        "location": "features/rounding.feature:34",
+        "name": "Exploratory, no key",
+        "status": "passed",
+        "steps": [
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:4",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:6"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 4.1961669921875e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "Given",
+            "location": "features/rounding.feature:35",
+            "match": {
+              "arguments": [
+                {
+                  "name": "total",
+                  "original": "0.00",
+                  "value": 0.0
+                }
+              ],
+              "location": "features/steps/steps.py:11"
+            },
+            "name": "an invoice total of CHF 0.00",
+            "result": {
+              "duration": 4.220008850097656e-05,
+              "status": "passed"
+            },
+            "step_type": "given"
+          },
+          {
+            "keyword": "When",
+            "location": "features/rounding.feature:36",
+            "match": {
+              "arguments": [],
+              "location": "features/steps/steps.py:16"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 3.62396240234375e-05,
+              "status": "passed"
+            },
+            "step_type": "when"
+          },
+          {
+            "keyword": "Then",
+            "location": "features/rounding.feature:37",
+            "match": {
+              "arguments": [
+                {
+                  "name": "due",
+                  "original": "0.00",
+                  "value": 0.0
+                }
+              ],
+              "location": "features/steps/steps.py:21"
+            },
+            "name": "the amount due is CHF 0.00",
+            "result": {
+              "duration": 2.6941299438476562e-05,
+              "status": "passed"
+            },
+            "step_type": "then"
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      }
+    ],
+    "keyword": "Feature",
+    "location": "features/rounding.feature:2",
+    "name": "Invoices round to five Rappen",
+    "status": "failed",
+    "tags": [
+      "billing"
+    ]
+  }
+]

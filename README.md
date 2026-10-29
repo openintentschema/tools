@@ -66,8 +66,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
   aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.13.0`, `0.13` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.13.0 --owner openintentschema`.
+- Tags: `0.14.0`, `0.14` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.14.0 --owner openintentschema`.
 
 ## Official packages
 
@@ -84,7 +84,7 @@ the project. How to check where a download was built:
 Sigstore verification included:
 
 ```yaml
-- uses: openintentschema/tools/.github/actions/setup@v0.13.0   # pin the tag's commit SHA in production
+- uses: openintentschema/tools/.github/actions/setup@v0.14.0   # pin the tag's commit SHA in production
 - run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
 ```
 
@@ -93,7 +93,7 @@ command:
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.13.0/.gitlab/ci/ois.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.14.0/.gitlab/ci/ois.gitlab-ci.yml
 
 ois:
   extends: .ois-junit
@@ -249,10 +249,16 @@ with a key tag such as `@AC-1`:
 ois intent from-gherkin features/rounding.feature --id https://ois.acme.example/intents/INT-7
 ois intent approve .ois/intents/INT-7-v1.ois.yaml --by "$PO"
 
-npx cucumber-js --format message:cucumber.ndjson          # Cucumber Messages; also cucumber-jvm, Reqnroll
+npx cucumber-js --format message:cucumber.ndjson          # or another runner, see below
 ois cucumber cucumber.ndjson --intent https://ois.acme.example/intents/INT-7@1 \
   --test-producer "$PO" --subject "$CODE"
 ```
+
+| Runner | Report |
+| --- | --- |
+| cucumber-js, cucumber-jvm, Reqnroll | Cucumber Messages: `--format message:cucumber.ndjson`, `--plugin message:cucumber.ndjson` |
+| cucumber-jvm, Godog, pytest-bdd | Cucumber JSON: `--plugin json:cucumber.json`, `Format: "cucumber:cucumber.json"`, `--cucumberjson=cucumber.json` |
+| behave | its JSON: `-f json -o behave.json` |
 
 - **Criteria:** one per scenario with a key tag (`--key-pattern` to change it), statement in
   `gherkin` notation: background and steps, and the examples of an outline. Scenarios without a
@@ -265,6 +271,9 @@ ois cucumber cucumber.ndjson --intent https://ois.acme.example/intents/INT-7@1 \
   counts as attested (R12). A scenario that differs is recorded with `derivedFrom: unknown`.
 - Step definitions are code written for the scenarios; the independence of R5 covers the
   scenario text, not them.
+- With JSON reports, the scenarios are read from the feature files in the checkout, and the
+  evidence is observed when the report was written. cucumber-jvm names features on the class
+  path; `ois cucumber` finds the one file in Git with that path.
 - Error messages and stack traces from the run are not copied.
 
 ## Measure non-functional criteria

@@ -1,4 +1,4 @@
-"""Gherkin scenarios as criteria, Cucumber Messages as evidence. A scenario worded exactly as its
+"""Gherkin scenarios as criteria, Cucumber runs as evidence. A scenario worded exactly as its
 approved criterion counts as derived from the intent; ois cucumber records that it checked this."""
 
 import hashlib
@@ -22,6 +22,9 @@ Record = dict[str, Any]
 
 ERRORS = {"UNDEFINED", "AMBIGUOUS", "UNKNOWN"}
 SKIPS = {"SKIPPED", "PENDING"}
+HOOKS = {"Before", "After"}  # cucumber-js reports hooks as steps
+BEHAVE = {"failed": "FAILED", "skipped": "SKIPPED"}  # scenario statuses; others are errors
+NOT_A_REPORT = "not Cucumber Messages, Cucumber JSON or behave JSON"
 
 
 class CucumberError(ValueError):
@@ -130,7 +133,7 @@ def result_of(statuses: Iterable[str]) -> str:
 
 
 def record_run(
-    messages: Iterable[str],
+    report: str,
     *,
     intent: Record,
     test_producer: str,
@@ -142,18 +145,21 @@ def record_run(
     location: str | None = None,
     key_pattern: str = KEY_PATTERN,
     context_recorded_by: str | None = None,
+    reported_at: datetime | None = None,
 ) -> Recorded:
     """The adapter actor, a test artifact per feature file and an evidence record per executed
-    scenario that names a criterion of the approved `intent`. `context_recorded_by` names the
-    actor that ran the check and signs, instead of the adapter."""
+    scenario that names a criterion of the approved `intent`. `report` is Cucumber Messages
+    (NDJSON), Cucumber JSON or behave JSON; JSON holds no times, so its evidence is observed at
+    `reported_at` (default `created_at`). `context_recorded_by` names the actor that ran the check
+    and signs, instead of the adapter."""
     if intent.get("status") != "approved":
         raise CucumberError("approve the intent first: evidence refers to an approved version")
     reference = f"{intent['id']}@{intent['version']}"
     criteria = {c["key"]: c for c in intent["criteria"]}
-    run_data = _read(messages)
+    run_data = _read(report, repo, reported_at or created_at)
     adapter = records.actor(
         kind="tool",
-        name="ois cucumber (Cucumber Messages adapter of ois-tools)",
+        name="ois cucumber (Cucumber adapter of ois-tools)",
         version=package_version("ois-tools"),
         created_at=created_at,
         id=f"{namespace.rstrip('/')}/actors/ois-cucumber",
@@ -223,7 +229,21 @@ class _Execution:
     finished: datetime
 
 
-def _read(messages: Iterable[str]) -> list[_Execution]:
+def _read(report: str, repo: Path, reported_at: datetime) -> list[_Execution]:
+    if report.lstrip().startswith("["):
+        try:
+            features = json.loads(report)
+        except json.JSONDecodeError as error:
+            raise CucumberError(f"not Cucumber JSON: {error}") from error
+        executions = _read_json(features, repo, reported_at)
+    else:
+        executions = _read_messages(report.splitlines(), repo)
+    if not executions:
+        raise CucumberError("the report holds no executed scenario")
+    return executions
+
+
+def _read_messages(messages: Iterable[str], repo: Path) -> list[_Execution]:
     """The final attempt of every executed scenario in a Cucumber Messages stream."""
     scenarios: dict[str, tuple[str, Record, Record | None]] = {}
     pickles: dict[str, Record] = {}
@@ -231,17 +251,22 @@ def _read(messages: Iterable[str]) -> list[_Execution]:
     started: dict[str, str] = {}  # test case started id -> test case id
     statuses: dict[str, list[str]] = {}
     finished: list[tuple[str, datetime]] = []
+    cucumber = False  # a stream starts with its meta message
     for line in messages:
         if not line.strip():
             continue
         try:
             envelope = json.loads(line)
         except json.JSONDecodeError as error:
-            raise CucumberError(f"not Cucumber Messages (NDJSON): {error}") from error
+            raise CucumberError(f"{NOT_A_REPORT}: {error}") from error
+        if not isinstance(envelope, dict):
+            raise CucumberError(NOT_A_REPORT)
+        cucumber = cucumber or "meta" in envelope
         if "gherkinDocument" in envelope:
             document = envelope["gherkinDocument"]
+            uri = _feature_path(repo, document["uri"])
             for scenario, background in _scenarios(document.get("feature") or {}):
-                scenarios[scenario["id"]] = (document["uri"], scenario, background)
+                scenarios[scenario["id"]] = (uri, scenario, background)
         elif "pickle" in envelope:
             pickles[envelope["pickle"]["id"]] = envelope["pickle"]
         elif "testCase" in envelope:
@@ -257,15 +282,103 @@ def _read(messages: Iterable[str]) -> list[_Execution]:
             done = envelope["testCaseFinished"]
             if not done.get("willBeRetried"):
                 finished.append((done["testCaseStartedId"], _time(done["timestamp"])))
+    if not cucumber:
+        raise CucumberError(NOT_A_REPORT)
     executions = []
     for started_id, moment in finished:
         pickle = pickles[cases[started[started_id]]]
         uri, scenario, background = scenarios[pickle["astNodeIds"][0]]
         result = result_of(statuses.get(started_id, []))
         executions.append(_Execution(uri, scenario, background, result, moment))
-    if not executions:
-        raise CucumberError("the messages hold no finished test case")
     return executions
+
+
+def _read_json(features: Any, repo: Path, reported_at: datetime) -> list[_Execution]:
+    """Every executed scenario in Cucumber JSON or behave JSON. The scenarios are read from the
+    feature files, by line: the report holds outlines with their values filled in."""
+    if not isinstance(features, list) or not all(
+        isinstance(f, dict) and "elements" in f and ("uri" in f or "location" in f)
+        for f in features
+    ):
+        raise CucumberError(NOT_A_REPORT)
+    executions = []
+    for feature in features:
+        uri = _feature_path(repo, feature.get("uri") or feature["location"].rpartition(":")[0])
+        try:
+            text = (repo / uri).read_text(encoding="utf-8")
+        except OSError as error:
+            raise CucumberError(f"{uri}: feature file not found in {repo}") from error
+        lines = _by_line(_parse(text).get("feature") or {})
+        background: list[str] = []  # cucumber-jvm reports the background before each scenario
+        background_steps = 0
+        for element in feature["elements"]:
+            statuses, steps = _statuses(element)
+            if element.get("type") == "background":
+                background, background_steps = statuses, steps
+                continue
+            if not steps and element.get("status") in (None, "skipped", "untested"):
+                continue  # not run, as deselected scenarios in behave
+            line = element.get("line") or int(element["location"].rpartition(":")[2])
+            if line not in lines:
+                raise CucumberError(f"{uri}:{line} is no scenario; the run had another version")
+            scenario, scenario_background = lines[line]
+            statuses = [*background, *statuses]
+            expected = len(scenario.get("steps", []))
+            expected += len((scenario_background or {}).get("steps", []))
+            if "status" not in element and background_steps + steps < expected:
+                # pytest-bdd leaves out undefined steps; behave gives the scenario's status
+                statuses.append("UNKNOWN")
+            background, background_steps = [], 0
+            result = result_of(statuses)
+            executions.append(_Execution(uri, scenario, scenario_background, result, reported_at))
+    return executions
+
+
+def _statuses(element: Record) -> tuple[list[str], int]:
+    """Step and hook statuses of a Cucumber JSON or behave JSON element, and the number of its
+    steps with a result."""
+    statuses = [_status(hook) for hook in [*element.get("before", []), *element.get("after", [])]]
+    steps = 0
+    for step in element.get("steps", []):
+        statuses.extend(_status(hook) for hook in [*step.get("before", []), *step.get("after", [])])
+        if "result" in step:
+            statuses.append(_status(step))
+            steps += step["keyword"].strip() not in HOOKS
+    if element.get("status") not in (None, "passed"):  # behave
+        statuses.append(BEHAVE.get(element["status"], "UNKNOWN"))
+    return statuses, steps
+
+
+def _status(item: Record) -> str:
+    status = str(item.get("result", {}).get("status", "unknown")).upper()
+    return status if status in {"PASSED", "FAILED", *ERRORS, *SKIPS} else "UNKNOWN"
+
+
+def _by_line(feature: Record) -> dict[int, tuple[Record, Record | None]]:
+    """Scenarios by the line of their keyword and of each example row."""
+    lines = {}
+    for scenario, background in _scenarios(feature):
+        lines[scenario["location"]["line"]] = (scenario, background)
+        for examples in scenario.get("examples", []):
+            for row in examples.get("tableBody", []):
+                lines[row["location"]["line"]] = (scenario, background)
+    return lines
+
+
+def _feature_path(repo: Path, uri: str) -> str:
+    """The path of a feature file in `repo`; cucumber-jvm names it on the class path."""
+    if not uri.startswith("classpath:"):
+        return uri
+    name = uri.removeprefix("classpath:").lstrip("/")
+    try:
+        tracked = records._git(repo, "ls-files").splitlines()
+    except records.RecordError as error:
+        raise CucumberError(f"{uri}: the feature files must be in Git: {error}") from error
+    found = [path for path in tracked if path == name or path.endswith(f"/{name}")]
+    if len(found) != 1:
+        which = "no file" if not found else f"several files ({', '.join(found)})"
+        raise CucumberError(f"{uri} matches {which} in Git")
+    return found[0]
 
 
 def _scenarios(feature: Record) -> Iterator[tuple[Record, Record | None]]:

@@ -1,5 +1,7 @@
-"""Gherkin and Cucumber Messages. rounding.ndjson: a real cucumber-js 13.3.0 run of
-rounding.feature (AC-1, AC-2 pass; AC-3 fails; AC-4 undefined; one scenario without key)."""
+"""Gherkin and Cucumber runs. Real runs of rounding.feature (AC-1, AC-2 pass; AC-3 fails; AC-4
+undefined; one scenario without key): rounding.ndjson from cucumber-js 13.3.0; cucumber-jvm 8.0.4
+messages and JSON; JSON of cucumber-js 13.3.0, Godog 0.16.0, pytest-bdd 9.0.0 and behave 1.3.3
+(error texts shortened)."""
 
 import json
 import shutil
@@ -33,9 +35,14 @@ AT = datetime(2026, 10, 29, 8, 0, tzinfo=UTC)
 
 @pytest.fixture
 def repo(tmp_path: Path) -> Path:
+    return git_repo(tmp_path, "features/rounding.feature")
+
+
+def git_repo(tmp_path: Path, *features: str) -> Path:
     root = tmp_path / "billing"
-    (root / "features").mkdir(parents=True)
-    shutil.copy(HERE / "rounding.feature", root / "features" / "rounding.feature")
+    for feature in features:
+        (root / feature).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(HERE / "rounding.feature", root / feature)
 
     def git(*args: str) -> None:
         subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
@@ -129,11 +136,11 @@ def test_step_statuses_to_a_result(statuses: list[str], result: str) -> None:
 # --- a run to records ---------------------------------------------------------------------------
 
 
-def run(repo: Path, intent: dict[str, Any], **options: Any) -> Any:
+def run(repo: Path, intent: dict[str, Any], report: str = "rounding.ndjson", **options: Any) -> Any:
+    text = (HERE / report).read_text(encoding="utf-8")
     return record_run(
-        MESSAGES, intent=intent, test_producer=QE, namespace=NS, repo=repo, created_at=AT,
-        **options,
-    )  # fmt: skip
+        text, intent=intent, test_producer=QE, namespace=NS, repo=repo, created_at=AT, **options
+    )
 
 
 def test_a_run_becomes_evidence_derived_from_the_intent(repo: Path) -> None:
@@ -280,3 +287,139 @@ def test_cli_names_a_context_recorder(repo: Path, tmp_path: Path) -> None:
     assert ois([*args, "--context-recorded-by", recorder]) == 0
     [test] = [json.loads(p.read_text()) for p in (out / "artifacts").iterdir()]
     assert test["contextRecordedBy"] == recorder
+
+
+# --- other runners and formats --------------------------------------------------------------------
+
+JVM_FEATURE = "src/test/resources/features/rounding.feature"
+
+
+@pytest.mark.parametrize(
+    ("report", "feature"),
+    [
+        ("cucumber-jvm.ndjson", JVM_FEATURE),
+        ("cucumber-jvm.json", JVM_FEATURE),
+        ("cucumber-js.json", "features/rounding.feature"),
+        ("godog.json", "features/rounding.feature"),
+        ("pytest-bdd.json", "features/rounding.feature"),
+        ("behave.json", "features/rounding.feature"),
+    ],
+)
+def test_each_runner_gives_evidence_derived_from_the_intent(
+    tmp_path: Path, report: str, feature: str
+) -> None:
+    recorded = run(git_repo(tmp_path, feature), approved(), report, reported_at=AT)
+    evidence = by_type(recorded.records, "evidence")
+    outcome = sorted((e["criterion"].rsplit("#", 1)[1], e["result"]) for e in evidence)
+    assert outcome == [
+        ("AC-1", "pass"), ("AC-2", "pass"), ("AC-2", "pass"), ("AC-3", "fail"), ("AC-4", "error"),
+    ]  # fmt: skip
+    assert {e["derivedFrom"] for e in evidence} == {"intent"}
+    [test] = by_type(recorded.records, "artifact")
+    assert test["path"] == feature
+    assert test["context"] == [f"{INTENT}@1#AC-{n}" for n in range(1, 5)]
+    assert recorded.unmatched == [f"{feature}: Exploratory, no key (no key tag)"]
+    for record in recorded.records:
+        assert validate(record).conforms, record["id"]
+
+
+def test_a_json_report_is_observed_when_it_was_written(tmp_path: Path) -> None:
+    written = datetime(2026, 10, 29, 7, 30, tzinfo=UTC)
+    repo = git_repo(tmp_path, "features/rounding.feature")
+    recorded = run(repo, approved(), "godog.json", reported_at=written)
+    assert {e["observedAt"] for e in by_type(recorded.records, "evidence")} == {
+        "2026-10-29T07:30:00Z"
+    }
+
+
+def test_a_json_report_scenario_that_differs_is_not_derived(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path, "features/rounding.feature")
+    changed = FEATURE.replace("CHF 10.00\n", "CHF 10.00 exactly\n", 1)
+    recorded = run(repo, approved(changed), "pytest-bdd.json", reported_at=AT)
+    ac1 = [e for e in by_type(recorded.records, "evidence") if e["criterion"].endswith("#AC-1")]
+    assert [e["derivedFrom"] for e in ac1] == ["unknown"]
+
+
+@pytest.mark.parametrize(
+    ("features", "message"),
+    [
+        ((), "classpath:features/rounding.feature matches no file"),
+        ((JVM_FEATURE, "src/main/resources/features/rounding.feature"), "matches several files"),
+    ],
+)
+def test_a_classpath_feature_must_be_one_file_in_git(
+    tmp_path: Path, features: tuple[str, ...], message: str
+) -> None:
+    repo = git_repo(tmp_path, "other/x.feature", *features)
+    with pytest.raises(CucumberError, match=message):
+        run(repo, approved(), "cucumber-jvm.json", reported_at=AT)
+
+
+def test_a_json_report_needs_its_feature_files(tmp_path: Path) -> None:
+    repo = git_repo(tmp_path, "other/rounding.feature")
+    with pytest.raises(CucumberError, match=r"features/rounding\.feature: feature file not found"):
+        run(repo, approved(), "behave.json", reported_at=AT)
+
+
+def test_an_unknown_report_is_refused(repo: Path, tmp_path: Path) -> None:
+    (tmp_path / "x.json").write_text('{"suites": []}', encoding="utf-8")
+    with pytest.raises(CucumberError, match="not Cucumber Messages, Cucumber JSON or behave JSON"):
+        record_run((tmp_path / "x.json").read_text(), intent=approved(), test_producer=QE,
+                   namespace=NS, repo=repo, created_at=AT)  # fmt: skip
+
+
+def test_cli_records_a_json_report_at_its_modification_time(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import os
+
+    repo = git_repo(tmp_path, "features/rounding.feature")
+    out = tmp_path / "ois"
+    (out / "intents").mkdir(parents=True)
+    (out / "intents" / "INT-7-v1.ois.json").write_text(json.dumps(approved()), encoding="utf-8")
+    report = tmp_path / "cucumber.json"
+    shutil.copy(HERE / "pytest-bdd.json", report)
+    written = datetime(2026, 10, 29, 7, 30, tzinfo=UTC).timestamp()
+    os.utime(report, (written, written))
+    args = ["cucumber", str(report), "--intent", f"{INTENT}@1", "--test-producer", QE]
+    assert ois([*args, "--namespace", NS, "--repo", str(repo), "--output-dir", str(out)]) == 0
+    assert "5 results: 5 derived from the intent, 0 not" in capsys.readouterr().err
+    observed = {json.loads(p.read_text())["observedAt"] for p in (out / "evidence").iterdir()}
+    assert observed == {"2026-10-29T07:30:00Z"}
+
+
+def changed_report(tmp_path: Path, report: str, change: Any) -> str:
+    data = json.loads((HERE / report).read_text(encoding="utf-8"))
+    change(next(e for e in data[0]["elements"] if e["name"] == "Round down"))
+    (tmp_path / report).write_text(json.dumps(data), encoding="utf-8")
+    return str(tmp_path / report)
+
+
+def ac1_results(tmp_path: Path, feature: str, report: str) -> list[str]:
+    recorded = run(git_repo(tmp_path, feature), approved(), report, reported_at=AT)
+    evidence = by_type(recorded.records, "evidence")
+    return [e["result"] for e in evidence if e["criterion"].endswith("#AC-1")]
+
+
+def test_a_failed_hook_fails_the_scenario(tmp_path: Path) -> None:
+    def hook(element: dict[str, Any]) -> None:
+        element["after"] = [{"match": {"location": "Hooks.close"}, "result": {"status": "failed"}}]
+
+    report = changed_report(tmp_path, "cucumber-jvm.json", hook)
+    assert ac1_results(tmp_path, JVM_FEATURE, report) == ["fail"]
+
+
+def test_a_scenario_behave_skips_while_running_is_skipped(tmp_path: Path) -> None:
+    def skip(element: dict[str, Any]) -> None:
+        element["status"] = "skipped"
+        del element["steps"][-1]["result"]
+
+    report = changed_report(tmp_path, "behave.json", skip)
+    assert ac1_results(tmp_path, "features/rounding.feature", report) == ["skipped"]
+
+
+def test_messages_without_a_scenario_hold_no_execution(repo: Path) -> None:
+    meta = (HERE / "rounding.ndjson").read_text(encoding="utf-8").splitlines()[0]
+    with pytest.raises(CucumberError, match="no executed scenario"):
+        record_run(meta, intent=approved(), test_producer=QE, namespace=NS, repo=repo,
+                   created_at=AT)  # fmt: skip
