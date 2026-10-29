@@ -201,7 +201,8 @@ for both: background steps, scenario steps, data tables, doc strings and outline
   across versions while scenario names change.
 - **Derived from the intent** only when the rendered scenario equals the approved criterion's
   statement. That comparison is what `ois cucumber` observes, so it is `contextRecordedBy` of the
-  test artifact and its context lists only those criteria (R4, R12).
+  test artifact and its context lists only those criteria (R4, R12). The adapter actor has no
+  identity; `--context-recorded-by` names the pipeline actor that ran it and signs instead.
 - **Final attempts only:** a test case finished with `willBeRetried` is ignored. A scenario's
   result is its worst step: failed, then undefined, ambiguous or unknown (`error`), then skipped
   or pending.
@@ -220,7 +221,7 @@ for both: background steps, scenario steps, data tables, doc strings and outline
   command line only maps a value of the run to it. `result` is the comparison with the target.
 - **Units** are known for k6 time metrics (`contains: time`, or the built-in `http_req_*`) and
   JMeter time columns (`ms`). A unit that differs from the target's is refused rather than
-  converted.
+  converted; a value of unknown unit against a target with one is compared and noted.
 - **Percentiles** of JMeter samples are interpolated between closest ranks, as k6 does, so both
   tools give the same value for the same samples.
 

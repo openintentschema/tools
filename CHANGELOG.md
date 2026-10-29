@@ -5,12 +5,19 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
-## 0.13.0
+## 0.14.0
 
 - Draft 5 of the specification: the passport predicate type, the schema `$id` and the coverage
   method URI are under `https://openintentschema.io/`; passports with the old placeholder type
   are rejected.
 - R16, R17 and the rule IDs `schema` and `signature` are rules of the specification.
+
+## 0.13.0 (2026-10-29)
+
+- `ois junit` reads the namespace from `OIS_NAMESPACE`, as the other commands do.
+- `ois cucumber --context-recorded-by`: the signing pipeline as recorder, so contexts count as
+  attested.
+- `ois measure` notes a value without unit measured against a target with one.
 - The setup action leaves the uv cache off; it no longer warns in repositories without Python files.
 
 ## 0.12.0 (2026-10-29)

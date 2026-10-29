@@ -246,3 +246,37 @@ def test_statement_renders_the_same_from_messages_and_the_feature() -> None:
     scenario = children[1]["scenario"]
     intent = draft_intent([FEATURE], id=INTENT, created_at=AT)
     assert statement(scenario, background) == intent["criteria"][0]["statement"]
+
+
+def test_a_context_recorder_that_signs_makes_the_context_attested(repo: Path) -> None:
+    from ois_tools import records, signing
+
+    private_pem, public_pem, keyid = signing.generate_key()
+    pipeline = records.actor(kind="tool", name="Release pipeline", version="1", created_at=AT,
+                             namespace=NS, identity={"keyId": keyid})  # fmt: skip
+    recorder = records.reference(pipeline)
+    recorded = run(repo, approved(), context_recorded_by=recorder)
+    [test] = by_type(recorded.records, "artifact")
+    assert test["contextRecordedBy"] == recorder
+    assert {e["recordedBy"] for e in by_type(recorded.records, "evidence")} == {recorded.adapter}
+    bundle = {"ois": "0.1", "type": "bundle", "id": f"{NS}/bundles/b", "createdAt": AT.isoformat(),
+              "records": [approved(), pipeline, *recorded.records]}  # fmt: skip
+    unsigned = validate(bundle)
+    assert any(r.rule == "R12" for r in unsigned.reports)
+    envelope = signing.sign(bundle, signing.load_private_key(private_pem))
+    signed = validate(envelope, trusted_keys=[signing.load_public_key(public_pem)])
+    assert not any(r.rule == "R12" for r in signed.reports)
+
+
+def test_cli_names_a_context_recorder(repo: Path, tmp_path: Path) -> None:
+    out = tmp_path / "ois"
+    (out / "intents").mkdir(parents=True)
+    (out / "intents" / "INT-7-v1.ois.json").write_text(json.dumps(approved()), encoding="utf-8")
+    messages = tmp_path / "run.ndjson"
+    messages.write_text("\n".join(MESSAGES), encoding="utf-8")
+    recorder = f"{NS}/actors/release-pipeline@1"
+    args = ["cucumber", str(messages), "--intent", f"{INTENT}@1", "--test-producer", QE]
+    args += ["--namespace", NS, "--repo", str(repo), "--output-dir", str(out)]
+    assert ois([*args, "--context-recorded-by", recorder]) == 0
+    [test] = [json.loads(p.read_text()) for p in (out / "artifacts").iterdir()]
+    assert test["contextRecordedBy"] == recorder

@@ -237,3 +237,12 @@ def test_cli_records_measures(
         ois([*args, "--criterion", "AC-3"])
     assert exit_info.value.code == 2
     assert "expected KEY=METRIC:STAT" in capsys.readouterr().err
+
+
+def test_a_value_without_unit_against_a_target_with_one_is_noted(repo: Path) -> None:
+    recorded = run(repo, "k6-summary-export.json", {"AC-3": "http_reqs:count"})
+    [made] = evidence(recorded.records)
+    assert made["measures"] == [{"name": "responseTimeP95", "value": 40}]
+    assert any("http_reqs:count has no unit, the target is in ms" in n for n in recorded.notes)
+    timed = run(repo, "k6-summary-export.json", {"AC-3": "http_req_duration:p(95)"})
+    assert timed.notes == []

@@ -141,9 +141,11 @@ def record_run(
     run: str | None = None,
     location: str | None = None,
     key_pattern: str = KEY_PATTERN,
+    context_recorded_by: str | None = None,
 ) -> Recorded:
     """The adapter actor, a test artifact per feature file and an evidence record per executed
-    scenario that names a criterion of the approved `intent`."""
+    scenario that names a criterion of the approved `intent`. `context_recorded_by` names the
+    actor that ran the check and signs, instead of the adapter."""
     if intent.get("status") != "approved":
         raise CucumberError("approve the intent first: evidence refers to an approved version")
     reference = f"{intent['id']}@{intent['version']}"
@@ -188,7 +190,7 @@ def record_run(
             created_at=created_at,
             namespace=namespace,
             context=context,
-            context_recorded_by=adapter_ref if context else None,
+            context_recorded_by=(context_recorded_by or adapter_ref) if context else None,
         )
         recorded.records.append(test)
         for index, (key, same, result, finished) in enumerate(executions):
