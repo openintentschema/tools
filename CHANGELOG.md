@@ -8,6 +8,7 @@ during 0.x any release may change behaviour.
 - `ois junit --intent`: evidence for the criteria that tests name by key.
 - `ois junit` also reads Playwright, Jest and Vitest JSON, `go test -json` and TRX.
 - `ois measure`: k6 and JMeter results as measures against the targets of criteria.
+- `ois coverage --format markdown`: tables for CI job summaries and pull request comments.
 
 ## 0.11.0 (2026-10-29)
 

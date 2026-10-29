@@ -41,6 +41,7 @@ class CoverageError(ValueError):
 @dataclass(frozen=True)
 class Criterion:
     reference: str  # <intent>@<version>#<key>
+    statement: str
     weight: int
     counted: tuple[str, ...]  # evidence ids that count
     attested: tuple[str, ...]  # of those, the ones whose test context is not self-declared
@@ -167,6 +168,7 @@ def _criterion(document: Document, intent: Record, required: Record, release: Re
             diverse.append(evidence["id"])
     return Criterion(
         reference=f"{intent['id']}@{intent['version']}#{required['key']}",
+        statement=required["statement"],
         weight=WEIGHTS.get(required.get("criticality", ""), 1),
         counted=tuple(counted),
         attested=tuple(attested),

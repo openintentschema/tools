@@ -327,3 +327,24 @@ def test_cli_on_records_before_the_passport(
     assert main([str(directory), "--build", BUILD, "--scope", f"{INTENT}#AC-2"]) == 0
     assert "intentCoverage 1.0" in capsys.readouterr().out
     assert main([str(directory)]) == 2  # records need --build
+
+
+def test_cli_writes_markdown(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    claimed = passport()
+    claimed["predicate"]["assessments"][0]["value"] = 0.9
+    path = tmp_path / "passport.json"
+    path.write_text(json.dumps(claimed), encoding="utf-8")
+    assert main([str(path), "--format", "markdown"]) == 1
+    out = capsys.readouterr().out
+    assert out.startswith("### Intent coverage\n")
+    assert "| intentCoverage | 50 % | 90 %, differs |" in out
+    assert "| `INT-142@1#AC-2` | WHEN an address cannot be assigned to a canton, THE portal" in out
+    assert "… | covered | `EV-9021` |" in out
+    assert "| `INT-142@1#AC-1` | Given a logged-in customer" in out
+    assert "| not covered | `EV-" in out or "| not covered | no evidence |" in out
+
+
+def test_markdown_escapes_table_cells() -> None:
+    from ois_tools.coverage_cli import cell
+
+    assert cell("a | b\nc") == "a \\| b c"

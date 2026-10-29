@@ -370,6 +370,9 @@ intentCoverage 0.5 (declared 0.5)
 | `intentCoverageWeighted` | criteria weighted by `criticality`: high 3, medium 2, low 1 |
 | `intentCoverageDiverse` | only evidence whose test and subject come from a human, or from agents on different models |
 
+`--format markdown` writes tables for a CI job summary or a pull request comment, for example
+`>> "$GITHUB_STEP_SUMMARY"`; ids are shortened to their last part.
+
 A passport that lists several intents counts the criteria in scope of all of them together.
 Exit code 1 means a declared value differs from the computed one, compared at the precision the
 passport declares; 2 means a file could not be read or the release subject is missing.

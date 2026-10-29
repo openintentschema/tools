@@ -36,6 +36,10 @@ def main(argv: list[str] | None = None) -> int:
     )  # fmt: skip
     parser.add_argument("--scope", action="append", help="criterion reference in scope")
     parser.add_argument(
+        "--format", choices=("text", "markdown"), default="text",
+        help="markdown: tables for a CI job summary or a pull request comment",
+    )  # fmt: skip
+    parser.add_argument(
         "--trusted-key",
         action="append",
         default=[],
@@ -82,20 +86,65 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ois coverage: {error}", file=sys.stderr)
         return EXIT_USAGE
 
-    _show(result)
-    differs = False
-    for measurement in result.measurements():
-        name, value = measurement["name"], measurement["value"]
-        if name not in declared:
-            print(f"{name} {value}")
-            continue
-        print(f"{name} {value} (declared {declared[name]})")
-        if not _agrees(declared[name], value):
-            print(
-                f"ois coverage: declared {name} {declared[name]}, computed {value}", file=sys.stderr
-            )
-            differs = True
+    differs = [
+        m["name"] for m in result.measurements()
+        if m["name"] in declared and not _agrees(declared[m["name"]], m["value"])
+    ]  # fmt: skip
+    if args.format == "markdown":
+        print(markdown(result, declared, differs), end="")
+    else:
+        _show(result)
+        for measurement in result.measurements():
+            name, value = measurement["name"], measurement["value"]
+            print(f"{name} {value}" + (f" (declared {declared[name]})" if name in declared else ""))
+    for name in differs:
+        computed = next(m["value"] for m in result.measurements() if m["name"] == name)
+        print(
+            f"ois coverage: declared {name} {declared[name]}, computed {computed}", file=sys.stderr
+        )
     return EXIT_DIFFERS if differs else EXIT_OK
+
+
+def markdown(result: Coverage, declared: dict[str, object], differs: list[str]) -> str:
+    """The coverage and each criterion as Markdown tables; ids shortened to their last part."""
+    lines = ["### Intent coverage", ""]
+    if not result.criteria:
+        return "\n".join([*lines, "No criteria in scope.", ""])
+    lines += ["| Measure | Value | Declared |", "| --- | --- | --- |"]
+    for measurement in result.measurements():
+        name = measurement["name"]
+        stated = f"{_percent(declared[name])}" if name in declared else ""
+        stated += ", differs" if name in differs else ""
+        lines.append(f"| {name} | {_percent(measurement['value'])} | {stated} |")
+    lines += ["", "| Criterion | Statement | Status | Evidence |", "| --- | --- | --- | --- |"]
+    for criterion in result.criteria:
+        statement = cell(criterion.statement)
+        statement = statement if len(statement) <= 80 else statement[:79].rstrip() + "…"
+        if criterion.covered:
+            status, evidence = "covered", ", ".join(f"`{_short(e)}`" for e in criterion.counted)
+        else:
+            status = "not covered"
+            evidence = "; ".join(f"`{_short(e)}`: {cell(why)}" for e, why in criterion.reasons)
+        lines.append(
+            f"| `{_short(criterion.reference)}` | {statement} | {status} | "
+            f"{evidence or 'no evidence'} |"
+        )
+    return "\n".join([*lines, ""])
+
+
+def cell(text: str) -> str:
+    """Text safe inside a Markdown table cell."""
+    return " ".join(text.replace("|", "\\|").split())
+
+
+def _short(reference: str) -> str:
+    return reference.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _percent(value: object) -> str:
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        return str(value)
+    return f"{value * 100:.4g} %"
 
 
 def _show(result: Coverage) -> None:
