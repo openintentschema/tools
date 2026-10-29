@@ -1,7 +1,5 @@
-"""Sigstore bundles (keyless signing). The test bundle is the real provenance attestation of the
-ois-tools 0.6.0 image, signed by GitHub Actions through the public-good Sigstore instance; the
-trusted root was fetched once from Sigstore's TUF repository. Both are frozen, so the tests run
-without network."""
+"""Sigstore bundles. Test data: the real provenance bundle of the ois-tools 0.6.0 image and a
+frozen public-good trusted root."""
 
 import base64
 import json

@@ -1,6 +1,5 @@
-"""Gherkin and Cucumber Messages. rounding.ndjson is a real cucumber-js 13.3.0 run of
-rounding.feature (local paths replaced): AC-1 and both rows of AC-2 pass, AC-3 fails, AC-4 has
-undefined steps, and one scenario has no key."""
+"""Gherkin and Cucumber Messages. rounding.ndjson: a real cucumber-js 13.3.0 run of
+rounding.feature (AC-1, AC-2 pass; AC-3 fails; AC-4 undefined; one scenario without key)."""
 
 import json
 import shutil
