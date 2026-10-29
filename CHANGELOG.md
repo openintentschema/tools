@@ -5,6 +5,8 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+- The setup action leaves the uv cache off; it no longer warns in repositories without Python files.
+
 ## 0.12.0 (2026-10-29)
 
 - `ois junit --intent`: evidence for the criteria that tests name by key.
