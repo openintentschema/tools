@@ -6,7 +6,7 @@ import hashlib
 import json
 import re
 import subprocess
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,7 +15,8 @@ from urllib.parse import urlsplit, urlunsplit
 
 import rfc8785
 
-from ois_tools import digests
+from ois_tools import digests, rules
+from ois_tools.document import Document, Entry
 from ois_tools.passports import PassportError, collect
 from ois_tools.validator import validate
 
@@ -142,6 +143,29 @@ def artifact(
     )
     name = id or _id(namespace, "artifacts", f"{_slug(source.name)}-{anchor[:12]}")
     return _checked(_record("artifact", name, created_at, fields))
+
+
+def known_test(known: Iterable[Record], source: Source) -> Record | None:
+    """A test artifact already recorded for this file at this content."""
+    for record in known:
+        if (
+            record["type"] == "artifact"
+            and record["kind"] == "test"
+            and record["digest"].get("sha256") == source.digest.get("sha256")
+            and record.get("path", source.path) == source.path
+        ):
+            return record
+    return None
+
+
+def derived(make: Callable[..., Record], around: list[Record]) -> tuple[Record, list[str]]:
+    """Evidence from `make(derived_from=...)`: intent where R4 and R5 allow it among the records
+    `around` it, otherwise unknown, with the reasons."""
+    claimed = make(derived_from="intent")
+    found = [*around, claimed]
+    document = Document([Entry(record, f"$.records[{i}]") for i, record in enumerate(found)])
+    problems = rules.derivation_problems(document, claimed)
+    return (make(derived_from="unknown"), problems) if problems else (claimed, [])
 
 
 def actor(

@@ -62,6 +62,7 @@ that passed it, so they can rely on its structure.
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
 | `formats.py` | Test reports by content: JUnit XML, TRX, Playwright JSON, Jest and Vitest JSON, `go test -json`. |
+| `measures.py`, `measure_cli.py` | `ois measure`: k6 summaries and JMeter results as measures against criterion targets. |
 | `junit.py`, `junit_cli.py` | `ois junit`: test reports to a Level 1 bundle (spec section 11.4), or with `--intent` to evidence for an approved intent. |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois intent`: seal, approve, next version, compare. |
@@ -209,6 +210,20 @@ for both: background steps, scenario steps, data tables, doc strings and outline
   test, key, row and time, so the rows of an outline stay apart.
 - Messages are read for structure and status only; error messages and stack traces are not
   copied.
+
+## Measures
+
+`ois measure` gives non-functional criteria the measure that Appendix D needs to count them.
+
+- **One metric syntax**, `METRIC{TAG:VALUE}:STAT`, taken from k6's submetric names, so JMeter
+  results are filtered the same way (`elapsed{label:Checkout}:p(95)`).
+- **The measure is named after the target's `metric`**: the intent decides the name, the
+  command line only maps a value of the run to it. `result` is the comparison with the target.
+- **Units** are known for k6 time metrics (`contains: time`, or the built-in `http_req_*`) and
+  JMeter time columns (`ms`). A unit that differs from the target's is refused rather than
+  converted.
+- **Percentiles** of JMeter samples are interpolated between closest ranks, as k6 does, so both
+  tools give the same value for the same samples.
 
 ## CI building blocks
 

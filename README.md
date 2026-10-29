@@ -12,7 +12,7 @@ between. One command, `ois`, records that evidence along the delivery lifecycle 
 | Requirement | intent with acceptance criteria, its approval | `ois intent`, `ois intent from-gherkin` |
 | Design | design approval | `ois record decision --gate design-approval` |
 | Implementation | code artifact, the context an agent was given | `ois record artifact` |
-| Test | evidence per criterion | `ois junit --intent`, `ois cucumber`, `ois record evidence` |
+| Test | evidence per criterion, measures for non-functional ones | `ois junit --intent`, `ois cucumber`, `ois measure`, `ois record evidence` |
 | Merge | merge decision | `ois record decision --gate merge` |
 | Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport build --sign` |
 | Operation | findings, their classification and resolution | `ois record finding`, `ois record supersede` |
@@ -253,6 +253,28 @@ ois cucumber cucumber.ndjson --intent https://ois.acme.example/intents/INT-7@1 \
 - Step definitions are code written for the scenarios; the independence of R5 covers the
   scenario text, not them.
 - Error messages and stack traces from the run are not copied.
+
+## Measure non-functional criteria
+
+`ois measure` records a load test run against the `target` of a non-functional criterion:
+
+```bash
+k6 run --summary-export=summary.json load/checkout.js       # or JMeter: jmeter -n -t checkout.jmx -l results.jtl
+ois measure summary.json --intent https://ois.acme.example/intents/INT-9@1 \
+  --criterion "AC-3=http_req_duration:p(95)" --test load/checkout.js --test-producer "$QE" \
+  --subject "$BUILD" --written-from-intent
+```
+
+- **Results:** k6 summaries (`--summary-export` or `handleSummary` JSON) and JMeter JTL CSV,
+  recognized by content.
+- **`--criterion KEY=METRIC:STAT`**, repeatable: a k6 metric or submetric
+  (`http_req_duration{expected_response:true}`), or for JMeter a column (`elapsed`, `Latency`,
+  `Connect`, …), `samples` or `errors`, filtered with `{label:NAME}`; statistics `avg`, `min`,
+  `med`, `max`, `p(N)`, `count` and `rate`.
+- **Evidence** per criterion, with the value as the measure the target names (`ms` for times),
+  `pass` if it meets the target, otherwise `fail`. A criterion without target, or a unit that
+  differs from the target's, is refused. The test artifact and `derivedFrom` work as with
+  `ois junit --intent`.
 
 ## Record artifacts, actors, evidence, decisions and findings
 

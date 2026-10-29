@@ -11,8 +11,7 @@ from importlib.metadata import version as package_version
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from ois_tools import records, rules
-from ois_tools.document import Document, Entry
+from ois_tools import records
 from ois_tools.formats import JUnitReport, TestCase, cases
 from ois_tools.records import KEY_PATTERN, Recorded, RecordError, location_of
 
@@ -173,7 +172,7 @@ def record_run(
     for path, named in tests.items():
         source = records.file_source(repo / path, location)
         context = [f"{reference}#{key}" for key in order if key in {k for _, k in named}]
-        test = _known_test(known, source) or records.artifact(
+        test = records.known_test(known, source) or records.artifact(
             source,
             kind="test",
             produced_by=test_producer,
@@ -195,32 +194,12 @@ def record_run(
                 subject=subject,
                 run=run,
             )
-            claimed = evidence(derived_from="intent")
-            document = _document([intent, *known, test, claimed])
-            problems = rules.derivation_problems(document, claimed)
-            made = evidence(derived_from="unknown") if problems else claimed
+            made, problems = records.derived(evidence, [intent, *known, test])
             if problems and "context" in test:
                 recorded.notes.append(f"{key}: {_statement(case)}: {problems[0]}")
             if made not in recorded.records:
                 recorded.records.append(made)
     return recorded
-
-
-def _known_test(known: list[Record], source: records.Source) -> Record | None:
-    """A test artifact already recorded for this file at this content."""
-    for record in known:
-        if (
-            record["type"] == "artifact"
-            and record["kind"] == "test"
-            and record["digest"].get("sha256") == source.digest["sha256"]
-            and record.get("path", source.path) == source.path
-        ):
-            return record
-    return None
-
-
-def _document(found: list[Record]) -> Document:
-    return Document([Entry(record, f"$.records[{i}]") for i, record in enumerate(found)])
 
 
 def _dedupe(cases: list[TestCase]) -> list[TestCase]:
