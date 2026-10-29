@@ -205,7 +205,7 @@ for both: background steps, scenario steps, data tables, doc strings and outline
 
 - **GitHub:** `.github/actions/setup` is a composite action: `setup-uv`, then
   `uv tool install ois-tools[sigstore]==<version>`, with `ois` on the `PATH`. Its `version`
-  default is the release it belongs to, so `uses: …/setup@v0.9.0` installs 0.9.0; `source`
+  default is the release it belongs to, so `uses: …/setup@v<version>` installs that version; `source`
   installs a checkout instead, which the CI job `Setup action` uses.
 - **GitLab:** `.gitlab/ci/ois.gitlab-ci.yml` defines hidden jobs on the image of the same
   release, with the entrypoint cleared so GitLab can run the script.

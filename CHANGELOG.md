@@ -5,18 +5,21 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
-## 0.9.0 (2026-10-29)
+## 0.10.0 (2026-10-29)
 
-- GitHub Action `.github/actions/setup`: installs `ois` in the version of its tag.
-- GitLab CI template `.gitlab/ci/ois.gitlab-ci.yml` with `.ois` and `.ois-junit`.
-- Profile `regulated/v0.1`, rules P1–P4: applied when a record lists it or with
-  `ois validate --profile`.
 - `ois intent from-gherkin`: a draft intent from feature files, one criterion per key-tagged
   scenario.
 - `ois cucumber`: evidence from a Cucumber Messages run; `derivedFrom: intent` where a scenario is
   worded as its criterion.
 - R10 compares intents without their criteria's digests too: a draft as authored and its approved
   record are one record. New dependency: `gherkin-official`.
+
+## 0.9.0 (2026-10-29)
+
+- GitHub Action `.github/actions/setup`: installs `ois` in the version of its tag.
+- GitLab CI template `.gitlab/ci/ois.gitlab-ci.yml` with `.ois` and `.ois-junit`.
+- Profile `regulated/v0.1`, rules P1–P4: applied when a record lists it or with
+  `ois validate --profile`.
 
 ## 0.8.0 (2026-10-28)
 

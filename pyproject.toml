@@ -1,6 +1,6 @@
 [project]
 name = "ois-tools"
-version = "0.9.0"
+version = "0.10.0"
 description = "Reference tools for the Open Intent Schema (OIS): validate, record and attest what was required, built and proven"
 keywords = ["ois", "open-intent-schema", "requirements", "traceability", "evidence", "in-toto", "junit", "coverage"]
 readme = "README.md"
