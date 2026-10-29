@@ -55,6 +55,7 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `profiles.py` | Known profiles (`regulated/v0.1`) and their rules, applied when listed or asked for. |
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
@@ -179,6 +180,15 @@ script in the image override it (GitLab: `entrypoint: [""]`).
   for DSSE and Sigstore. Ed25519 signs deterministically, which the fixtures rely on.
 - **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
   gets a signature; adding a signature keeps the payload bytes unchanged.
+
+## Profiles
+
+`profiles.py` checks the profiles it knows after the core rules, on the same `Document`. A
+profile applies when a record of the document lists its URI or the verifier names it, and then to
+the whole document, as `fixtures/README.md` reads section 10.2. Rules a document can meet only
+once signed (`BEFORE_SIGNING`, P3) are left out where a document is checked before signing:
+`passports.build` and `ois sign`. `Document.enveloped` tells whether the input came in a signed
+envelope; whether the signature verifies is the `signature` rule's concern.
 
 ## Keyless signatures
 

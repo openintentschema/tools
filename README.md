@@ -289,6 +289,25 @@ A passport that lists several intents counts the criteria in scope of all of the
 Exit code 1 means a declared value differs from the computed one, compared at the precision the
 passport declares; 2 means a file could not be read or the release subject is missing.
 
+## Profiles
+
+A profile adds rules for an industry (specification section 10.2). `ois validate` checks the
+profiles it knows when a record lists them in `profiles`, or when asked:
+
+```bash
+ois validate passport.dsse.json --profile regulated/v0.1 --trusted-key keys/
+```
+
+| Rule | Violation |
+| --- | --- |
+| `regulated/P1` | an intent without `risk` |
+| `regulated/P2` | an intent approval or release decided by an agent or tool |
+| `regulated/P3` | a passport that is not signed |
+| `regulated/P4` | a production dataset as test input |
+
+P3 holds only once a passport is signed, so `ois passport build` and `ois sign` do not refuse an
+unsigned passport for it; `ois validate` reports it until it is signed.
+
 ## Sign bundles and passports
 
 Signing makes records attributable (specification section 8.3, Level 3). A signature counts for an

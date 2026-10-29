@@ -865,6 +865,67 @@
       ]
     },
     {
+      "path": "valid/regulated-passport.json",
+      "description": "A signed passport whose intent lists the regulated profile and meets P1 to P4.",
+      "expect": []
+    },
+    {
+      "path": "invalid/regulated/P1/intent-without-risk.json",
+      "description": "The intent lists the regulated profile but carries no risk.",
+      "expect": [
+        {
+          "rule": "regulated/P1",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/regulated/P2/agent-approves-release.json",
+      "description": "A signed passport under the regulated profile whose release an agent approved.",
+      "expect": [
+        {
+          "rule": "regulated/P2",
+          "level": "violation"
+        }
+      ]
+    },
+    {
+      "path": "invalid/regulated/P3/unsigned-passport.json",
+      "description": "A passport under the regulated profile that is not signed.",
+      "expect": [
+        {
+          "rule": "regulated/P3",
+          "level": "violation"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
+      "path": "invalid/regulated/P4/production-dataset.json",
+      "description": "Under the regulated profile, evidence lists an input dataset classified as production.",
+      "expect": [
+        {
+          "rule": "regulated/P4",
+          "level": "violation"
+        },
+        {
+          "rule": "R8",
+          "level": "warning"
+        },
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
       "path": "valid/keyless-passport.json",
       "description": "The passport, signed keylessly by a GitHub Actions workflow through the public-good Sigstore instance (a recorded Sigstore bundle). The workflow is the agent runtime's certificate identity, so every recorded context is attested.",
       "expect": []

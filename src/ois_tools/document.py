@@ -70,6 +70,7 @@ class Document:
     passport: Record | None = None  # the predicate, for passports
     subjects: list[dict[str, str]] = field(default_factory=list)  # statement subject digests
     signers: Signers = NOBODY  # who signed the envelope around it, as verified
+    enveloped: bool = False  # in a DSSE envelope or Sigstore bundle with a signature
     _by_id: dict[str, list[Entry]] = field(default_factory=dict, repr=False)
 
     def __post_init__(self) -> None:
@@ -77,7 +78,9 @@ class Document:
             self._by_id.setdefault(entry.record["id"], []).append(entry)
 
     @classmethod
-    def of(cls, document: Record, *, signers: Signers = NOBODY) -> "Document":
+    def of(
+        cls, document: Record, *, signers: Signers = NOBODY, enveloped: bool = False
+    ) -> "Document":
         """The records of a single record, bundle or passport; `signers` signed its envelope."""
         if document.get("_type") == STATEMENT_TYPE:
             predicate: Record = document["predicate"]
@@ -89,7 +92,8 @@ class Document:
                 if isinstance(s, dict) and isinstance(s.get("digest"), dict)
             ]
             entries = _entries(predicate["records"], "$.predicate.records")
-            return cls(entries, passport=predicate, subjects=subjects, signers=signers)
+            return cls(entries, passport=predicate, subjects=subjects, signers=signers,
+                       enveloped=enveloped)  # fmt: skip
         if document["type"] == "bundle":
             return cls(_entries(document["records"], "$.records"), signers=signers)
         return cls([Entry(document, "$")], container=False, signers=signers)

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from ois_tools.keyless import load_trusted_roots
+from ois_tools.profiles import ProfileError, resolve
 from ois_tools.report import Level, Report, Result
 from ois_tools.signing import SigningError, TrustedKey, load_trusted
 from ois_tools.validator import validate
@@ -37,11 +38,19 @@ def main(argv: list[str] | None = None) -> int:
         metavar="FILE",
         help="Sigstore trusted root (JSON, or JSON lines from gh attestation trusted-root)",
     )
+    parser.add_argument(
+        "--profile",
+        action="append",
+        default=[],
+        metavar="PROFILE",
+        help="also check this profile, by URI or name (regulated/v0.1); records may list it too",
+    )
     args = parser.parse_args(argv)
     try:
+        profiles = [resolve(name) for name in args.profile]
         trusted = load_trusted(args.trusted_key)
         roots = load_trusted_roots(args.trusted_root)
-    except (OSError, SigningError) as error:
+    except (OSError, SigningError, ProfileError) as error:
         print(f"ois validate: {error}", file=sys.stderr)
         return EXIT_USAGE
 
@@ -52,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, UnicodeDecodeError) as error:
             print(f"ois validate: {name}: {error}", file=sys.stderr)
             return EXIT_USAGE
-        results[name] = _validate_text(text, trusted, roots)
+        results[name] = _validate_text(text, trusted, roots, profiles)
 
     if args.format == "json":
         out = [
@@ -70,12 +79,14 @@ def main(argv: list[str] | None = None) -> int:
     return EXIT_CONFORMS if all(r.conforms for r in results.values()) else EXIT_VIOLATION
 
 
-def _validate_text(text: str, trusted: list[TrustedKey], roots: list[Any]) -> Result:
+def _validate_text(
+    text: str, trusted: list[TrustedKey], roots: list[Any], profiles: list[str]
+) -> Result:
     try:
         document = json.loads(text)
     except json.JSONDecodeError as error:
         return Result([Report(Level.VIOLATION, "json", f"not valid JSON: {error}", "$")])
-    return validate(document, trusted_keys=trusted, trusted_roots=roots)
+    return validate(document, trusted_keys=trusted, trusted_roots=roots, profiles=profiles)
 
 
 if __name__ == "__main__":

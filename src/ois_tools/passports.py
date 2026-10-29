@@ -10,6 +10,7 @@ from typing import Any
 from ois_tools.coverage import coverage
 from ois_tools.document import NOBODY, Signers
 from ois_tools.keyless import is_sigstore_bundle, open_sigstore_bundle
+from ois_tools.profiles import BEFORE_SIGNING
 from ois_tools.rules import content
 from ois_tools.schema import PASSPORT_PREDICATE_TYPE, STATEMENT_TYPE
 from ois_tools.signing import is_envelope, open_envelope
@@ -122,7 +123,11 @@ def build(
         "predicateType": PASSPORT_PREDICATE_TYPE,
         "predicate": predicate,
     }
-    violations = [r for r in validate(statement).reports if r.level == "violation"]
+    violations = [
+        r
+        for r in validate(statement).reports
+        if r.level == "violation" and r.rule not in BEFORE_SIGNING
+    ]
     if violations:
         details = "; ".join(f"[{r.rule}] {r.path}: {r.message}" for r in violations)
         raise PassportError(f"the passport would not conform: {details}")

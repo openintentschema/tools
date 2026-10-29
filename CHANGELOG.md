@@ -9,6 +9,8 @@ during 0.x any release may change behaviour.
 
 - GitHub Action: `uses: openintentschema/tools@v0.9.0` installs `ois` in its version.
 - GitLab CI template `ci/gitlab/ois.gitlab-ci.yml` with `.ois` and `.ois-junit`.
+- Profile `regulated/v0.1`, rules P1–P4: applied when a record lists it or with
+  `ois validate --profile`.
 
 ## 0.8.0 (2026-10-28)
 

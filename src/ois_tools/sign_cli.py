@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ois_tools.authoring import AuthoringError, load
+from ois_tools.profiles import BEFORE_SIGNING
 from ois_tools.signing import SigningError, is_envelope, load_private_key, open_envelope, sign
 from ois_tools.validator import validate
 
@@ -43,7 +44,11 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_USAGE
 
     content = open_envelope(document, []).payload if is_envelope(document) else document
-    violations = [r for r in validate(content).reports if r.level == "violation"]
+    violations = [
+        r
+        for r in validate(content).reports
+        if r.level == "violation" and r.rule not in BEFORE_SIGNING
+    ]
     if violations:
         for report in violations:
             message = f"{report.level} [{report.rule}] {report.path}: {report.message}"

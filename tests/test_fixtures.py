@@ -16,7 +16,12 @@ from ois_tools.keyless import load_trusted_roots
 from ois_tools.signing import load_public_key
 
 FIXTURES = Path(__file__).parent / "fixtures"
-IMPLEMENTED = {"schema", "signature", *(f"R{n}" for n in range(1, 18) if n not in (6, 7))}
+IMPLEMENTED = {
+    "schema",
+    "signature",
+    *(f"R{n}" for n in range(1, 18) if n not in (6, 7)),
+    *(f"regulated/P{n}" for n in range(1, 5)),
+}
 
 _MANIFEST: dict[str, Any] = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
 MANIFEST: list[dict[str, Any]] = _MANIFEST["fixtures"]
