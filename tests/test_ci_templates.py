@@ -9,6 +9,7 @@ import yaml
 
 ROOT = Path(__file__).parent.parent
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+ACTION = ROOT / ".github" / "actions" / "setup" / "action.yml"
 PINNED = re.compile(r"^[\w.-]+/[\w.-]+@[0-9a-f]{40}$")
 
 
@@ -17,17 +18,17 @@ def load(path: Path) -> Any:
 
 
 def test_the_action_installs_this_version() -> None:
-    action = load(ROOT / "action.yml")
+    action = load(ACTION)
     assert action["runs"]["using"] == "composite"
     assert action["inputs"]["version"]["default"] == VERSION
     assert "ois-version" in action["outputs"]
 
 
 def test_the_action_pins_what_it_uses() -> None:
-    action = load(ROOT / "action.yml")
+    action = load(ACTION)
     used = [step["uses"] for step in action["runs"]["steps"] if "uses" in step]
     assert used and all(PINNED.match(ref) for ref in used)
-    text = (ROOT / "action.yml").read_text(encoding="utf-8")
+    text = ACTION.read_text(encoding="utf-8")
     assert all(re.search(rf"{re.escape(ref)} # v\d", text) for ref in used)
 
 

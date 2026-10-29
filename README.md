@@ -68,11 +68,11 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 
 ## Use in CI
 
-**GitHub Actions:** this repository is an action that installs `ois` in its own version, Sigstore
-verification included:
+**GitHub Actions:** the action `.github/actions/setup` installs `ois` in the version of its tag,
+Sigstore verification included:
 
 ```yaml
-- uses: openintentschema/tools@v0.9.0   # pin the tag's commit SHA in production
+- uses: openintentschema/tools/.github/actions/setup@v0.9.0   # pin the tag's commit SHA in production
 - run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
 ```
 

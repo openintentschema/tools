@@ -26,7 +26,7 @@ depend on, name or favour a product or vendor.
 | `tests/` | unit tests per module; `fixtures/` and `examples/` are copies from the specification |
 | `scripts/sync_spec.py`, `spec.lock` | copy schema, examples and fixtures; the specification commit they come from |
 | `Dockerfile` | the container image `ghcr.io/openintentschema/ois-tools`, published by `release.yml` |
-| `action.yml`, `ci/gitlab/` | the GitHub Action and the GitLab CI template; their versions follow `pyproject.toml` |
+| `.github/actions/setup/`, `ci/gitlab/` | the GitHub Action and the GitLab CI template; their versions follow `pyproject.toml` |
 | `docs/` | [architecture.md](docs/architecture.md) (design decisions), [development.md](docs/development.md) (setup, adding a rule, releases) |
 | `.github/` | CI and release workflows, templates, contributing guide, Code of Conduct, security policy |
 
