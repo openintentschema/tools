@@ -5,6 +5,10 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.11.0 (2026-10-29)
+
+- `ois validate --format sarif`: SARIF 2.1.0 for GitHub code scanning and IDEs, with line numbers.
+
 ## 0.10.0 (2026-10-29)
 
 - `ois intent from-gherkin`: a draft intent from feature files, one criterion per key-tagged

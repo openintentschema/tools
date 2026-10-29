@@ -63,8 +63,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
   aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.10.0`, `0.10` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.10.0 --owner openintentschema`.
+- Tags: `0.11.0`, `0.11` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.11.0 --owner openintentschema`.
 
 ## Use in CI
 
@@ -72,7 +72,7 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 Sigstore verification included:
 
 ```yaml
-- uses: openintentschema/tools/.github/actions/setup@v0.10.0   # pin the tag's commit SHA in production
+- uses: openintentschema/tools/.github/actions/setup@v0.11.0   # pin the tag's commit SHA in production
 - run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
 ```
 
@@ -81,7 +81,7 @@ command:
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.10.0/.gitlab/ci/ois.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.11.0/.gitlab/ci/ois.gitlab-ci.yml
 
 ois:
   extends: .ois-junit
@@ -93,6 +93,20 @@ ois:
 ```
 
 **Any other CI** runs the container image or `uvx --from ois-tools ois …`.
+
+**GitHub code scanning** shows the reports at their lines, from SARIF:
+
+```yaml
+- run: ois validate passport.json --format sarif > ois.sarif
+- uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+  if: ${{ !cancelled() }}
+  with:
+    sarif_file: ois.sarif
+    category: ois
+```
+
+The job needs `permissions: security-events: write`; code scanning is free for public
+repositories and needs GitHub Advanced Security for private ones.
 
 ## Validate
 

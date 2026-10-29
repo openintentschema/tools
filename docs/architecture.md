@@ -55,6 +55,7 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `sarif.py` | SARIF 2.1.0 output of `ois validate`. |
 | `cucumber.py`, `cucumber_cli.py` | Gherkin scenarios as criteria (`ois intent from-gherkin`) and Cucumber Messages as evidence (`ois cucumber`). |
 | `profiles.py` | Known profiles (`regulated/v0.1`) and their rules, applied when listed or asked for. |
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
@@ -181,6 +182,13 @@ script in the image override it (GitLab: `entrypoint: [""]`).
   for DSSE and Sigstore. Ed25519 signs deterministically, which the fixtures rely on.
 - **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
   gets a signature; adding a signature keeps the payload bytes unchanged.
+
+## SARIF
+
+`sarif.py` maps reports to SARIF 2.1.0: violation to `error`, warning to `warning`, info to
+`note`, each rule with a link to its explanation. A small JSON scanner turns a report's JSONPath
+into the line of that value, or of its nearest existing parent; reports on an envelope's payload
+point at the `payload` line. The JSONPath is kept as the logical location.
 
 ## Gherkin and Cucumber
 

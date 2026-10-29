@@ -9,6 +9,7 @@ from typing import Any
 from ois_tools.keyless import load_trusted_roots
 from ois_tools.profiles import ProfileError, resolve
 from ois_tools.report import Level, Report, Result
+from ois_tools.sarif import to_sarif
 from ois_tools.signing import SigningError, TrustedKey, load_trusted
 from ois_tools.validator import validate
 
@@ -23,7 +24,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Validate OIS records, bundles and Quality Passports.",
     )
     parser.add_argument("files", nargs="+", metavar="FILE", help="JSON file, or - for stdin")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "json", "sarif"), default="text")
     parser.add_argument(
         "--trusted-key",
         action="append",
@@ -55,15 +56,20 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_USAGE
 
     results: dict[str, Result] = {}
+    texts: dict[str, str] = {}
     for name in args.files:
         try:
             text = sys.stdin.read() if name == "-" else Path(name).read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as error:
             print(f"ois validate: {name}: {error}", file=sys.stderr)
             return EXIT_USAGE
+        texts[name] = text
         results[name] = _validate_text(text, trusted, roots, profiles)
 
-    if args.format == "json":
+    if args.format == "sarif":
+        sarif = to_sarif({name: (texts[name], result) for name, result in results.items()})
+        print(json.dumps(sarif, indent=2))
+    elif args.format == "json":
         out = [
             {"file": name, "conforms": r.conforms, "reports": [x.as_dict() for x in r.reports]}
             for name, r in results.items()

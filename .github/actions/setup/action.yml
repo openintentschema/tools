@@ -8,7 +8,7 @@ branding:
 inputs:
   version:
     description: Version of ois-tools to install; the default is the release this action belongs to.
-    default: "0.10.0"
+    default: "0.11.0"
   source:
     description: Install from this path instead of PyPI, for example "." in a checkout of this repository.
     default: ""
