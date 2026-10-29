@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.acme.billing.RoundingTest" tests="3" skipped="0" failures="1" errors="0" timestamp="2026-10-29T15:16:09.536Z" hostname="ci" time="0.035">
+  <properties/>
+  <testcase name="withoutKey()" classname="com.acme.billing.RoundingTest" time="0.015"/>
+  <testcase name="AC-1 rounds down" classname="com.acme.billing.RoundingTest" time="0.004"/>
+  <testcase name="rejectsNegativeAmounts()" classname="com.acme.billing.RoundingTest" time="0.007">
+    <failure message="org.opentest4j.AssertionFailedError: expected: &lt;1&gt; but was: &lt;2&gt;" type="org.opentest4j.AssertionFailedError">shortened</failure>
+  </testcase>
+  </testsuite>
