@@ -221,3 +221,15 @@ def test_cli_writes_nothing_when_the_passport_breaks_a_rule(tmp_path: Path) -> N
     ]
     assert main(args) == 1
     assert not out.exists()
+
+
+def test_collect_reads_an_authored_draft_intent_without_type() -> None:
+    """Drafts are written as in section 7, often without ois and type; they are intents."""
+    records = fixture_records()
+    intent = next(r for r in records if r["type"] == "intent")
+    draft = {k: v for k, v in intent.items() if k not in ("ois", "type", "digest")}
+    draft["status"] = "draft"
+    collected = collect([draft, *records])
+    assert next(r for r in collected if r["id"] == intent["id"])["status"] == "approved"
+    with pytest.raises(PassportError, match="not an OIS record"):
+        collect([{"id": "x"}])

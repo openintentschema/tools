@@ -55,6 +55,7 @@ that passed it, so they can rely on its structure.
 | `validator.py` | `validate()`: schema, then rules. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `cucumber.py`, `cucumber_cli.py` | Gherkin scenarios as criteria (`ois intent from-gherkin`) and Cucumber Messages as evidence (`ois cucumber`). |
 | `profiles.py` | Known profiles (`regulated/v0.1`) and their rules, applied when listed or asked for. |
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
@@ -108,14 +109,14 @@ them; if an RFC is rejected, the fixtures change and this validator follows.
 
 No command opens a network connection, with one explicit exception: `ois trust update` fetches a
 Sigstore trusted root through TUF when it is run, so that verifiers need not use another tool;
-verification itself reads that file. The schema is bundled (`schemas/`) and loaded
-through a local `referencing` registry, so no `$ref` is fetched; `ois junit` and `ois record`
-run local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This
-was verified by running every command and the whole test suite in a sandbox that blocks all
-network access, and the container image with `docker run --network none` in CI. A new
-dependency or feature must keep it that way, and a command that needs the network must say so in
-its name or help, as `ois trust update` does; the specification's
-[privacy page](https://openintentschema.io/privacy/) states it to users.
+verification itself reads that file. The schema is bundled (`schemas/`) and loaded through a local
+`referencing` registry, so no `$ref` is fetched; `ois junit`, `ois cucumber` and `ois record` run
+local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This was
+verified by running every command and the whole test suite in a sandbox that blocks all network
+access, and the container image with `docker run --network none` in CI. A new dependency or feature
+must keep it that way, and a command that needs the network must say so in its name or help, as `ois
+trust update` does; the specification's [privacy page](https://openintentschema.io/privacy/) states
+it to users.
 
 ## Authoring intents
 
@@ -153,11 +154,11 @@ its name or help, as `ois trust update` does; the specification's
 
 The `Dockerfile` builds the wheel from source in one stage and installs it in a slim Python image
 with the runtime dependencies exported from `uv.lock` and checked by hash, so the image holds
-exactly what the lock file names. git is installed because `ois junit` and `ois record` read the
-checkout; `safe.directory '*'` lets git read a checkout mounted from the host, which belongs to
-another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker run --user`
-with the host's ids works and written files belong to the host user. Its entrypoint is `ois`,
-so the arguments after the image name are those of the command line; CI systems that run a
+exactly what the lock file names. git is installed because `ois junit`, `ois cucumber` and `ois
+record` read the checkout; `safe.directory '*'` lets git read a checkout mounted from the host,
+which belongs to another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker
+run --user` with the host's ids works and written files belong to the host user. Its entrypoint is
+`ois`, so the arguments after the image name are those of the command line; CI systems that run a
 script in the image override it (GitLab: `entrypoint: [""]`).
 
 ## Signatures
@@ -180,6 +181,25 @@ script in the image override it (GitLab: `entrypoint: [""]`).
   for DSSE and Sigstore. Ed25519 signs deterministically, which the fixtures rely on.
 - **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
   gets a signature; adding a signature keeps the payload bytes unchanged.
+
+## Gherkin and Cucumber
+
+`cucumber.py` reads feature files with `gherkin-official` and runs as Cucumber Messages (NDJSON),
+whose `gherkinDocument` has the same structure, so one renderer gives the criterion statement
+for both: background steps, scenario steps, data tables, doc strings and outline examples.
+
+- **The key is a tag**, matched by `--key-pattern` (default `KEY-1` style), so it stays stable
+  across versions while scenario names change.
+- **Derived from the intent** only when the rendered scenario equals the approved criterion's
+  statement. That comparison is what `ois cucumber` observes, so it is `contextRecordedBy` of the
+  test artifact and its context lists only those criteria (R4, R12).
+- **Final attempts only:** a test case finished with `willBeRetried` is ignored. A scenario's
+  result is its worst step: failed, then undefined, ambiguous or unknown (`error`), then skipped
+  or pending.
+- **Records go to `.ois/`** through `records.store`, as with `ois record`; evidence ids hash the
+  test, key, row and time, so the rows of an outline stay apart.
+- Messages are read for structure and status only; error messages and stack traces are not
+  copied.
 
 ## CI building blocks
 

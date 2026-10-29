@@ -1,4 +1,4 @@
-"""Command line interface: ois intent seal | approve | next | compare"""
+"""Command line interface: ois intent seal | approve | next | compare | from-gherkin"""
 
 import argparse
 import json
@@ -10,6 +10,7 @@ from typing import Any
 import yaml
 
 from ois_tools.authoring import AuthoringError, load
+from ois_tools.cucumber import KEY_PATTERN, CucumberError, draft_intent
 from ois_tools.intents import IntentError, approve, compare, file_stem, next_version, seal
 
 EXIT_OK = 0
@@ -50,6 +51,19 @@ def main(argv: list[str] | None = None) -> int:
     following.add_argument("--at", help="createdAt of the new version, RFC 3339 (default now)")
     following.add_argument("--output-dir", type=Path, default=Path(".ois"))
 
+    gherkin = commands.add_parser(
+        "from-gherkin", help="write a draft intent from Gherkin feature files"
+    )
+    gherkin.add_argument("features", nargs="+", type=Path, metavar="FEATURE")
+    gherkin.add_argument("--id", required=True, help="id of the intent")
+    gherkin.add_argument("--title", help="default: the feature's name")
+    gherkin.add_argument("--produced-by", metavar="ACTOR")
+    gherkin.add_argument(
+        "--key-pattern", default=KEY_PATTERN, help="regex on a tag without @; group 1 is the key"
+    )
+    gherkin.add_argument("--at", help="createdAt, RFC 3339 (default now)")
+    gherkin.add_argument("--output-dir", type=Path, default=Path(".ois"))
+
     comparing = commands.add_parser("compare", help="show which criteria changed between versions")
     comparing.add_argument("old", type=Path)
     comparing.add_argument("new", type=Path)
@@ -70,13 +84,27 @@ def main(argv: list[str] | None = None) -> int:
             stem = file_stem(approved)
             _emit(approved, args.output_dir / "intents" / f"{stem}.ois.json")
             _emit(decision, args.output_dir / "decisions" / f"{stem}-approval.ois.json")
+        elif args.command == "from-gherkin":
+            skipped: list[str] = []
+            draft = draft_intent(
+                [path.read_text(encoding="utf-8") for path in args.features],
+                id=args.id,
+                created_at=_moment(args.at),
+                title=args.title,
+                produced_by=args.produced_by,
+                key_pattern=args.key_pattern,
+                skipped=skipped,
+            )
+            for item in skipped:
+                print(f"ois intent: skipped {item}", file=sys.stderr)
+            _emit(draft, args.output_dir / "intents" / f"{file_stem(draft)}.ois.yaml")
         elif args.command == "next":
             draft = next_version(load(args.file), created_at=_moment(args.at))
             _emit(draft, args.output_dir / "intents" / f"{file_stem(draft)}.ois.yaml")
         else:
             for key, change in compare(load(args.old), load(args.new)):
                 print(f"{key}: {MEANING[change]}")
-    except (OSError, AuthoringError, IntentError) as error:
+    except (OSError, AuthoringError, IntentError, CucumberError) as error:
         print(f"ois intent: {error}", file=sys.stderr)
         return EXIT_ERROR
     return EXIT_OK

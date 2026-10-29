@@ -3,6 +3,7 @@ checked against Appendix B and R17. Content-derived ids keep recording idempoten
 
 import copy
 import hashlib
+import json
 import re
 import subprocess
 from collections.abc import Iterable
@@ -378,6 +379,28 @@ def file_name(record: Record) -> str:
     if "version" in record:
         stem = f"{stem}-v{record['version']}"
     return f"{COLLECTIONS[record['type']]}/{stem}.ois.json"
+
+
+def store(record: Record, output_dir: Path) -> tuple[Path, bool]:
+    """Write the record to `output_dir` unless it is already there (False); a different record
+    under its id is refused, since records never change (section 6.3)."""
+    path = output_dir / file_name(record)
+    if path.exists():
+        existing = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict) or not same(existing, record):
+            advice = (
+                "record a new version"
+                if record["type"] == "actor"
+                else "a different record needs a different id (R10)"
+            )
+            raise RecordError(
+                f"{path} already holds {reference(record)} with other content; "
+                f"records never change: {advice}"
+            )
+        return path, False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return path, True
 
 
 def same(a: Record, b: Record) -> bool:

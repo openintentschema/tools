@@ -408,9 +408,16 @@ def _kind(record: Record) -> str:
 
 
 def content(record: Record) -> Record:
-    """What R10 compares. A draft intent and its approved record differ only in status and
-    digest, and an intent's digest follows from its content, so intents leave both out. For
-    every other record the digest pins the content and is compared."""
+    """What R10 compares. A draft intent and its approved record differ in status and in the
+    digests approval adds, which follow from the content; intents leave them out. For every other
+    record the digest pins the content and is compared."""
     if record["type"] != "intent":
         return record
-    return {k: v for k, v in record.items() if k not in ("status", "digest")}
+    compared = {k: v for k, v in record.items() if k not in ("status", "digest")}
+    criteria = compared.get("criteria")
+    if isinstance(criteria, list):
+        compared["criteria"] = [
+            {k: v for k, v in c.items() if k != "digest"} if isinstance(c, dict) else c
+            for c in criteria
+        ]
+    return compared

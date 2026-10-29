@@ -6,6 +6,7 @@ from importlib.metadata import version
 
 from ois_tools import (
     coverage_cli,
+    cucumber_cli,
     intent_cli,
     junit_cli,
     key_cli,
@@ -24,6 +25,7 @@ COMMANDS: dict[str, tuple[str, Callable[[list[str]], int]]] = {
         validate_cli.main,
     ),
     "junit": ("turn JUnit XML into a Level 1 bundle", junit_cli.main),
+    "cucumber": ("record a Cucumber run as evidence for an intent", cucumber_cli.main),
     "intent": ("seal, approve, version and compare intents", intent_cli.main),
     "record": ("write actors, artifacts, evidence, decisions and findings", record_cli.main),
     "passport": ("assemble a Quality Passport for a release", passport_cli.main),

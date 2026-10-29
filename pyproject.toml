@@ -9,6 +9,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
     "cryptography>=50.0.2",
+    "gherkin-official>=42.0.1",
     "jsonschema[format-nongpl]>=4.26.0",
     "pyyaml>=6.0.3",
     "rfc8785>=0.1.4",

@@ -189,25 +189,8 @@ COMMANDS = {
 
 
 def _store(record: dict[str, Any], output_dir: Path) -> str:
-    """Write the record unless it is already there; a record never changes (section 6.3)."""
-    path = output_dir / records.file_name(record)
-    if path.exists():
-        existing = load(path)
-        if not isinstance(existing, dict) or not records.same(existing, record):
-            advice = (
-                "record a new version"
-                if record["type"] == "actor"
-                else "a different record needs a different id (R10)"
-            )
-            raise RecordError(
-                f"{path} already holds {records.reference(record)} with other content; "
-                f"records never change: {advice}"
-            )
-        print(f"ois record: unchanged {path}", file=sys.stderr)
-        return records.reference(existing)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"ois record: wrote {path}", file=sys.stderr)
+    path, written = records.store(record, output_dir)
+    print(f"ois record: {'wrote' if written else 'unchanged'} {path}", file=sys.stderr)
     return records.reference(record)
 
 

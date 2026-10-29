@@ -149,6 +149,10 @@ def _records(document: object) -> list[Record]:
     if document.get("type") == "bundle":
         records: list[Record] = document["records"]
         return records
+    if "type" not in document:
+        if "criteria" not in document:
+            raise PassportError(f"not an OIS record: {document.get('id', 'no id')} has no type")
+        return [{"ois": "0.1", "type": "intent", **document}]  # an authored intent (section 7)
     return [document]
 
 

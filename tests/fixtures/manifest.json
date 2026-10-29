@@ -65,6 +65,16 @@
       ]
     },
     {
+      "path": "valid/draft-without-digests-and-approved-intent.json",
+      "description": "The draft as authored, without the digests that approval adds, and the approved record of the same version. Intents are compared without status and digests, those of their criteria included, so they count as one record in two states (R10).",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
       "path": "valid/evidence-revocation.json",
       "description": "Evidence withdrawn by an evidence-revocation decision with rationale (R11).",
       "expect": [

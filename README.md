@@ -9,10 +9,10 @@ between. One command, `ois`, records that evidence along the delivery lifecycle 
 
 | Phase | What is recorded | Command |
 | --- | --- | --- |
-| Requirement | intent with acceptance criteria, its approval | `ois intent` |
+| Requirement | intent with acceptance criteria, its approval | `ois intent`, `ois intent from-gherkin` |
 | Design | design approval | `ois record decision --gate design-approval` |
 | Implementation | code artifact, the context an agent was given | `ois record artifact` |
-| Test | evidence per criterion | `ois junit`, `ois record evidence` |
+| Test | evidence per criterion | `ois cucumber`, `ois junit`, `ois record evidence` |
 | Merge | merge decision | `ois record decision --gate merge` |
 | Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport build --sign` |
 | Operation | findings, their classification and resolution | `ois record finding`, `ois record supersede` |
@@ -190,6 +190,32 @@ ois intent compare .ois/intents/INT-142-v1.ois.json .ois/intents/INT-142-v2.ois.
 - YAML is read as section 7 requires: `2026-10-14T09:12:00Z` and `yes` stay strings, and tags,
   merge keys and non-string or duplicate keys are refused, so that digests do not depend on how
   a YAML library reads the text.
+
+## Gherkin and Cucumber
+
+Feature files become the intent, and a Cucumber run its evidence. A scenario names its criterion
+with a key tag such as `@AC-1`:
+
+```bash
+ois intent from-gherkin features/rounding.feature --id https://ois.acme.example/intents/INT-7
+ois intent approve .ois/intents/INT-7-v1.ois.yaml --by "$PO"
+
+npx cucumber-js --format message:cucumber.ndjson          # Cucumber Messages; also cucumber-jvm, Reqnroll
+ois cucumber cucumber.ndjson --intent https://ois.acme.example/intents/INT-7@1 \
+  --test-producer "$PO" --subject "$CODE"
+```
+
+- **Criteria:** one per scenario with a key tag (`--key-pattern` to change it), statement in
+  `gherkin` notation: background and steps, and the examples of an outline. Scenarios without a
+  key tag are skipped.
+- **Evidence:** one per executed scenario, written to `.ois/` with a test artifact per feature
+  file. Results: passed, failed, skipped or pending, and `error` for undefined steps.
+- **`derivedFrom: intent`** only where the scenario is worded exactly as its approved criterion;
+  `ois cucumber` checks this and records itself as `contextRecordedBy`. A scenario that differs
+  is recorded with `derivedFrom: unknown`.
+- Step definitions are code written for the scenarios; the independence of R5 covers the
+  scenario text, not them.
+- Error messages and stack traces from the run are not copied.
 
 ## Record artifacts, actors, evidence, decisions and findings
 
@@ -377,11 +403,11 @@ ois validate passport.sigstore.json --trusted-root trusted_root.json
 ## Privacy
 
 No command opens a network connection except `ois trust update`, which fetches a Sigstore trusted
-root when you run it. The JSON Schema ships inside the package, `ois junit` and `ois record` read
-local files and the local Git checkout only, and verifying signatures uses local files. Installing
-the package contacts PyPI, pulling the container image contacts GitHub (ghcr.io), and `uvx`
-without a local Python downloads one from GitHub. Details and a diagram:
-[Privacy and data flows](https://openintentschema.io/privacy/).
+root when you run it. The JSON Schema ships inside the package, `ois junit`, `ois cucumber` and `ois
+record` read local files and the local Git checkout only, and verifying signatures uses local files.
+Installing the package contacts PyPI, pulling the container image contacts GitHub (ghcr.io), and
+`uvx` without a local Python downloads one from GitHub. Details and a diagram: [Privacy and data
+flows](https://openintentschema.io/privacy/).
 
 ## Documentation
 
