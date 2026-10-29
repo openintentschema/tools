@@ -16,7 +16,9 @@ usually checked out next to this one as `../openintentschema`. **The validator i
 specification; it never defines it.** What is valid, which rule applies and at which level is
 decided there; `fixtures/README.md` there fixes how each rule is read. If the two disagree, the
 specification wins and a gap is fixed there by RFC, not worked around here. Nothing here may
-depend on, name or favour a product or vendor.
+depend on, name or favour a product or vendor. A second implementation of the validator, for
+Node.js, lives in [openintentschema/tools-js](https://github.com/openintentschema/tools-js); a
+rule change lands in both.
 
 ## Where things are
 

@@ -475,6 +475,7 @@ flows](https://openintentschema.io/privacy/).
 
 - [Specification, schema and conformance fixtures](https://github.com/openintentschema/openintentschema)
 - [Getting started](https://openintentschema.io/getting-started/): first OIS bundle from a test report
+- [ois-tools for Node.js](https://github.com/openintentschema/tools-js): a second implementation of the validator
 - [Architecture](docs/architecture.md): how the commands are built, and why
 - [Development](docs/development.md): setup, checks, specification sync, adding a rule, releases
 - [Changelog](CHANGELOG.md)
