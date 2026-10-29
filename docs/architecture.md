@@ -56,7 +56,7 @@ that passed it, so they can rely on its structure.
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
 | `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
 | `sarif.py` | SARIF 2.1.0 output of `ois validate`. |
-| `cucumber.py`, `cucumber_cli.py` | Gherkin scenarios as criteria (`ois intent from-gherkin`) and Cucumber Messages as evidence (`ois cucumber`). |
+| `cucumber.py`, `cucumber_cli.py` | Gherkin scenarios as criteria (`ois intent from-gherkin`) and Cucumber runs as evidence (`ois cucumber`). |
 | `profiles.py` | Known profiles (`regulated/v0.1`) and their rules, applied when listed or asked for. |
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
@@ -208,7 +208,16 @@ for both: background steps, scenario steps, data tables, doc strings and outline
   or pending.
 - **Records go to `.ois/`** through `records.store`, as with `ois record`; evidence ids hash the
   test, key, row and time, so the rows of an outline stay apart.
-- Messages are read for structure and status only; error messages and stack traces are not
+- **Cucumber JSON and behave JSON** hold outlines with their values filled in and backgrounds
+  merged or repeated, so the statement cannot be rendered from them. The scenario is taken from
+  the feature file in the checkout by its line (keyword or example row), the result from the
+  report. Neither format records times; the evidence is observed at the report's modification
+  time. pytest-bdd leaves out undefined steps, so fewer reported steps than the scenario has is
+  an `error`; behave's own scenario status counts with its steps. A scenario without any step
+  result, as behave reports deselected ones, was not run and gives no evidence.
+- **`classpath:` URIs** of cucumber-jvm resolve to the one file in Git whose path ends with
+  them; none or several is refused, since the test artifact must name one file.
+- Reports are read for structure and status only; error messages and stack traces are not
   copied.
 
 ## Measures

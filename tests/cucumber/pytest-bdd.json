@@ -1,0 +1,343 @@
+[
+  {
+    "keyword": "Feature",
+    "uri": "features/rounding.feature",
+    "name": "Invoices round to five Rappen",
+    "id": "features/rounding.feature",
+    "line": 2,
+    "description": "",
+    "language": "en",
+    "tags": [
+      {
+        "name": "billing",
+        "line": 1
+      }
+    ],
+    "elements": [
+      {
+        "keyword": "Scenario",
+        "id": "test_round_down",
+        "name": "Round down",
+        "line": 7,
+        "description": "",
+        "tags": [
+          {
+            "name": "AC-1",
+            "line": 6
+          },
+          {
+            "name": "smoke",
+            "line": 6
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 47374
+            }
+          },
+          {
+            "keyword": "Given",
+            "name": "an invoice total of CHF 10.02",
+            "line": 8,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 28042
+            }
+          },
+          {
+            "keyword": "When",
+            "name": "the invoice is issued",
+            "line": 9,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 14749
+            }
+          },
+          {
+            "keyword": "Then",
+            "name": "the amount due is CHF 10.00",
+            "line": 10,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 20667
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario Outline",
+        "id": "test_reject_negative_amounts[-1]",
+        "name": "Reject negative amounts",
+        "line": 13,
+        "description": "",
+        "tags": [
+          {
+            "name": "AC-2",
+            "line": 12
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 37082
+            }
+          },
+          {
+            "keyword": "When",
+            "name": "an amount of -1 is entered",
+            "line": 14,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 20500
+            }
+          },
+          {
+            "keyword": "Then",
+            "name": "the invoice is rejected",
+            "line": 15,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 11249
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario Outline",
+        "id": "test_reject_negative_amounts[-0.05]",
+        "name": "Reject negative amounts",
+        "line": 13,
+        "description": "",
+        "tags": [
+          {
+            "name": "AC-2",
+            "line": 12
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 35791
+            }
+          },
+          {
+            "keyword": "When",
+            "name": "an amount of -0.05 is entered",
+            "line": 14,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 18958
+            }
+          },
+          {
+            "keyword": "Then",
+            "name": "the invoice is rejected",
+            "line": 15,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 10707
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "id": "test_round_up",
+        "name": "Round up",
+        "line": 23,
+        "description": "",
+        "tags": [
+          {
+            "name": "AC-3",
+            "line": 22
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 36292
+            }
+          },
+          {
+            "keyword": "Given",
+            "name": "an invoice total of CHF 10.03",
+            "line": 24,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 17792
+            }
+          },
+          {
+            "keyword": "When",
+            "name": "the invoice is issued",
+            "line": 25,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 11041
+            }
+          },
+          {
+            "keyword": "Then",
+            "name": "the amount due is CHF 10.05",
+            "line": 26,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "failed",
+              "duration": 107999,
+              "error_message": "fixturefunc = <function due at 0x10b588510>"
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "id": "test_credit_notes",
+        "name": "Credit notes",
+        "line": 29,
+        "description": "",
+        "tags": [
+          {
+            "name": "AC-4",
+            "line": 28
+          }
+        ],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 43333
+            }
+          }
+        ]
+      },
+      {
+        "keyword": "Scenario",
+        "id": "test_exploratory_no_key",
+        "name": "Exploratory, no key",
+        "line": 34,
+        "description": "",
+        "tags": [],
+        "type": "scenario",
+        "steps": [
+          {
+            "keyword": "Given",
+            "name": "the currency is CHF",
+            "line": 4,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 37249
+            }
+          },
+          {
+            "keyword": "Given",
+            "name": "an invoice total of CHF 0.00",
+            "line": 35,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 20375
+            }
+          },
+          {
+            "keyword": "When",
+            "name": "the invoice is issued",
+            "line": 36,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 11165
+            }
+          },
+          {
+            "keyword": "Then",
+            "name": "the amount due is CHF 0.00",
+            "line": 37,
+            "match": {
+              "location": ""
+            },
+            "result": {
+              "status": "passed",
+              "duration": 16040
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

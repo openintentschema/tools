@@ -1,9 +1,9 @@
-# include: remote: https://raw.githubusercontent.com/openintentschema/tools/v0.14.0/.gitlab/ci/ois.gitlab-ci.yml
+# include: remote: https://raw.githubusercontent.com/openintentschema/tools/v0.15.0/.gitlab/ci/ois.gitlab-ci.yml
 
 # Any ois command, in the image of this release.
 .ois:
   image:
-    name: ghcr.io/openintentschema/ois-tools:0.14.0
+    name: ghcr.io/openintentschema/ois-tools:0.15.0
     entrypoint: [""]
 
 # Record test results: set OIS_JUNIT_REPORTS, OIS_NAMESPACE and OIS_SUITE; runs after failed tests too.

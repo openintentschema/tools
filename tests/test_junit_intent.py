@@ -1,6 +1,6 @@
 """ois junit --intent. tests/junit/: real reports of pytest 9.2.0, Vitest 5.0.5, Jest 30.5.2 with
-jest-junit 17.0.0, Playwright 1.64.1, JUnit 6.1.3 with Surefire 3.6.1, Go 1.27.3 and .NET SDK
-10.0.403 with xUnit and MSTest (failure texts shortened, paths those of a CI checkout).
+jest-junit 17.0.0, Playwright 1.64.1, JUnit 6.1.3 with Surefire 3.6.1 and Gradle 9.8.2, Go 1.27.3
+and .NET SDK 10.0.403 with xUnit and MSTest (failure texts shortened, paths those of a CI checkout).
 Each run has AC-1 passing, AC-2 failing and a test without a key; Playwright names AC-1 by its tag
 option and JUnit AC-2 by @Tag, neither of which reaches the report."""
 
@@ -172,6 +172,7 @@ def test_a_key_is_a_whole_word() -> None:
         ("jest.xml", "jest/rounding.test.cjs"),
         ("playwright.xml", "tests/rounding.spec.ts"),
         ("surefire.xml", "src/test/java/com/acme/billing/RoundingTest.java"),
+        ("gradle.xml", "src/test/java/com/acme/billing/RoundingTest.java"),
         ("playwright.json", "tests/rounding.spec.ts"),
         ("jest.json", "jest/rounding.test.cjs"),
         ("vitest.json", "tests/rounding.test.js"),
@@ -188,7 +189,7 @@ def test_each_runner_gives_evidence_for_its_keys(repo: Path, name: str, path: st
     expected = {"AC-1": ("pass", "unknown"), "AC-2": ("fail", "unknown")}
     if name == "playwright.xml":  # the tag option does not reach JUnit XML, the annotation does
         expected = {"AC-2": ("fail", "unknown")}
-    if name in ("surefire.xml", "xunit.trx"):  # display names reach them, tags and traits not
+    if name in ("surefire.xml", "gradle.xml", "xunit.trx"):  # display names, not tags or traits
         expected = {"AC-1": ("pass", "unknown")}
     if name == "mstest.trx":  # [TestCategory] reaches TRX, the display name does not
         expected = {"AC-2": ("fail", "unknown")}

@@ -1,6 +1,7 @@
-"""Command line interface: ois cucumber MESSAGES --intent REF --test-producer ACTOR
+"""Command line interface: ois cucumber REPORT --intent REF --test-producer ACTOR
 
-Writes the evidence of a Cucumber Messages run (NDJSON) for an approved intent to <output-dir>."""
+Writes the evidence of a Cucumber run (Cucumber Messages, Cucumber JSON or behave JSON) for an
+approved intent to <output-dir>."""
 
 import argparse
 import os
@@ -23,9 +24,11 @@ EXIT_USAGE = 2
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="ois cucumber",
-        description="Record a Cucumber run (Cucumber Messages, NDJSON) as evidence for an intent.",
+        description="Record a Cucumber run as evidence for an intent.",
     )
-    parser.add_argument("messages", help="NDJSON file of the message formatter, or -")
+    parser.add_argument(
+        "report", help="Cucumber Messages (NDJSON), Cucumber JSON or behave JSON, or -"
+    )
     parser.add_argument("--intent", required=True, metavar="REF", help="<intent>@<version>")
     parser.add_argument(
         "--test-producer", required=True, metavar="ACTOR", help="who wrote the features"
@@ -47,16 +50,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        lines = (
-            sys.stdin.read() if args.messages == "-" else Path(args.messages).read_text("utf-8")
-        ).splitlines()
+        if args.report == "-":
+            report, reported_at = sys.stdin.read(), None
+        else:
+            path = Path(args.report)
+            report = path.read_text("utf-8")
+            reported_at = datetime.fromtimestamp(path.stat().st_mtime, UTC)
         known = [args.output_dir] if args.output_dir.is_dir() else []
         found = collect(load(path) for path in files([*known, *args.records]))
         intent = _intent(found, args.intent)
         if not args.namespace:
             raise RecordError("pass --namespace or set OIS_NAMESPACE")
         recorded = record_run(
-            lines,
+            report,
             intent=intent,
             test_producer=args.test_producer,
             namespace=args.namespace,
@@ -67,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
             location=args.location,
             key_pattern=args.key_pattern,
             context_recorded_by=args.context_recorded_by,
+            reported_at=reported_at,
         )
         for record in recorded.records:
             path, written = records.store(record, args.output_dir)

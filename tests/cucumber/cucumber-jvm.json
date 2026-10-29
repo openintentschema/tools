@@ -1,0 +1,496 @@
+[
+  {
+    "uri": "classpath:features/rounding.feature",
+    "id": "invoices-round-to-five-rappen",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Invoices round to five Rappen",
+    "description": "",
+    "elements": [
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 1391542,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.911Z",
+        "line": 7,
+        "id": "invoices-round-to-five-rappen;round-down",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "name": "Round down",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 8,
+            "match": {
+              "location": "com.acme.billing.Steps.total(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "10.02",
+                  "offset": 24
+                }
+              ]
+            },
+            "name": "an invoice total of CHF 10.02",
+            "result": {
+              "duration": 575167,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "When ",
+            "line": 9,
+            "match": {
+              "location": "com.acme.billing.Steps.issue()"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 214875,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 10,
+            "match": {
+              "location": "com.acme.billing.Steps.due(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "10.00",
+                  "offset": 22
+                }
+              ]
+            },
+            "name": "the amount due is CHF 10.00",
+            "result": {
+              "duration": 1687750,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          },
+          {
+            "name": "@AC-1"
+          },
+          {
+            "name": "@smoke"
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 168833,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.924Z",
+        "line": 19,
+        "id": "invoices-round-to-five-rappen;reject-negative-amounts;;2",
+        "type": "scenario",
+        "keyword": "Scenario Outline",
+        "name": "Reject negative amounts",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "When ",
+            "line": 14,
+            "match": {
+              "location": "com.acme.billing.Steps.enter(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "-1",
+                  "offset": 13
+                }
+              ]
+            },
+            "name": "an amount of -1 is entered",
+            "result": {
+              "duration": 272250,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 15,
+            "match": {
+              "location": "com.acme.billing.Steps.rejected()"
+            },
+            "name": "the invoice is rejected",
+            "result": {
+              "duration": 501125,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          },
+          {
+            "name": "@AC-2"
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 183625,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.927Z",
+        "line": 20,
+        "id": "invoices-round-to-five-rappen;reject-negative-amounts;;3",
+        "type": "scenario",
+        "keyword": "Scenario Outline",
+        "name": "Reject negative amounts",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "When ",
+            "line": 14,
+            "match": {
+              "location": "com.acme.billing.Steps.enter(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "-0.05",
+                  "offset": 13
+                }
+              ]
+            },
+            "name": "an amount of -0.05 is entered",
+            "result": {
+              "duration": 305125,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 15,
+            "match": {
+              "location": "com.acme.billing.Steps.rejected()"
+            },
+            "name": "the invoice is rejected",
+            "result": {
+              "duration": 157334,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          },
+          {
+            "name": "@AC-2"
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 152000,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.930Z",
+        "line": 23,
+        "id": "invoices-round-to-five-rappen;round-up",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "name": "Round up",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 24,
+            "match": {
+              "location": "com.acme.billing.Steps.total(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "10.03",
+                  "offset": 24
+                }
+              ]
+            },
+            "name": "an invoice total of CHF 10.03",
+            "result": {
+              "duration": 268125,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "When ",
+            "line": 25,
+            "match": {
+              "location": "com.acme.billing.Steps.issue()"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 173292,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 26,
+            "match": {
+              "location": "com.acme.billing.Steps.due(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "10.05",
+                  "offset": 22
+                }
+              ]
+            },
+            "name": "the amount due is CHF 10.05",
+            "result": {
+              "duration": 3568875,
+              "status": "failed",
+              "error_message": "org.opentest4j.AssertionFailedError: expected: <10.05> but was: <10.00>"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          },
+          {
+            "name": "@AC-3"
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 155083,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.962Z",
+        "line": 29,
+        "id": "invoices-round-to-five-rappen;credit-notes",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "name": "Credit notes",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 30,
+            "match": {},
+            "name": "a credit note of CHF 5.02",
+            "result": {
+              "status": "undefined"
+            }
+          },
+          {
+            "keyword": "When ",
+            "line": 31,
+            "match": {},
+            "name": "the credit note is issued",
+            "result": {
+              "duration": 145167,
+              "status": "skipped"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 32,
+            "match": {},
+            "name": "the amount credited is CHF 5.00",
+            "result": {
+              "duration": 132666,
+              "status": "skipped"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          },
+          {
+            "name": "@AC-4"
+          }
+        ]
+      },
+      {
+        "line": 3,
+        "type": "background",
+        "keyword": "Background",
+        "name": "",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 4,
+            "match": {
+              "location": "com.acme.billing.Steps.currency()"
+            },
+            "name": "the currency is CHF",
+            "result": {
+              "duration": 178250,
+              "status": "passed"
+            }
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2026-10-29T15:28:36.966Z",
+        "line": 34,
+        "id": "invoices-round-to-five-rappen;exploratory--no-key",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "name": "Exploratory, no key",
+        "description": "",
+        "steps": [
+          {
+            "keyword": "Given ",
+            "line": 35,
+            "match": {
+              "location": "com.acme.billing.Steps.total(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "0.00",
+                  "offset": 24
+                }
+              ]
+            },
+            "name": "an invoice total of CHF 0.00",
+            "result": {
+              "duration": 201375,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "When ",
+            "line": 36,
+            "match": {
+              "location": "com.acme.billing.Steps.issue()"
+            },
+            "name": "the invoice is issued",
+            "result": {
+              "duration": 229208,
+              "status": "passed"
+            }
+          },
+          {
+            "keyword": "Then ",
+            "line": 37,
+            "match": {
+              "location": "com.acme.billing.Steps.due(java.math.BigDecimal)",
+              "arguments": [
+                {
+                  "val": "0.00",
+                  "offset": 22
+                }
+              ]
+            },
+            "name": "the amount due is CHF 0.00",
+            "result": {
+              "duration": 143542,
+              "status": "passed"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing"
+          }
+        ]
+      }
+    ],
+    "tags": [
+      {
+        "name": "@billing",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    ]
+  }
+]

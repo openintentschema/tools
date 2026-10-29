@@ -1,0 +1,416 @@
+[
+  {
+    "description": "",
+    "elements": [
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;round-down",
+        "keyword": "Scenario",
+        "line": 7,
+        "name": "Round down",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 219375
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 64333
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "an invoice total of CHF 10.02",
+            "match": {
+              "location": "features/step_definitions/steps.js:5"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 28041
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 9,
+            "name": "the invoice is issued",
+            "match": {
+              "location": "features/step_definitions/steps.js:6"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 42458
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 10,
+            "name": "the amount due is CHF 10.00",
+            "match": {
+              "location": "features/step_definitions/steps.js:7"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          },
+          {
+            "name": "@AC-1",
+            "line": 6
+          },
+          {
+            "name": "@smoke",
+            "line": 6
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;reject-negative-amounts",
+        "keyword": "Scenario Outline",
+        "line": 19,
+        "name": "Reject negative amounts",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 22291
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 27375
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 14,
+            "name": "an amount of -1 is entered",
+            "match": {
+              "location": "features/step_definitions/steps.js:8"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 46250
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 15,
+            "name": "the invoice is rejected",
+            "match": {
+              "location": "features/step_definitions/steps.js:9"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          },
+          {
+            "name": "@AC-2",
+            "line": 12
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;reject-negative-amounts",
+        "keyword": "Scenario Outline",
+        "line": 20,
+        "name": "Reject negative amounts",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 14499
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 23749
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 14,
+            "name": "an amount of -0.05 is entered",
+            "match": {
+              "location": "features/step_definitions/steps.js:8"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 25374
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 15,
+            "name": "the invoice is rejected",
+            "match": {
+              "location": "features/step_definitions/steps.js:9"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          },
+          {
+            "name": "@AC-2",
+            "line": 12
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;round-up",
+        "keyword": "Scenario",
+        "line": 23,
+        "name": "Round up",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 12334
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 14124
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 24,
+            "name": "an invoice total of CHF 10.03",
+            "match": {
+              "location": "features/step_definitions/steps.js:5"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 9250
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 25,
+            "name": "the invoice is issued",
+            "match": {
+              "location": "features/step_definitions/steps.js:6"
+            }
+          },
+          {
+            "result": {
+              "status": "failed",
+              "duration": 419041,
+              "error_message": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 26,
+            "name": "the amount due is CHF 10.05",
+            "match": {
+              "location": "features/step_definitions/steps.js:7"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          },
+          {
+            "name": "@AC-3",
+            "line": 22
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;credit-notes",
+        "keyword": "Scenario",
+        "line": 29,
+        "name": "Credit notes",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 18459
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 30,
+            "name": "a credit note of CHF 5.02"
+          },
+          {
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 31,
+            "name": "the credit note is issued"
+          },
+          {
+            "result": {
+              "status": "undefined",
+              "duration": 0
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 32,
+            "name": "the amount credited is CHF 5.00"
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          },
+          {
+            "name": "@AC-4",
+            "line": 28
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "invoices-round-to-five-rappen;exploratory,-no-key",
+        "keyword": "Scenario",
+        "line": 34,
+        "name": "Exploratory, no key",
+        "steps": [
+          {
+            "result": {
+              "status": "passed",
+              "duration": 12666
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "the currency is CHF",
+            "match": {
+              "location": "features/step_definitions/steps.js:4"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 16916
+            },
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 35,
+            "name": "an invoice total of CHF 0.00",
+            "match": {
+              "location": "features/step_definitions/steps.js:5"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 10457
+            },
+            "arguments": [],
+            "keyword": "When ",
+            "line": 36,
+            "name": "the invoice is issued",
+            "match": {
+              "location": "features/step_definitions/steps.js:6"
+            }
+          },
+          {
+            "result": {
+              "status": "passed",
+              "duration": 12415
+            },
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 37,
+            "name": "the amount due is CHF 0.00",
+            "match": {
+              "location": "features/step_definitions/steps.js:7"
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@billing",
+            "line": 1
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "invoices-round-to-five-rappen",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Invoices round to five Rappen",
+    "tags": [
+      {
+        "name": "@billing",
+        "line": 1
+      }
+    ],
+    "uri": "features/rounding.feature"
+  }
+]

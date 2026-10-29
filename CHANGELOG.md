@@ -5,12 +5,19 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
-## 0.14.0
+## 0.15.0
 
 - Draft 5 of the specification: the passport predicate type, the schema `$id` and the coverage
   method URI are under `https://openintentschema.io/`; passports with the old placeholder type
   are rejected.
 - R16, R17 and the rule IDs `schema` and `signature` are rules of the specification.
+
+## 0.14.0 (2026-10-29)
+
+- `ois cucumber` reads Cucumber JSON (cucumber-jvm, Godog, pytest-bdd) and behave JSON, with the
+  scenarios taken from the feature files, so their runs can count as derived from the intent.
+- `ois cucumber` finds the feature files that cucumber-jvm names on the class path; Cucumber
+  Messages of cucumber-jvm were refused before.
 
 ## 0.13.0 (2026-10-29)
 
