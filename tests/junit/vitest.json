@@ -1,0 +1,67 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 2,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 3,
+  "numPassedTests": 2,
+  "numFailedTests": 1,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "startTime": 1793266805827,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "fullName": "Invoices rounds down",
+          "status": "passed",
+          "title": "rounds down",
+          "duration": 0.895458000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [
+            "AC-1"
+          ],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "fullName": "Invoices rejects negative amounts @AC-2",
+          "status": "failed",
+          "title": "rejects negative amounts @AC-2",
+          "duration": 3.258749999999992,
+          "failureMessages": [
+            "shortened"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "fullName": "Invoices without a key",
+          "status": "passed",
+          "title": "without a key",
+          "duration": 0.11012499999999648,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1793266805958,
+      "endTime": 1793266805962.2588,
+      "status": "failed",
+      "message": "",
+      "name": "/home/runner/work/billing/billing/tests/rounding.test.js"
+    }
+  ]
+}

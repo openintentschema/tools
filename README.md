@@ -47,7 +47,7 @@ pip install ois-tools                            # or install; Python 3.13 or la
 ois --help                                       # the commands
 ```
 
-The commands work for projects in any language: they read JSON, YAML, JUnit XML and the local
+The commands work for projects in any language: they read JSON, YAML, test reports and the local
 Git checkout, not the code. Without Python, use [uv](https://docs.astral.sh/uv/) alone (`uvx`
 fetches a Python on first use) or the container image, which holds `ois` and git:
 
@@ -153,11 +153,12 @@ result.conforms  # False if any report is a violation
 result.reports  # list of Report(level, rule, message, path)
 ```
 
-## Record test results from JUnit XML
+## Record test results
 
-`ois junit` turns the JUnit XML that almost every test framework writes into a bundle, as the
-Level 1 quick start in specification section 11.4 describes. Run it in the Git checkout the
-tests ran in:
+`ois junit` turns a test report into a bundle, as the Level 1 quick start in specification
+section 11.4 describes. It reads JUnit XML, which almost every test framework writes, and
+recognizes by content the native reports of Playwright (JSON), Jest and Vitest (JSON), Go
+(`go test -json`) and .NET (TRX). Run it in the Git checkout the tests ran in:
 
 ```bash
 ois junit build/test-results/*.xml \
@@ -188,7 +189,7 @@ walks through it step by step, including a CI example.
 ### Evidence for an approved intent
 
 Tests that name a criterion key such as `AC-1` give evidence for that criterion of an approved
-intent, in any framework that writes JUnit XML:
+intent, from any of these reports:
 
 ```bash
 ois junit build/test-results/*.xml --namespace https://ois.acme.example \
@@ -196,8 +197,9 @@ ois junit build/test-results/*.xml --namespace https://ois.acme.example \
   --subject "$BUILD" --written-from-intent
 ```
 
-- **Keys** come from a `criterion` property of the test case (pytest `user_properties`, Playwright
-  annotations) or from the test name as a whole word (`@DisplayName`, Jest and Vitest titles);
+- **Keys** come from a `criterion` property or annotation (pytest `user_properties`,
+  Playwright), from tags and test categories (Playwright and Vitest JSON, TRX), or from the test
+  name between non-alphanumeric characters (`@DisplayName`, Jest, Vitest, Go subtests);
   `--key-pattern` changes the pattern. Tests without a key are counted and skipped.
 - **Records** go to `.ois/`: evidence per test and key, and a test artifact per file. A test
   artifact already recorded there or in `--records` for the same file content is reused, so an
@@ -447,7 +449,7 @@ flows](https://openintentschema.io/privacy/).
 ## Documentation
 
 - [Specification, schema and conformance fixtures](https://github.com/openintentschema/openintentschema)
-- [Getting started](https://openintentschema.io/getting-started/): first OIS bundle from JUnit XML
+- [Getting started](https://openintentschema.io/getting-started/): first OIS bundle from a test report
 - [Architecture](docs/architecture.md): how the commands are built, and why
 - [Development](docs/development.md): setup, checks, specification sync, adding a rule, releases
 - [Changelog](CHANGELOG.md)

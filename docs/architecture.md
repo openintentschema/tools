@@ -61,7 +61,8 @@ that passed it, so they can rely on its structure.
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
-| `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4), or with `--intent` to evidence for an approved intent. |
+| `formats.py` | Test reports by content: JUnit XML, TRX, Playwright JSON, Jest and Vitest JSON, `go test -json`. |
+| `junit.py`, `junit_cli.py` | `ois junit`: test reports to a Level 1 bundle (spec section 11.4), or with `--intent` to evidence for an approved intent. |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois intent`: seal, approve, next version, compare. |
 | `passports.py`, `passport_cli.py` | `ois passport build`: collect records, assemble and validate a passport. |
@@ -311,19 +312,25 @@ writing.
 - **Stable ids.** Criterion keys are `TC-` plus a hash of class and test name, valid for any
   test name and stable across runs. Artifact ids follow path and content, so a changed test
   file is a new artifact, as R10 requires.
-- **Content at the commit.** Test files are found through `git ls-files` (the `file` attribute,
-  or the longest prefix of the class name that names one file) and read with `git show` at
-  `HEAD`, so `sha256` and `gitCommit` in one digest always agree. A test without a file is
-  pinned by `gitCommit` alone, as section 6.4 allows.
+- **Content at the commit.** Test files are found through `git ls-files`: the report's file
+  path, also absolute or from another checkout (matched by its tracked suffix); a class name
+  that is a path; for Go, the `_test.go` file in the package directory (from `go.mod`) that
+  declares the test function; or the longest prefix, or the last part, of the class name that
+  names one file. They are read with `git show` at `HEAD`, so `sha256` and `gitCommit` in one
+  digest always agree. A test without a file is pinned by `gitCommit` alone, as section 6.4
+  allows.
+- **Formats** are recognized by content, so one command serves every runner. The native
+  reports are read where JUnit XML loses data: tags, categories, per-test times and the final
+  attempt of a retried test (Playwright). Only names, results, times, tags and paths are read.
 - **Location** is `git+<origin>@<HEAD>`, credentials removed; scp-like remotes become `ssh` URIs.
-- **XML** comes from the producer's own pipeline and is parsed with the standard library, whose
+- **XML** (JUnit, TRX) comes from the producer's own pipeline and is parsed with the standard library, whose
   Expat (2.4.1 and later) refuses entity expansion attacks and loads no external entities.
 
 With `--intent`, `record_run` writes evidence for an approved intent instead (Level 2).
 
-- **Keys** come from `criterion` properties and from whole words of the test name. These are
-  the two places that reach JUnit XML in common runners; JUnit `@Tag` and Playwright's `tag`
-  option do not. Class names that are paths (Vitest, Playwright) locate the test file directly.
+- **Keys** come from `criterion` properties, tags and test name. These are the places that reach
+  reports in common runners; JUnit `@Tag`, xUnit `[Trait]` and Playwright tags in JUnit XML do
+  not. Name matches allow `_` around the key for Go subtests.
 - **derivedFrom** is claimed as `intent` and kept only if `rules.derivation_problems` (R4, R5)
   finds nothing, so the adapter and the validator cannot disagree.
 - **Known test artifacts are reused**, matched by path and `sha256`: a context recorded by an

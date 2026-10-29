@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="27e51dc9-2a5b-48ff-a9d3-d34d4a32be9b" name="ci" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-29T09:39:38.7277312+00:00" queuing="2026-10-29T09:39:38.7277313+00:00" start="2026-10-29T09:39:38.2599950+00:00" finish="2026-10-29T09:39:38.7326151+00:00" />
+  <TestSettings name="default" id="3e47cf02-0906-4b3a-9573-0a52478be4a8">
+    <Deployment runDeploymentRoot="_428065569ff6_2026-10-29_09_39_38" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="41c5b0e9-b15b-43bd-846f-f2f3db91c8ba" testId="1467902c-ac3e-81f7-9825-36bd74e65574" testName="RejectsNegativeAmounts" computerName="ci" duration="00:00:00.0110150" startTime="2026-10-29T09:39:38.6376722+00:00" endTime="2026-10-29T09:39:38.6595415+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="41c5b0e9-b15b-43bd-846f-f2f3db91c8ba">
+      
+    </UnitTestResult>
+    <UnitTestResult executionId="6be670ba-b9bb-42e8-8f5d-41b36b7ecfe0" testId="12904f8e-115f-840f-9c4b-7a580c7afbf0" testName="WithoutKey" computerName="ci" duration="00:00:00.0040733" startTime="2026-10-29T09:39:38.6377092+00:00" endTime="2026-10-29T09:39:38.6542123+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6be670ba-b9bb-42e8-8f5d-41b36b7ecfe0" />
+    <UnitTestResult executionId="e525f272-477c-455d-aca4-21ee6526d0e5" testId="162cdfb7-cac0-8fef-9382-f4842089ba26" testName="RoundsDown" computerName="ci" duration="00:00:00.0041567" startTime="2026-10-29T09:39:38.6376970+00:00" endTime="2026-10-29T09:39:38.6542074+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e525f272-477c-455d-aca4-21ee6526d0e5" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="RoundsDown" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="162cdfb7-cac0-8fef-9382-f4842089ba26">
+      <Execution id="e525f272-477c-455d-aca4-21ee6526d0e5" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="Billing.Tests.RoundingTests" name="RoundsDown" />
+    </UnitTest>
+    <UnitTest name="RejectsNegativeAmounts" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="1467902c-ac3e-81f7-9825-36bd74e65574">
+      <TestCategory>
+        <TestCategoryItem TestCategory="AC-2" />
+      </TestCategory>
+      <Execution id="41c5b0e9-b15b-43bd-846f-f2f3db91c8ba" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="Billing.Tests.RoundingTests" name="RejectsNegativeAmounts" />
+    </UnitTest>
+    <UnitTest name="WithoutKey" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="12904f8e-115f-840f-9c4b-7a580c7afbf0">
+      <Execution id="6be670ba-b9bb-42e8-8f5d-41b36b7ecfe0" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="Billing.Tests.RoundingTests" name="WithoutKey" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1467902c-ac3e-81f7-9825-36bd74e65574" executionId="41c5b0e9-b15b-43bd-846f-f2f3db91c8ba" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12904f8e-115f-840f-9c4b-7a580c7afbf0" executionId="6be670ba-b9bb-42e8-8f5d-41b36b7ecfe0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="162cdfb7-cac0-8fef-9382-f4842089ba26" executionId="e525f272-477c-455d-aca4-21ee6526d0e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed" />
+</TestRun>

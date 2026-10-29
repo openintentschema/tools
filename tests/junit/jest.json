@@ -1,0 +1,81 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 1,
+  "numPassedTestSuites": 0,
+  "numPassedTests": 2,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 3,
+  "openHandles": [],
+  "startTime": 1793266792414,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "duration": 1,
+          "failing": false,
+          "failureMessages": [],
+          "fullName": "Invoices AC-1 rounds down",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryMessages": [],
+          "retryReasons": [],
+          "status": "passed",
+          "title": "AC-1 rounds down",
+          "startAt": 1793266792674
+        },
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "duration": 1,
+          "failing": false,
+          "failureMessages": [
+            "shortened"
+          ],
+          "fullName": "Invoices rejects negative amounts @AC-2",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "retryMessages": [],
+          "retryReasons": [],
+          "status": "failed",
+          "title": "rejects negative amounts @AC-2",
+          "startAt": 1793266792676
+        },
+        {
+          "ancestorTitles": [
+            "Invoices"
+          ],
+          "duration": 0,
+          "failing": false,
+          "failureMessages": [],
+          "fullName": "Invoices without a key",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryMessages": [],
+          "retryReasons": [],
+          "status": "passed",
+          "title": "without a key",
+          "startAt": 1793266792680
+        }
+      ],
+      "endTime": 1793266792691,
+      "message": "shortened",
+      "name": "/home/runner/work/billing/billing/jest/rounding.test.cjs",
+      "startTime": 1793266792609,
+      "status": "failed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

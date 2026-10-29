@@ -1,12 +1,10 @@
-"""JUnit XML to OIS: a Level 1 bundle (section 11.4), or evidence for the criteria of an approved
-intent that tests name by key. The standard library's Expat refuses entity expansion and external
-entities."""
+"""Test reports to OIS: a Level 1 bundle (section 11.4), or evidence for the criteria of an
+approved intent that tests name by key. formats.py reads the reports."""
 
 import hashlib
 import re
 import subprocess
-import xml.etree.ElementTree as ElementTree
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import partial
 from importlib.metadata import version as package_version
@@ -15,18 +13,13 @@ from typing import Any
 
 from ois_tools import records, rules
 from ois_tools.document import Document, Entry
+from ois_tools.formats import JUnitReport, TestCase, cases
 from ois_tools.records import KEY_PATTERN, Recorded, RecordError, location_of
 
 Record = dict[str, Any]
 
 RESULTS = ("pass", "skipped", "fail", "error")  # from best to worst
 KEY_PROPERTY = "criterion"  # <property name="criterion" value="AC-1"/> on a test case
-
-
-@dataclass(frozen=True)
-class JUnitReport:
-    content: bytes
-    written_at: datetime | None = None  # file modification time, for timestamps without offset
 
 
 @dataclass(frozen=True)
@@ -39,17 +32,6 @@ class Options:
     now: datetime | None = None
 
 
-@dataclass(frozen=True)
-class TestCase:
-    classname: str
-    name: str
-    file: str | None
-    result: str
-    observed_at: datetime
-    report: str  # sha256 of the report the case comes from
-    properties: tuple[tuple[str, str], ...] = ()
-
-
 def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
     """Build the bundle; the caller validates it before passing it on."""
     now = (options.now or datetime.now(UTC)).astimezone(UTC)
@@ -57,14 +39,14 @@ def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
     commit = _git(options.repo, "rev-parse", "HEAD")
     location = options.location or location_of(options.repo)
     tracked = [path for path in _git(options.repo, "ls-files", "-z").split("\0") if path]
-    cases = _dedupe([case for report in reports for case in _cases(report, now)])
+    found = _dedupe(_located(reports, now, options.repo, tracked))
 
     adapter = _record(
         "actor",
         f"{ns}/actors/ois-junit",
         now,
         kind="tool",
-        name="ois junit (JUnit XML adapter of ois-tools)",
+        name="ois junit (test report adapter of ois-tools)",
         version=package_version("ois-tools"),
     )
     suite = _record(
@@ -88,14 +70,14 @@ def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
         producedBy=adapter_ref,
         criteria=[
             {"key": _key(c), "statement": _statement(c), "notation": "text", "kind": "functional"}
-            for c in cases
+            for c in found
         ],
     )
 
     artifacts: dict[str, Record] = {}
     evidence = []
-    for case in cases:
-        path = _test_file(tracked, case)
+    for case in found:
+        path = case.file
         artifact = _artifact(ns, options.repo, commit, location, path, case, suite_ref, now)
         artifacts.setdefault(artifact["id"], artifact)
         record = _record(
@@ -113,14 +95,14 @@ def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
             record["run"] = options.run
         evidence.append(record)
 
-    combined = hashlib.sha256("".join(c.report for c in cases).encode()).hexdigest()
+    combined = hashlib.sha256("".join(c.report for c in found).encode()).hexdigest()
     records = [adapter, suite, intent, *artifacts.values(), *evidence]
     return _record("bundle", f"{ns}/bundles/junit-{combined[:16]}", now, records=records)
 
 
 def keys_of(case: TestCase, pattern: str = KEY_PATTERN) -> list[str]:
-    """Criterion keys of a test: its `criterion` properties, then keys in its name as whole
-    words. Group 1 of the pattern, if it has one, is the key."""
+    """Criterion keys of a test: its `criterion` properties, its tags, then keys in its name
+    between non-alphanumeric characters. Group 1 of the pattern, if it has one, is the key."""
     found = [
         key
         for name, value in case.properties
@@ -128,7 +110,10 @@ def keys_of(case: TestCase, pattern: str = KEY_PATTERN) -> list[str]:
         for key in re.split(r"[\s,]+", value)
         if key
     ]
-    for match in re.finditer(rf"(?<![\w-])(?:{pattern})(?!\w)", case.name):
+    for tag in case.tags:
+        if match := re.fullmatch(pattern, tag):
+            found.append(match[1] if match.re.groups else match[0])
+    for match in re.finditer(rf"(?<![A-Za-z0-9-])(?:{pattern})(?![A-Za-z0-9])", case.name):
         found.append(match[1] if match.re.groups else match[0])
     return list(dict.fromkeys(found))
 
@@ -159,7 +144,7 @@ def record_run(
     order = [c["key"] for c in intent["criteria"]]
     adapter = records.actor(
         kind="tool",
-        name="ois junit (JUnit XML adapter of ois-tools)",
+        name="ois junit (test report adapter of ois-tools)",
         version=package_version("ois-tools"),
         created_at=created_at,
         id=f"{namespace.rstrip('/')}/actors/ois-junit",
@@ -168,12 +153,12 @@ def record_run(
     tracked = [path for path in _git(repo, "ls-files", "-z").split("\0") if path]
 
     tests: dict[str, list[tuple[TestCase, str]]] = {}  # file -> named criteria
-    for case in _dedupe([case for report in reports for case in _cases(report, created_at)]):
+    for case in _dedupe(_located(reports, created_at, repo, tracked)):
         keys = keys_of(case, key_pattern)
         if not keys:
             recorded.without_key += 1
             continue
-        path = _test_file(tracked, case)
+        path = case.file
         if path is None:
             recorded.unmatched.append(f"{_statement(case)}: no test file found in Git")
             continue
@@ -238,39 +223,6 @@ def _document(found: list[Record]) -> Document:
     return Document([Entry(record, f"$.records[{i}]") for i, record in enumerate(found)])
 
 
-def _cases(report: JUnitReport, now: datetime) -> list[TestCase]:
-    root = ElementTree.fromstring(report.content)
-    digest = hashlib.sha256(report.content).hexdigest()
-    cases = []
-    for suite in root.iter("testsuite"):
-        observed_at = _observed_at(suite.get("timestamp"), report.written_at or now)
-        for case in suite.findall("testcase"):
-            cases.append(
-                TestCase(
-                    classname=case.get("classname", ""),
-                    name=case.get("name", ""),
-                    file=case.get("file"),
-                    result=_result(case),
-                    observed_at=observed_at,
-                    report=digest,
-                    properties=tuple(
-                        (p.get("name", ""), p.get("value", "")) for p in case.iter("property")
-                    ),
-                )
-            )
-    return cases
-
-
-def _result(case: ElementTree.Element) -> str:
-    if case.find("error") is not None:
-        return "error"
-    if case.find("failure") is not None:
-        return "fail"
-    if case.find("skipped") is not None:
-        return "skipped"
-    return "pass"
-
-
 def _dedupe(cases: list[TestCase]) -> list[TestCase]:
     """One case per test; a test that ran more than once keeps its worst result."""
     worst: dict[str, TestCase] = {}
@@ -281,31 +233,75 @@ def _dedupe(cases: list[TestCase]) -> list[TestCase]:
     return list(worst.values())
 
 
-def _observed_at(timestamp: str | None, fallback: datetime) -> datetime:
-    """The suite's timestamp if it names an offset; JUnit often omits it, so otherwise the time
-    the report was written."""
-    if timestamp:
-        parsed = datetime.fromisoformat(timestamp)
-        if parsed.tzinfo is not None:
-            return parsed
-    return fallback
+def _located(
+    reports: list[JUnitReport], now: datetime, repo: Path, tracked: list[str]
+) -> list[TestCase]:
+    """The cases of the reports, each with its tracked test file or None; a case without a class
+    name is named after its file."""
+    found = []
+    for report in reports:
+        for case in cases(report, now):
+            path = _test_file(tracked, case, repo)
+            found.append(replace(case, file=path, classname=case.classname or path or ""))
+    return found
 
 
-def _test_file(tracked: list[str], case: TestCase) -> str | None:
-    """The tracked file a test case comes from: its file attribute, its class name as a path, or
-    the longest prefix of its class name that names exactly one file (com.acme.InvoiceTest ->
-    .../com/acme/InvoiceTest.java, tests.test_invoice -> tests/test_invoice.py)."""
-    if case.file and case.file in tracked:
-        return case.file
+def _test_file(tracked: list[str], case: TestCase, repo: Path) -> str | None:
+    """The tracked file a test case comes from: its file, also as an absolute path or one from
+    another checkout; its class name as a path; the Go package and function; or the longest
+    prefix of its class name, or its last part, that names exactly one file
+    (com.acme.InvoiceTest -> .../com/acme/InvoiceTest.java, tests.test_invoice ->
+    tests/test_invoice.py, Billing.Tests.RoundingTests -> .../RoundingTests.cs)."""
+    if case.file:
+        if case.file in tracked:
+            return case.file
+        given = PurePosixPath(case.file)
+        if given.is_absolute():
+            try:
+                relative = Path(case.file).resolve().relative_to(repo.resolve()).as_posix()
+            except ValueError:
+                relative = None
+            if relative in tracked:
+                return relative
+        ends = [p for p in tracked if case.file.endswith(f"/{p}")]
+        if ends:
+            return max(ends, key=len)
     if case.classname in tracked:  # Vitest and Playwright
         return case.classname
+    if case.format == "go":
+        return _go_test_file(tracked, case, repo)
     parts = case.classname.split(".")
     for end in range(len(parts), 0, -1):
         stem = "/".join(parts[:end])
         matches = [p for p in tracked if _stem(p) == stem or _stem(p).endswith(f"/{stem}")]
         if len(matches) == 1:
             return matches[0]
-    return None
+    matches = [p for p in tracked if PurePosixPath(p).stem == parts[-1]]
+    return matches[0] if len(matches) == 1 and parts[-1] else None
+
+
+def _go_test_file(tracked: list[str], case: TestCase, repo: Path) -> str | None:
+    """The _test.go file in the package's directory that declares the top-level test."""
+    modules = {}
+    for path in tracked:
+        if PurePosixPath(path).name == "go.mod":
+            declared = re.search(r"^module\s+(\S+)", (repo / path).read_text("utf-8"), re.M)
+            if declared:
+                modules[declared[1]] = str(PurePosixPath(path).parent)
+    owners = [m for m in modules if case.classname == m or case.classname.startswith(f"{m}/")]
+    if not owners:
+        return None
+    module = max(owners, key=len)
+    directory = PurePosixPath(modules[module], case.classname[len(module) :].lstrip("/"))
+    function = f"func {case.name.split('/')[0]}("
+    matches = [
+        p
+        for p in tracked
+        if PurePosixPath(p).parent == directory
+        and p.endswith("_test.go")
+        and function in (repo / p).read_text("utf-8", errors="replace")
+    ]
+    return matches[0] if len(matches) == 1 else None
 
 
 def _stem(path: str) -> str:
@@ -359,7 +355,9 @@ def _key(case: TestCase) -> str:
 
 
 def _statement(case: TestCase) -> str:
-    return f"{case.classname}.{case.name}" if case.classname else case.name
+    if not case.classname:
+        return case.name
+    return f"{case.classname}{' > ' if '/' in case.classname else '.'}{case.name}"
 
 
 def _slug(text: str) -> str:

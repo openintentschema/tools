@@ -11,7 +11,8 @@ from xml.etree.ElementTree import ParseError
 
 from ois_tools import records
 from ois_tools.authoring import AuthoringError, files, load
-from ois_tools.junit import JUnitReport, Options, record_run, to_bundle
+from ois_tools.formats import JUnitReport
+from ois_tools.junit import Options, record_run, to_bundle
 from ois_tools.passports import PassportError, collect
 from ois_tools.records import KEY_PATTERN, RecordError
 from ois_tools.validator import validate

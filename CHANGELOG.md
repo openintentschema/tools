@@ -5,7 +5,8 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
-- `ois junit --intent`: evidence for the criteria that tests name by key, from any JUnit XML.
+- `ois junit --intent`: evidence for the criteria that tests name by key.
+- `ois junit` also reads Playwright, Jest and Vitest JSON, `go test -json` and TRX.
 
 ## 0.11.0 (2026-10-29)
 

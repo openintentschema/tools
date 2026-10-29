@@ -1,0 +1,12 @@
+{"Time":"2026-10-29T09:38:03.877849638Z","Action":"start","Package":"git.acme.example/billing/rounding"}
+{"Time":"2026-10-29T09:38:03.879675263Z","Action":"run","Package":"git.acme.example/billing/rounding","Test":"TestRounding"}
+{"Time":"2026-10-29T09:38:03.879714305Z","Action":"run","Package":"git.acme.example/billing/rounding","Test":"TestRounding/AC-1_rounds_down"}
+{"Time":"2026-10-29T09:38:03.879723096Z","Action":"pass","Package":"git.acme.example/billing/rounding","Test":"TestRounding/AC-1_rounds_down","Elapsed":0}
+{"Time":"2026-10-29T09:38:03.87972718Z","Action":"run","Package":"git.acme.example/billing/rounding","Test":"TestRounding/AC-2_rejects_negative_amounts"}
+{"Time":"2026-10-29T09:38:03.879788221Z","Action":"fail","Package":"git.acme.example/billing/rounding","Test":"TestRounding/AC-2_rejects_negative_amounts","Elapsed":0}
+{"Time":"2026-10-29T09:38:03.879793471Z","Action":"fail","Package":"git.acme.example/billing/rounding","Test":"TestRounding","Elapsed":0}
+{"Time":"2026-10-29T09:38:03.879794888Z","Action":"run","Package":"git.acme.example/billing/rounding","Test":"TestWithoutKey"}
+{"Time":"2026-10-29T09:38:03.879800555Z","Action":"pass","Package":"git.acme.example/billing/rounding","Test":"TestWithoutKey","Elapsed":0}
+{"Time":"2026-10-29T09:38:03.879801971Z","Action":"run","Package":"git.acme.example/billing/rounding","Test":"TestSkipped"}
+{"Time":"2026-10-29T09:38:03.879813971Z","Action":"skip","Package":"git.acme.example/billing/rounding","Test":"TestSkipped","Elapsed":0}
+{"Time":"2026-10-29T09:38:03.880194763Z","Action":"fail","Package":"git.acme.example/billing/rounding","Elapsed":0.002}

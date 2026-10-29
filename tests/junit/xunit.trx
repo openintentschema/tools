@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="5fd81115-8c7f-4488-9e0b-10d247559942" name="ci" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-29T09:39:16.0934332+00:00" queuing="2026-10-29T09:39:16.0934333+00:00" start="2026-10-29T09:39:15.4857895+00:00" finish="2026-10-29T09:39:16.0976546+00:00" />
+  <TestSettings name="default" id="987f40c6-572c-415f-9b00-91a6fc4c1e65">
+    <Deployment runDeploymentRoot="_23699e9414e0_2026-10-29_09_39_16" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="090eb374-b784-4803-a957-43c6b0bdce4e" testId="ff841eb1-8c0f-2293-0532-3086e2ec5002" testName="Billing.Tests.RoundingTests.WithoutKey" computerName="ci" duration="00:00:00.0007781" startTime="2026-10-29T09:39:16.0097084+00:00" endTime="2026-10-29T09:39:16.0098812+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="090eb374-b784-4803-a957-43c6b0bdce4e" />
+    <UnitTestResult executionId="f03f338d-180c-436b-9d5b-9201be38b3d1" testId="e7131227-f38f-0c08-d57a-29bca72d2bb5" testName="Billing.Tests.RoundingTests.RejectsNegativeAmounts" computerName="ci" duration="00:00:00.0137887" startTime="2026-10-29T09:39:15.9759104+00:00" endTime="2026-10-29T09:39:16.0000290+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f03f338d-180c-436b-9d5b-9201be38b3d1">
+      
+    </UnitTestResult>
+    <UnitTestResult executionId="f5b9f21c-8cc1-45f3-9bf4-212cc94562e9" testId="1b54fbc8-ef6e-d2c0-cba5-f8c242178bc2" testName="AC-1 rounds down" computerName="ci" duration="00:00:00.0000549" startTime="2026-10-29T09:39:16.0106189+00:00" endTime="2026-10-29T09:39:16.0106797+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f5b9f21c-8cc1-45f3-9bf4-212cc94562e9" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Billing.Tests.RoundingTests.WithoutKey" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="ff841eb1-8c0f-2293-0532-3086e2ec5002">
+      <Execution id="090eb374-b784-4803-a957-43c6b0bdce4e" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Billing.Tests.RoundingTests" name="WithoutKey" />
+    </UnitTest>
+    <UnitTest name="Billing.Tests.RoundingTests.RejectsNegativeAmounts" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="e7131227-f38f-0c08-d57a-29bca72d2bb5">
+      <Execution id="f03f338d-180c-436b-9d5b-9201be38b3d1" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Billing.Tests.RoundingTests" name="RejectsNegativeAmounts" />
+    </UnitTest>
+    <UnitTest name="AC-1 rounds down" storage="/home/runner/work/billing/billing/billing.tests/bin/debug/net10.0/billing.tests.dll" id="1b54fbc8-ef6e-d2c0-cba5-f8c242178bc2">
+      <Execution id="f5b9f21c-8cc1-45f3-9bf4-212cc94562e9" />
+      <TestMethod codeBase="/home/runner/work/billing/billing/Billing.Tests/bin/Debug/net10.0/Billing.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Billing.Tests.RoundingTests" name="RoundsDown" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="ff841eb1-8c0f-2293-0532-3086e2ec5002" executionId="090eb374-b784-4803-a957-43c6b0bdce4e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e7131227-f38f-0c08-d57a-29bca72d2bb5" executionId="f03f338d-180c-436b-9d5b-9201be38b3d1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b54fbc8-ef6e-d2c0-cba5-f8c242178bc2" executionId="f5b9f21c-8cc1-45f3-9bf4-212cc94562e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed" />
+</TestRun>

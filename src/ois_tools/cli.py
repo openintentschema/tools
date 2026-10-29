@@ -24,7 +24,7 @@ COMMANDS: dict[str, tuple[str, Callable[[list[str]], int]]] = {
         "check records, bundles and passports against the specification",
         validate_cli.main,
     ),
-    "junit": ("turn JUnit XML into a Level 1 bundle", junit_cli.main),
+    "junit": ("turn test reports into a bundle or evidence", junit_cli.main),
     "cucumber": ("record a Cucumber run as evidence for an intent", cucumber_cli.main),
     "intent": ("seal, approve, version and compare intents", intent_cli.main),
     "record": ("write actors, artifacts, evidence, decisions and findings", record_cli.main),

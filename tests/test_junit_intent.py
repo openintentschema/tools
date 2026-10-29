@@ -1,5 +1,6 @@
 """ois junit --intent. tests/junit/: real reports of pytest 9.2.0, Vitest 5.0.5, Jest 30.5.2 with
-jest-junit 17.0.0, Playwright 1.64.1 and JUnit 6.1.3 with Surefire 3.6.1 (failure texts shortened).
+jest-junit 17.0.0, Playwright 1.64.1, JUnit 6.1.3 with Surefire 3.6.1, Go 1.27.3 and .NET SDK
+10.0.403 with xUnit and MSTest (failure texts shortened, paths those of a CI checkout).
 Each run has AC-1 passing, AC-2 failing and a test without a key; Playwright names AC-1 by its tag
 option and JUnit AC-2 by @Tag, neither of which reaches the report."""
 
@@ -13,9 +14,9 @@ import pytest
 
 from ois_tools import validate
 from ois_tools.cli import main as ois
+from ois_tools.formats import TestCase as Case
 from ois_tools.intents import approve, seal
-from ois_tools.junit import JUnitReport, keys_of, record_run
-from ois_tools.junit import TestCase as Case
+from ois_tools.junit import JUnitReport, Options, keys_of, record_run, to_bundle
 
 HERE = Path(__file__).parent / "junit"
 NS = "https://ois.acme.example"
@@ -32,7 +33,14 @@ FILES = [
     "tests/rounding.spec.ts",
     "src/test/java/com/acme/billing/RoundingTest.java",
     "src/main/java/com/acme/billing/Rounding.java",
+    "Billing.Tests/RoundingTests.cs",
 ]
+GO = {
+    "go.mod": "module git.acme.example/billing\n\ngo 1.27\n",
+    "rounding/rounding.go": "package rounding\n",
+    "rounding/rounding_test.go": "package rounding\n\nfunc TestRounding(t *testing.T) {}\n"
+    "func TestWithoutKey(t *testing.T) {}\nfunc TestSkipped(t *testing.T) {}\n",
+}
 
 
 @pytest.fixture
@@ -41,6 +49,9 @@ def repo(tmp_path: Path) -> Path:
     for name in FILES:
         (root / name).parent.mkdir(parents=True, exist_ok=True)
         (root / name).write_text(f"// {name}\n")
+    for name, text in GO.items():
+        (root / name).parent.mkdir(parents=True, exist_ok=True)
+        (root / name).write_text(text)
     git(root, "init", "-q")
     git(root, "remote", "add", "origin", "https://git.acme.example/billing.git")
     git(root, "add", ".")
@@ -160,6 +171,12 @@ def test_a_key_is_a_whole_word() -> None:
         ("jest.xml", "jest/rounding.test.cjs"),
         ("playwright.xml", "tests/rounding.spec.ts"),
         ("surefire.xml", "src/test/java/com/acme/billing/RoundingTest.java"),
+        ("playwright.json", "tests/rounding.spec.ts"),
+        ("jest.json", "jest/rounding.test.cjs"),
+        ("vitest.json", "tests/rounding.test.js"),
+        ("go.json", "rounding/rounding_test.go"),
+        ("xunit.trx", "Billing.Tests/RoundingTests.cs"),
+        ("mstest.trx", "Billing.Tests/RoundingTests.cs"),
     ],
 )
 def test_each_runner_gives_evidence_for_its_keys(repo: Path, name: str, path: str) -> None:
@@ -170,11 +187,23 @@ def test_each_runner_gives_evidence_for_its_keys(repo: Path, name: str, path: st
     expected = {"AC-1": ("pass", "unknown"), "AC-2": ("fail", "unknown")}
     if name == "playwright.xml":  # the tag option does not reach JUnit XML, the annotation does
         expected = {"AC-2": ("fail", "unknown")}
-    if name == "surefire.xml":  # @DisplayName reaches it, @Tag does not
+    if name in ("surefire.xml", "xunit.trx"):  # display names reach them, tags and traits not
         expected = {"AC-1": ("pass", "unknown")}
+    if name == "mstest.trx":  # [TestCategory] reaches TRX, the display name does not
+        expected = {"AC-2": ("fail", "unknown")}
     assert results(recorded.records) == expected
     assert recorded.without_key >= 1
     assert validate(bundle(*recorded.records)).conforms
+
+
+@pytest.mark.parametrize("name", sorted(p.name for p in HERE.iterdir()))
+def test_each_format_gives_a_level_1_bundle(repo: Path, name: str) -> None:
+    options = Options(namespace=NS, suite="Team Billing", repo=repo, now=AT)
+    made = to_bundle([report(name)], options)
+    assert validate(made).conforms
+    tests = [r for r in made["records"] if r["type"] == "artifact"]
+    assert all("path" in t for t in tests)  # every test file found
+    assert not any("/home/runner" in json.dumps(r) for r in made["records"])
 
 
 def test_evidence_names_criterion_test_subject_and_run(repo: Path) -> None:

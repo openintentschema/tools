@@ -1,0 +1,180 @@
+{
+  "config": {
+    "rootDir": "/home/runner/work/billing/billing",
+    "version": "1.64.1"
+  },
+  "suites": [
+    {
+      "title": "tests/rounding.spec.ts",
+      "file": "tests/rounding.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "rounds down",
+          "ok": true,
+          "tags": [
+            "AC-1"
+          ],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-29T09:39:50.968Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b4214feb31a6de4b091-3378144d3ded9530708f",
+          "file": "tests/rounding.spec.ts",
+          "line": 3,
+          "column": 5
+        },
+        {
+          "title": "rejects negative amounts",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [
+                {
+                  "type": "criterion",
+                  "description": "AC-2",
+                  "location": {
+                    "file": "/home/runner/work/billing/billing/tests/rounding.spec.ts",
+                    "line": 4,
+                    "column": 5
+                  }
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 1,
+                  "errors": [
+                    {
+                      "message": "shortened"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-29T09:39:50.996Z",
+                  "annotations": [
+                    {
+                      "type": "criterion",
+                      "description": "AC-2",
+                      "location": {
+                        "file": "/home/runner/work/billing/billing/tests/rounding.spec.ts",
+                        "line": 4,
+                        "column": 5
+                      }
+                    }
+                  ],
+                  "attachments": []
+                },
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 4,
+                  "errors": [
+                    {
+                      "message": "shortened"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-10-29T09:39:51.282Z",
+                  "annotations": [
+                    {
+                      "type": "criterion",
+                      "description": "AC-2",
+                      "location": {
+                        "file": "/home/runner/work/billing/billing/tests/rounding.spec.ts",
+                        "line": 4,
+                        "column": 5
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "8b4214feb31a6de4b091-c190f76e064718d43272",
+          "file": "tests/rounding.spec.ts",
+          "line": 4,
+          "column": 5
+        },
+        {
+          "title": "without a key",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-29T09:39:51.587Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8b4214feb31a6de4b091-5331c03e1bf815fa89c0",
+          "file": "tests/rounding.spec.ts",
+          "line": 5,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-29T09:39:50.677Z",
+    "duration": 946.4409999999999,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
