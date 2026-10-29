@@ -251,7 +251,7 @@ def r15_passport_intents(document: Document) -> Iterator[Report]:
 
 
 def r16_release_decision(document: Document) -> Iterator[Report]:
-    """R16 (proposed): a passport carries an approved or passed release decision for a build
+    """R16: a passport carries an approved or passed release decision for a build
     whose digest matches a subject of the statement."""
     if document.passport is None:
         return
@@ -275,7 +275,7 @@ def r16_release_decision(document: Document) -> Iterator[Report]:
 
 
 def r17_digests(document: Document) -> Iterator[Report]:
-    """R17 (proposed): intent and criterion digests match their content (section 6.4)."""
+    """R17: intent and criterion digests match their content (section 6.4)."""
     for entry in document.of_type("intent"):
         intent = entry.record
         for index, item in enumerate(intent["criteria"]):

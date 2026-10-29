@@ -103,10 +103,9 @@ verified signature by the recorder (see Signatures). Otherwise it is reported as
 (warning), with the reason: no recorder, recorded by its own producer, or no verified signature
 by the recorder.
 
-**Proposed rules.** R16 (release decision), R17 (digests), the rule IDs `schema` and
-`signature` and the narrower R10 comparison (only intents ignore `status` and `digest`) are
-proposed in RFCs #1, #2, #3, #5 and #8 (`signature`). The fixtures already use
-them; if an RFC is rejected, the fixtures change and this validator follows.
+**Rules of draft 5.** R16 (release decision), R17 (digests), the rule IDs `schema` and
+`signature` and the narrower R10 comparison (only intents ignore `status` and digests) came with
+draft 5 of the specification.
 
 ## No network access
 
@@ -280,8 +279,8 @@ compares instead.
   version is among the records and its criterion with the same key has the same digest
   (section 6.3). Evidence for a later version never counts.
 - **Several intents.** Appendix D defines coverage for one intent version; a passport lists
-  several. The criteria in scope of all listed intents are counted together, as section 8.2
-  reads `scope` for the passport (proposed in RFC #7). With one intent both readings agree.
+  several. The criteria in scope of all listed intents are counted together, as Appendix D says
+  since draft 5.
 - **The release subject** of a passport is the build of its approved or passed release decision
   whose digest matches the statement subject, as R16 finds it.
 - **Attested** uses `rules.self_declared`, the reason R12 reports, with the key ids that signed
@@ -290,7 +289,6 @@ compares instead.
   one shares provider and name with a model of the other, and a tool does not count.
 - **Values** are rounded to four decimals. A declared value agrees if it is equal at its own
   precision (0.33 agrees with 0.3333).
-- The method URI is the specification's placeholder until RFC #6 replaces it.
 
 ## Recording the other records
 

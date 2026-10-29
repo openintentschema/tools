@@ -4,7 +4,7 @@
     { "name": "customer-portal",
       "digest": { "sha256": "0d4f7a2c9e15b83d6a0c47e91f5b28d3c6e09a4f71b2d58e3a96c0f4d7b12e85" } }
   ],
-  "predicateType": "https://ois.example/passport/v0.1",
+  "predicateType": "https://openintentschema.io/passport/v0.1",
   "predicate": {
     "ois": "0.1",
     "release": { "name": "customer-portal", "version": "2026.10.3" },
@@ -30,11 +30,11 @@
         "decidedAt": "2026-10-21T08:45:00Z",
         "evidence": ["https://ois.acme.example/evidence/EV-9021"],
         "assessments": [{ "name": "intentCoverage", "value": 0.5,
-                          "method": "https://ois.example/methods/basic-intent-coverage/v0.1" }]
+                          "method": "https://openintentschema.io/methods/basic-intent-coverage/v0.1" }]
       }
     ],
     "assessments": [{ "name": "intentCoverage", "value": 0.5,
-                      "method": "https://ois.example/methods/basic-intent-coverage/v0.1" }],
+                      "method": "https://openintentschema.io/methods/basic-intent-coverage/v0.1" }],
     "issuedBy": "https://ois.acme.example/actors/passport-issuer@1.0",
     "issuedAt": "2026-10-21T09:00:00Z"
   }

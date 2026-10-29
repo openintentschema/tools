@@ -63,8 +63,8 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
   aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.12.0`, `0.12` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.12.0 --owner openintentschema`.
+- Tags: `0.13.0`, `0.13` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.13.0 --owner openintentschema`.
 
 ## Use in CI
 
@@ -72,7 +72,7 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 Sigstore verification included:
 
 ```yaml
-- uses: openintentschema/tools/.github/actions/setup@v0.12.0   # pin the tag's commit SHA in production
+- uses: openintentschema/tools/.github/actions/setup@v0.13.0   # pin the tag's commit SHA in production
 - run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
 ```
 
@@ -81,7 +81,7 @@ command:
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.12.0/.gitlab/ci/ois.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.13.0/.gitlab/ci/ois.gitlab-ci.yml
 
 ois:
   extends: .ois-junit
@@ -417,7 +417,7 @@ ois validate passport.dsse.json --trusted-key keys/       # a .pub file, a direc
 - **R12:** a recorded context is attested when its `contextRecordedBy` actor signed the document.
   The runtime that ran an agent therefore signs the bundle or passport next to the producer;
   a DSSE envelope holds several signatures.
-- **Reports** under the rule ID `signature` (proposed): a violation for an envelope without
+- **Reports** under the rule ID `signature` (section 11.1): a violation for an envelope without
   signatures, with the wrong payload type, or with a signature that does not verify, and the
   envelope then counts as unsigned; a warning for a key that is not trusted.
 - Private keys are written readable by you only and are never needed for verification. Keep them
@@ -441,7 +441,7 @@ jq .predicate passport.json > predicate.json  # actions/attest builds the statem
   with:
     subject-name: billing
     subject-digest: sha256:${{ steps.passport.outputs.digest }}   # the passport's subject
-    predicate-type: https://ois.example/passport/v0.1
+    predicate-type: https://openintentschema.io/passport/v0.1
     predicate-path: predicate.json
 ```
 
