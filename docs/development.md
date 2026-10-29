@@ -100,7 +100,9 @@ The first image push creates the package on GitHub as private. Make it public on
 this repository (the image label `org.opencontainers.image.source` does that).
 
 After a release, update the guides on the website (specification repository,
-`site/src/content/docs/`) that describe a changed command, and install the new version from PyPI
+`site/src/content/docs/`) that describe a changed command, set `OIS_TOOLS` in the comparison job
+of [tools-js](https://github.com/openintentschema/tools-js) when what the validator reports
+changed, and install the new version from PyPI
 once to check it (`uvx --refresh --from ois-tools==<version> ois --version`; shields.io caches the PyPI
 badge for up to six hours).
 
