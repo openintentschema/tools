@@ -14,9 +14,10 @@ import pytest
 
 from ois_tools import validate
 from ois_tools.cli import main as ois
+from ois_tools.formats import JUnitReport
 from ois_tools.formats import TestCase as Case
 from ois_tools.intents import approve, seal
-from ois_tools.junit import JUnitReport, Options, keys_of, record_run, to_bundle
+from ois_tools.junit import Options, keys_of, record_run, to_bundle
 
 HERE = Path(__file__).parent / "junit"
 NS = "https://ois.acme.example"

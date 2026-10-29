@@ -35,10 +35,10 @@ def test_jest_and_vitest_json() -> None:
     jest = by_name(read("jest.json"))
     assert jest["Invoices AC-1 rounds down"].result == "pass"
     assert jest["Invoices rejects negative amounts @AC-2"].result == "fail"
-    assert jest["Invoices AC-1 rounds down"].file.endswith("/jest/rounding.test.cjs")
+    assert str(jest["Invoices AC-1 rounds down"].file).endswith("/jest/rounding.test.cjs")
     vitest = by_name(read("vitest.json"))
     assert vitest["Invoices rounds down"].tags == ("AC-1",)
-    assert vitest["Invoices rounds down"].file.endswith("/tests/rounding.test.js")
+    assert str(vitest["Invoices rounds down"].file).endswith("/tests/rounding.test.js")
 
 
 def test_go_test_json() -> None:
