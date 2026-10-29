@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="3" failures="1" errors="0" time="0.167">
+  <testsuite name="Invoices" errors="0" failures="1" skipped="0" timestamp="2026-10-29T09:26:27" time="0.07" tests="3">
+    <testcase classname="Invoices AC-1 rounds down" name="Invoices AC-1 rounds down" time="0.001" file="jest/rounding.test.cjs">
+    </testcase>
+    <testcase classname="Invoices rejects negative amounts @AC-2" name="Invoices rejects negative amounts @AC-2" time="0.001" file="jest/rounding.test.cjs">
+      <failure>shortened</failure>
+    </testcase>
+    <testcase classname="Invoices without a key" name="Invoices without a key" time="0" file="jest/rounding.test.cjs">
+    </testcase>
+  </testsuite>
+</testsuites>

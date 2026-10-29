@@ -1,5 +1,6 @@
-"""Level 1 adapter: JUnit XML to an OIS bundle (section 11.4). The standard library's Expat refuses
-entity expansion and external entities."""
+"""JUnit XML to OIS: a Level 1 bundle (section 11.4), or evidence for the criteria of an approved
+intent that tests name by key. The standard library's Expat refuses entity expansion and external
+entities."""
 
 import hashlib
 import re
@@ -7,14 +8,19 @@ import subprocess
 import xml.etree.ElementTree as ElementTree
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import partial
 from importlib.metadata import version as package_version
 from pathlib import Path, PurePosixPath
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+
+from ois_tools import records, rules
+from ois_tools.document import Document, Entry
+from ois_tools.records import KEY_PATTERN, Recorded, RecordError, location_of
 
 Record = dict[str, Any]
 
 RESULTS = ("pass", "skipped", "fail", "error")  # from best to worst
+KEY_PROPERTY = "criterion"  # <property name="criterion" value="AC-1"/> on a test case
 
 
 @dataclass(frozen=True)
@@ -41,6 +47,7 @@ class TestCase:
     result: str
     observed_at: datetime
     report: str  # sha256 of the report the case comes from
+    properties: tuple[tuple[str, str], ...] = ()
 
 
 def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
@@ -111,17 +118,124 @@ def to_bundle(reports: list[JUnitReport], options: Options) -> Record:
     return _record("bundle", f"{ns}/bundles/junit-{combined[:16]}", now, records=records)
 
 
-def location_of(repo: Path) -> str:
-    """git+<origin URL>@<HEAD commit>, without credentials; scp-like remotes become ssh URIs."""
-    remote = _git(repo, "remote", "get-url", "origin")
-    commit = _git(repo, "rev-parse", "HEAD")
-    if "://" not in remote and (scp := re.fullmatch(r"(?:[^@/]+@)?([^:/]+):(.+)", remote)):
-        remote = f"ssh://{scp[1]}/{scp[2]}"
-    parts = urlsplit(remote)
-    if parts.scheme not in ("https", "http", "ssh", "git") or not parts.hostname:
-        raise ValueError(f"cannot turn remote {remote!r} into a location; pass --location")
-    host = parts.hostname + (f":{parts.port}" if parts.port else "")
-    return f"git+{urlunsplit((parts.scheme, host, parts.path, '', ''))}@{commit}"
+def keys_of(case: TestCase, pattern: str = KEY_PATTERN) -> list[str]:
+    """Criterion keys of a test: its `criterion` properties, then keys in its name as whole
+    words. Group 1 of the pattern, if it has one, is the key."""
+    found = [
+        key
+        for name, value in case.properties
+        if name == KEY_PROPERTY
+        for key in re.split(r"[\s,]+", value)
+        if key
+    ]
+    for match in re.finditer(rf"(?<![\w-])(?:{pattern})(?!\w)", case.name):
+        found.append(match[1] if match.re.groups else match[0])
+    return list(dict.fromkeys(found))
+
+
+def record_run(
+    reports: list[JUnitReport],
+    *,
+    intent: Record,
+    test_producer: str,
+    namespace: str,
+    repo: Path,
+    created_at: datetime,
+    known: list[Record] | None = None,
+    subject: str | None = None,
+    run: str | None = None,
+    location: str | None = None,
+    key_pattern: str = KEY_PATTERN,
+    written_from_intent: bool = False,
+) -> Recorded:
+    """Evidence for each criterion of the approved `intent` that a test names by key, and a test
+    artifact per file: reused from `known` records if recorded there, otherwise produced by
+    `test_producer`, with the named criteria as self-declared context if `written_from_intent`.
+    derivedFrom is intent where R4 and R5 allow it."""
+    if intent.get("status") != "approved":
+        raise RecordError("approve the intent first: evidence refers to an approved version")
+    known = known or []
+    reference = records.reference(intent)
+    order = [c["key"] for c in intent["criteria"]]
+    adapter = records.actor(
+        kind="tool",
+        name="ois junit (JUnit XML adapter of ois-tools)",
+        version=package_version("ois-tools"),
+        created_at=created_at,
+        id=f"{namespace.rstrip('/')}/actors/ois-junit",
+    )
+    recorded = Recorded([adapter], records.reference(adapter))
+    tracked = [path for path in _git(repo, "ls-files", "-z").split("\0") if path]
+
+    tests: dict[str, list[tuple[TestCase, str]]] = {}  # file -> named criteria
+    for case in _dedupe([case for report in reports for case in _cases(report, created_at)]):
+        keys = keys_of(case, key_pattern)
+        if not keys:
+            recorded.without_key += 1
+            continue
+        path = _test_file(tracked, case)
+        if path is None:
+            recorded.unmatched.append(f"{_statement(case)}: no test file found in Git")
+            continue
+        for key in keys:
+            if key in order:
+                tests.setdefault(path, []).append((case, key))
+            else:
+                recorded.unmatched.append(
+                    f"{_statement(case)}: {key} is not a criterion of {reference}"
+                )
+
+    for path, named in tests.items():
+        source = records.file_source(repo / path, location)
+        context = [f"{reference}#{key}" for key in order if key in {k for _, k in named}]
+        test = _known_test(known, source) or records.artifact(
+            source,
+            kind="test",
+            produced_by=test_producer,
+            created_at=created_at,
+            namespace=namespace,
+            context=context if written_from_intent else (),
+        )
+        recorded.records.append(test)
+        for case, key in named:
+            evidence = partial(
+                records.evidence,
+                criterion=f"{reference}#{key}",
+                test=test["id"],
+                result=case.result,
+                recorded_by=recorded.adapter,
+                observed_at=case.observed_at,
+                created_at=created_at,
+                namespace=namespace,
+                subject=subject,
+                run=run,
+            )
+            claimed = evidence(derived_from="intent")
+            document = _document([intent, *known, test, claimed])
+            problems = rules.derivation_problems(document, claimed)
+            made = evidence(derived_from="unknown") if problems else claimed
+            if problems and "context" in test:
+                recorded.notes.append(f"{key}: {_statement(case)}: {problems[0]}")
+            if made not in recorded.records:
+                recorded.records.append(made)
+    return recorded
+
+
+def _known_test(known: list[Record], source: records.Source) -> Record | None:
+    """A test artifact already recorded for this file at this content."""
+    for record in known:
+        if (
+            record["type"] == "artifact"
+            and record["kind"] == "test"
+            and record["digest"].get("sha256") == source.digest["sha256"]
+            and record.get("path", source.path) == source.path
+        ):
+            return record
+    return None
+
+
+def _document(found: list[Record]) -> Document:
+    return Document([Entry(record, f"$.records[{i}]") for i, record in enumerate(found)])
 
 
 def _cases(report: JUnitReport, now: datetime) -> list[TestCase]:
@@ -139,6 +253,9 @@ def _cases(report: JUnitReport, now: datetime) -> list[TestCase]:
                     result=_result(case),
                     observed_at=observed_at,
                     report=digest,
+                    properties=tuple(
+                        (p.get("name", ""), p.get("value", "")) for p in case.iter("property")
+                    ),
                 )
             )
     return cases
@@ -175,11 +292,13 @@ def _observed_at(timestamp: str | None, fallback: datetime) -> datetime:
 
 
 def _test_file(tracked: list[str], case: TestCase) -> str | None:
-    """The tracked file a test case comes from: its file attribute, or the longest prefix of its
-    class name that names exactly one file (com.acme.InvoiceTest -> .../com/acme/InvoiceTest.java,
-    tests.test_invoice -> tests/test_invoice.py)."""
+    """The tracked file a test case comes from: its file attribute, its class name as a path, or
+    the longest prefix of its class name that names exactly one file (com.acme.InvoiceTest ->
+    .../com/acme/InvoiceTest.java, tests.test_invoice -> tests/test_invoice.py)."""
     if case.file and case.file in tracked:
         return case.file
+    if case.classname in tracked:  # Vitest and Playwright
+        return case.classname
     parts = case.classname.split(".")
     for end in range(len(parts), 0, -1):
         stem = "/".join(parts[:end])

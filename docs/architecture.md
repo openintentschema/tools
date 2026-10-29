@@ -61,7 +61,7 @@ that passed it, so they can rely on its structure.
 | `keyless.py` | Sigstore bundles: offline verification against trusted roots, certificate identity. |
 | `trust_cli.py` | `ois trust update`: a Sigstore trusted root through TUF, the only command with network access. |
 | `signing.py`, `sign_cli.py`, `key_cli.py` | DSSE envelopes: keys and key ids, signing, verification under trusted keys; `ois sign`, `ois key`. |
-| `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4). |
+| `junit.py`, `junit_cli.py` | `ois junit`: JUnit XML to a Level 1 bundle (spec section 11.4), or with `--intent` to evidence for an approved intent. |
 | `authoring.py` | Reads authored JSON, and YAML with the JSON schema of YAML 1.2 (section 7); walks input directories. |
 | `intents.py`, `intent_cli.py` | `ois intent`: seal, approve, next version, compare. |
 | `passports.py`, `passport_cli.py` | `ois passport build`: collect records, assemble and validate a passport. |
@@ -318,3 +318,15 @@ writing.
 - **Location** is `git+<origin>@<HEAD>`, credentials removed; scp-like remotes become `ssh` URIs.
 - **XML** comes from the producer's own pipeline and is parsed with the standard library, whose
   Expat (2.4.1 and later) refuses entity expansion attacks and loads no external entities.
+
+With `--intent`, `record_run` writes evidence for an approved intent instead (Level 2).
+
+- **Keys** come from `criterion` properties and from whole words of the test name. These are
+  the two places that reach JUnit XML in common runners; JUnit `@Tag` and Playwright's `tag`
+  option do not. Class names that are paths (Vitest, Playwright) locate the test file directly.
+- **derivedFrom** is claimed as `intent` and kept only if `rules.derivation_problems` (R4, R5)
+  finds nothing, so the adapter and the validator cannot disagree.
+- **Known test artifacts are reused**, matched by path and `sha256`: a context recorded by an
+  agent runtime stays the one that counts, and a second artifact under the same id is avoided.
+  `--written-from-intent` only adds a self-declared context to artifacts the adapter creates; the
+  adapter cannot observe how a test was written, so it is not `contextRecordedBy`.

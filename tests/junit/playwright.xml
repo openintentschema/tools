@@ -1,0 +1,15 @@
+<testsuites id="" name="" tests="3" failures="1" skipped="0" errors="0" time="0.620543">
+<testsuite name="tests/rounding.spec.ts" timestamp="2026-10-29T09:26:39.835Z" hostname="ci" tests="3" failures="1" skipped="0" time="0.007" errors="0">
+<testcase name="rounds down" classname="tests/rounding.spec.ts" time="0.003">
+</testcase>
+<testcase name="rejects negative amounts" classname="tests/rounding.spec.ts" time="0.001">
+<properties>
+<property name="criterion" value="AC-2">
+</property>
+</properties>
+<failure message="expect(received).toBe(expected) // Object.is equality" type="expect.toBe">shortened</failure>
+</testcase>
+<testcase name="without a key" classname="tests/rounding.spec.ts" time="0.003">
+</testcase>
+</testsuite>
+</testsuites>

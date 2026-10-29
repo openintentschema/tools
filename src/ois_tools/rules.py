@@ -76,35 +76,54 @@ def r4_derivation(document: Document) -> Iterator[Report]:
     key has the same digest, and no artifact of kind code.
     """
     for entry, intent, required, test in _derived_from_intent(document):
-        path = f"{entry.path}.derivedFrom"
-        context = test.get("context", [])
-        if not context:
-            yield Report(Level.VIOLATION, "R4", f"test {test['id']} has no context", path)
-            continue
-        for reference in context:
-            seen = document.record(reference)
-            if seen is not None and seen["type"] == "artifact" and seen["kind"] == "code":
-                message = f"the context of test {test['id']} includes code {reference}"
-                yield Report(Level.VIOLATION, "R4", message, path)
-        if not any(_covers(document, reference, intent, required) for reference in context):
-            message = (
-                f"the context of test {test['id']} includes neither {entry.record['criterion']} "
-                "nor a version of the intent with the same criterion digest"
-            )
-            yield Report(Level.VIOLATION, "R4", message, path)
+        for message in _r4(document, entry.record, intent, required, test):
+            yield Report(Level.VIOLATION, "R4", message, f"{entry.path}.derivedFrom")
 
 
 def r5_independence(document: Document) -> Iterator[Report]:
     """R5: a test derived from the intent was not produced by the actor that produced the
     subject, in any version."""
     for entry, _, _, test in _derived_from_intent(document):
-        subject = document.record(entry.record.get("subject", ""))
-        if subject is None or subject["type"] != "artifact":
-            continue
-        producer = _actor_id(test["producedBy"])
-        if producer == _actor_id(subject["producedBy"]):
-            message = f"test and subject are both produced by {producer}"
+        if (message := _r5(document, entry.record, test)) is not None:
             yield Report(Level.VIOLATION, "R5", message, f"{entry.path}.derivedFrom")
+
+
+def derivation_problems(document: Document, evidence: Record) -> list[str]:
+    """Why `evidence` may not claim derivedFrom intent under R4 and R5; empty if it may."""
+    parts = _derivation(document, evidence)
+    if parts is None:
+        return [f"{evidence['criterion']} or test {evidence['test']} does not resolve"]
+    intent, required, test = parts
+    r5 = _r5(document, evidence, test)
+    return [*_r4(document, evidence, intent, required, test), *([r5] if r5 else [])]
+
+
+def _r4(
+    document: Document, evidence: Record, intent: Record, required: Record, test: Record
+) -> Iterator[str]:
+    context = test.get("context", [])
+    if not context:
+        yield f"test {test['id']} has no context"
+        return
+    for reference in context:
+        seen = document.record(reference)
+        if seen is not None and seen["type"] == "artifact" and seen["kind"] == "code":
+            yield f"the context of test {test['id']} includes code {reference}"
+    if not any(_covers(document, reference, intent, required) for reference in context):
+        yield (
+            f"the context of test {test['id']} includes neither {evidence['criterion']} "
+            "nor a version of the intent with the same criterion digest"
+        )
+
+
+def _r5(document: Document, evidence: Record, test: Record) -> str | None:
+    subject = document.record(evidence.get("subject", ""))
+    if subject is None or subject["type"] != "artifact":
+        return None
+    producer = _actor_id(test["producedBy"])
+    if producer == _actor_id(subject["producedBy"]):
+        return f"test and subject are both produced by {producer}"
+    return None
 
 
 def r8_production_data(document: Document) -> Iterator[Report]:
@@ -333,15 +352,21 @@ def _derived_from_intent(document: Document) -> Iterator[tuple[Entry, Record, Re
     """Evidence with derivedFrom intent, with its intent version, criterion and test artifact,
     where all three resolve."""
     for entry in document.of_type("evidence"):
-        if entry.record["derivedFrom"] != "intent":
-            continue
-        intent_ref, _, key = entry.record["criterion"].partition("#")
-        intent = document.record(intent_ref)
-        required = criterion(intent, key) if intent is not None else None
-        test = document.record(entry.record["test"])
-        if intent is None or required is None or test is None or test["type"] != "artifact":
-            continue
-        yield entry, intent, required, test
+        if entry.record["derivedFrom"] == "intent":
+            parts = _derivation(document, entry.record)
+            if parts is not None:
+                yield entry, *parts
+
+
+def _derivation(document: Document, evidence: Record) -> tuple[Record, Record, Record] | None:
+    """The intent version, criterion and test artifact of an evidence record, if all resolve."""
+    intent_ref, _, key = evidence["criterion"].partition("#")
+    intent = document.record(intent_ref)
+    required = criterion(intent, key) if intent is not None else None
+    test = document.record(evidence["test"])
+    if intent is None or required is None or test is None or test["type"] != "artifact":
+        return None
+    return intent, required, test
 
 
 def _covers(document: Document, reference: str, intent: Record, required: Record) -> bool:

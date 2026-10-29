@@ -11,9 +11,9 @@ from typing import Any
 
 from ois_tools import records
 from ois_tools.authoring import AuthoringError, files, load
-from ois_tools.cucumber import KEY_PATTERN, CucumberError, record_run
+from ois_tools.cucumber import CucumberError, record_run
 from ois_tools.passports import PassportError, collect
-from ois_tools.records import RecordError
+from ois_tools.records import KEY_PATTERN, RecordError
 
 EXIT_OK = 0
 EXIT_REFUSED = 1

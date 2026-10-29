@@ -12,7 +12,7 @@ between. One command, `ois`, records that evidence along the delivery lifecycle 
 | Requirement | intent with acceptance criteria, its approval | `ois intent`, `ois intent from-gherkin` |
 | Design | design approval | `ois record decision --gate design-approval` |
 | Implementation | code artifact, the context an agent was given | `ois record artifact` |
-| Test | evidence per criterion | `ois cucumber`, `ois junit`, `ois record evidence` |
+| Test | evidence per criterion | `ois junit --intent`, `ois cucumber`, `ois record evidence` |
 | Merge | merge decision | `ois record decision --gate merge` |
 | Release | build, release decision, signed passport with intent coverage | `ois record`, `ois passport build --sign` |
 | Operation | findings, their classification and resolution | `ois record finding`, `ois record supersede` |
@@ -184,6 +184,27 @@ nothing is written, 2 means a report or the Git checkout could not be read.
 
 The [getting started guide](https://openintentschema.io/getting-started/)
 walks through it step by step, including a CI example.
+
+### Evidence for an approved intent
+
+Tests that name a criterion key such as `AC-1` give evidence for that criterion of an approved
+intent, in any framework that writes JUnit XML:
+
+```bash
+ois junit build/test-results/*.xml --namespace https://ois.acme.example \
+  --intent https://ois.acme.example/intents/INT-7@1 --test-producer "$QE" \
+  --subject "$BUILD" --written-from-intent
+```
+
+- **Keys** come from a `criterion` property of the test case (pytest `user_properties`, Playwright
+  annotations) or from the test name as a whole word (`@DisplayName`, Jest and Vitest titles);
+  `--key-pattern` changes the pattern. Tests without a key are counted and skipped.
+- **Records** go to `.ois/`: evidence per test and key, and a test artifact per file. A test
+  artifact already recorded there or in `--records` for the same file content is reused, so an
+  agent runtime's context counts.
+- **`derivedFrom: intent`** where R4 and R5 allow it, otherwise `unknown`. `--written-from-intent`
+  declares the named criteria as the context of new test artifacts: self-declared (R12), so it
+  counts in `intentCoverage` but not in `intentCoverageAttested`.
 
 ## Write and approve intents
 

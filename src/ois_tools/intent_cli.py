@@ -10,8 +10,9 @@ from typing import Any
 import yaml
 
 from ois_tools.authoring import AuthoringError, load
-from ois_tools.cucumber import KEY_PATTERN, CucumberError, draft_intent
+from ois_tools.cucumber import CucumberError, draft_intent
 from ois_tools.intents import IntentError, approve, compare, file_stem, next_version, seal
+from ois_tools.records import KEY_PATTERN
 
 EXIT_OK = 0
 EXIT_ERROR = 2

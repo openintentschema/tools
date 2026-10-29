@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="1" errors="0" time="0.005120041">
+    <testsuite name="tests/rounding.test.js" timestamp="2026-10-29T09:26:27.129Z" hostname="ci" tests="3" failures="1" errors="0" skipped="0" time="0.005120041">
+        <testcase classname="tests/rounding.test.js" name="Invoices &gt; AC-1 rounds down" time="0.000875333">
+        </testcase>
+        <testcase classname="tests/rounding.test.js" name="Invoices &gt; rejects negative amounts @AC-2" time="0.003193625">
+            <failure message="expected 1 to be 2 // Object.is equality" type="AssertionError">shortened</failure>
+        </testcase>
+        <testcase classname="tests/rounding.test.js" name="Invoices &gt; without a key" time="0.00009425">
+        </testcase>
+    </testsuite>
+</testsuites>

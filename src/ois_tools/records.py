@@ -7,15 +7,15 @@ import json
 import re
 import subprocess
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import rfc8785
 
 from ois_tools import digests
-from ois_tools.junit import location_of
 from ois_tools.passports import PassportError, collect
 from ois_tools.validator import validate
 
@@ -42,8 +42,22 @@ COLLECTIONS = {
 }
 
 
+KEY_PATTERN = r"([A-Z][A-Z0-9]*-[0-9]+)"  # a criterion key such as AC-1; group 1 is the key
+
+
 class RecordError(ValueError):
     """The record cannot be written as asked."""
+
+
+@dataclass
+class Recorded:
+    """What an adapter recorded from a test run."""
+
+    records: list[Record]
+    adapter: str  # reference of the adapter actor
+    unmatched: list[str] = field(default_factory=list)  # results without evidence, and why
+    notes: list[str] = field(default_factory=list)  # evidence not derived from the intent, why
+    without_key: int = 0  # tests that name no criterion
 
 
 @dataclass(frozen=True)
@@ -509,6 +523,19 @@ def _slug(text: str) -> str:
 
 def _timestamp(moment: datetime) -> str:
     return moment.astimezone(UTC).replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def location_of(repo: Path) -> str:
+    """git+<origin URL>@<HEAD commit>, without credentials; scp-like remotes become ssh URIs."""
+    remote = _git(repo, "remote", "get-url", "origin")
+    commit = _git(repo, "rev-parse", "HEAD")
+    if "://" not in remote and (scp := re.fullmatch(r"(?:[^@/]+@)?([^:/]+):(.+)", remote)):
+        remote = f"ssh://{scp[1]}/{scp[2]}"
+    parts = urlsplit(remote)
+    if parts.scheme not in ("https", "http", "ssh", "git") or not parts.hostname:
+        raise ValueError(f"cannot turn remote {remote!r} into a location; pass --location")
+    host = parts.hostname + (f":{parts.port}" if parts.port else "")
+    return f"git+{urlunsplit((parts.scheme, host, parts.path, '', ''))}@{commit}"
 
 
 def _location(root: Path) -> str:

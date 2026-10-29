@@ -5,7 +5,7 @@ import hashlib
 import json
 import re
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version as package_version
 from pathlib import Path
@@ -16,24 +16,16 @@ from gherkin.parser import Parser
 from gherkin.token_scanner import TokenScanner
 
 from ois_tools import records
+from ois_tools.records import KEY_PATTERN, Recorded
 
 Record = dict[str, Any]
 
-KEY_PATTERN = r"([A-Z][A-Z0-9]*-[0-9]+)"  # a tag without "@"; group 1 is the criterion key
 ERRORS = {"UNDEFINED", "AMBIGUOUS", "UNKNOWN"}
 SKIPS = {"SKIPPED", "PENDING"}
 
 
 class CucumberError(ValueError):
     """The features or the run cannot be turned into records."""
-
-
-@dataclass
-class Recorded:
-    records: list[Record]
-    adapter: str  # reference of the ois cucumber actor
-    unmatched: list[str] = field(default_factory=list)  # scenarios without a criterion
-    notes: list[str] = field(default_factory=list)  # scenarios that differ from their criterion
 
 
 def statement(scenario: Record, background: Record | None = None) -> str:

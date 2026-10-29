@@ -5,6 +5,8 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+- `ois junit --intent`: evidence for the criteria that tests name by key, from any JUnit XML.
+
 ## 0.11.0 (2026-10-29)
 
 - `ois validate --format sarif`: SARIF 2.1.0 for GitHub code scanning and IDEs, with line numbers.
