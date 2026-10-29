@@ -18,7 +18,7 @@ jobs:
         python: ["3.13", "3.14", "3.15"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python }}
       - run: uv sync --locked
@@ -39,7 +39,7 @@ jobs:
           repository: openintentschema/openintentschema
           ref: ${{ steps.lock.outputs.commit }}
           path: spec
-      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       - run: uv run scripts/sync_spec.py --check spec
 
   image:
@@ -60,3 +60,21 @@ jobs:
           run coverage tests/fixtures/valid/passport.json
           run record artifact --commit . --kind code --namespace https://ois.acme.example \
             --produced-by https://ois.acme.example/actors/dev@1 --output-dir /tmp/ois
+
+  action:
+    name: Setup action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: setup
+        uses: ./
+        with:
+          source: .
+      - name: ois from the action verifies the signed fixtures
+        env:
+          INSTALLED: ${{ steps.setup.outputs.ois-version }}
+        run: |
+          test "$(ois --version)" = "$INSTALLED"
+          ois validate tests/fixtures/valid/signed-passport.json --trusted-key tests/fixtures/keys
+          ois validate tests/fixtures/valid/keyless-passport.json \
+            --trusted-root tests/fixtures/keys/sigstore-public-good.trusted_root.json

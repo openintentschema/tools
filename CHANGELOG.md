@@ -5,6 +5,11 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+## 0.9.0 (2026-10-29)
+
+- GitHub Action: `uses: openintentschema/tools@v0.9.0` installs `ois` in its version.
+- GitLab CI template `ci/gitlab/ois.gitlab-ci.yml` with `.ois` and `.ois-junit`.
+
 ## 0.8.0 (2026-10-28)
 
 - Sigstore keyless signatures: Sigstore bundles verified offline with `--trusted-root`; the

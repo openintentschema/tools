@@ -63,8 +63,36 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
   aside, which fetches a trusted root).
 - In a CI job that uses the image as its image, override the entrypoint (GitLab:
   `entrypoint: [""]`) and call `ois` in the script.
-- Tags: `0.8.0`, `0.8` and `latest`. Each image carries a signed build provenance and an SBOM:
-  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.8.0 --owner openintentschema`.
+- Tags: `0.9.0`, `0.9` and `latest`. Each image carries a signed build provenance and an SBOM:
+  `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.9.0 --owner openintentschema`.
+
+## Use in CI
+
+**GitHub Actions:** this repository is an action that installs `ois` in its own version, Sigstore
+verification included:
+
+```yaml
+- uses: openintentschema/tools@v0.9.0   # pin the tag's commit SHA in production
+- run: ois junit build/test-results/test/*.xml --namespace https://ois.acme.example --suite "Team Billing" --output ois-bundle.json
+```
+
+**GitLab CI:** include the template of a release and extend `.ois-junit`, or `.ois` for any
+command:
+
+```yaml
+include:
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.9.0/ci/gitlab/ois.gitlab-ci.yml
+
+ois:
+  extends: .ois-junit
+  needs: [test]
+  variables:
+    OIS_JUNIT_REPORTS: build/test-results/test/*.xml
+    OIS_NAMESPACE: https://ois.acme.example
+    OIS_SUITE: Team Billing
+```
+
+**Any other CI** runs the container image or `uvx --from ois-tools ois …`.
 
 ## Validate
 

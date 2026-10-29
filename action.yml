@@ -1,0 +1,39 @@
+name: Set up the OIS tools
+description: Install ois, the reference tools of the Open Intent Schema, with Sigstore verification.
+author: Open Intent Schema
+branding:
+  icon: check-circle
+  color: green
+
+inputs:
+  version:
+    description: Version of ois-tools to install; the default is the release this action belongs to.
+    default: "0.9.0"
+  source:
+    description: Install from this path instead of PyPI, for example "." in a checkout of this repository.
+    default: ""
+
+outputs:
+  ois-version:
+    description: The installed version.
+    value: ${{ steps.installed.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+    - name: Install ois
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        SOURCE: ${{ inputs.source }}
+      run: |
+        if [ -n "$SOURCE" ]; then
+          uv tool install "$SOURCE[sigstore]"
+        else
+          uv tool install "ois-tools[sigstore]==$VERSION"
+        fi
+        uv tool dir --bin >> "$GITHUB_PATH"
+    - id: installed
+      shell: bash
+      run: echo "version=$(ois --version)" >> "$GITHUB_OUTPUT"
