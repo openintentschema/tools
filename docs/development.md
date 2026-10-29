@@ -30,7 +30,6 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" ois-to
 src/ois_tools/   the package (modules: architecture.md)
   schemas/           copy of Appendix B
 Dockerfile           the container image (.dockerignore keeps the build context small)
-ci/gitlab/           the GitLab CI template
 tests/
   fixtures/          copy of the conformance fixtures, run by test_fixtures.py
   examples/          copy of the Appendix A examples
@@ -41,6 +40,7 @@ spec.lock            the specification commit the copies come from
 docs/                this file and architecture.md
 .github/             CI and release workflows, the setup action (actions/setup), templates,
                      contributing guide, Code of Conduct, security policy
+.gitlab/ci/          the GitLab CI template
 ```
 
 ## Copies from the specification
@@ -81,7 +81,7 @@ fix.
 
 1. Add the changes under a new version in `CHANGELOG.md` and set the version in `pyproject.toml`,
    in the `version` default of `.github/actions/setup/action.yml` and in the image tag of
-   `ci/gitlab/ois.gitlab-ci.yml`; `tests/test_ci_templates.py` checks that they agree.
+   `.gitlab/ci/ois.gitlab-ci.yml`; `tests/test_ci_templates.py` checks that they agree.
 2. Merge to `main` and wait for CI.
 3. Push a tag: `git tag v<version> && git push origin v<version>`.
 

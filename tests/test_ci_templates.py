@@ -33,7 +33,7 @@ def test_the_action_pins_what_it_uses() -> None:
 
 
 def test_the_gitlab_template_uses_the_image_of_this_version() -> None:
-    template = load(ROOT / "ci" / "gitlab" / "ois.gitlab-ci.yml")
+    template = load(ROOT / ".gitlab" / "ci" / "ois.gitlab-ci.yml")
     image = template[".ois"]["image"]
     assert image["name"] == f"ghcr.io/openintentschema/ois-tools:{VERSION}"
     assert image["entrypoint"] == [""]

@@ -81,7 +81,7 @@ command:
 
 ```yaml
 include:
-  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.9.0/ci/gitlab/ois.gitlab-ci.yml
+  - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.9.0/.gitlab/ci/ois.gitlab-ci.yml
 
 ois:
   extends: .ois-junit

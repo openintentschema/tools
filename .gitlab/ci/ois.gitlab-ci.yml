@@ -1,7 +1,7 @@
 # OIS for GitLab CI. Include it pinned to a release, then extend .ois or .ois-junit:
 #
 #   include:
-#     - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.9.0/ci/gitlab/ois.gitlab-ci.yml
+#     - remote: https://raw.githubusercontent.com/openintentschema/tools/v0.9.0/.gitlab/ci/ois.gitlab-ci.yml
 
 # Any ois command, in the image of this release.
 .ois:
