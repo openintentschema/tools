@@ -181,6 +181,19 @@ script in the image override it (GitLab: `entrypoint: [""]`).
 - **Signing validates first.** `ois sign` refuses a document with a violation, so nothing broken
   gets a signature; adding a signature keeps the payload bytes unchanged.
 
+## CI building blocks
+
+- **GitHub:** `.github/actions/setup` is a composite action: `setup-uv`, then
+  `uv tool install ois-tools[sigstore]==<version>`, with `ois` on the `PATH`. Its `version`
+  default is the release it belongs to, so `uses: …/setup@v0.9.0` installs 0.9.0; `source`
+  installs a checkout instead, which the CI job `Setup action` uses.
+- **GitLab:** `.gitlab/ci/ois.gitlab-ci.yml` defines hidden jobs on the image of the same
+  release, with the entrypoint cleared so GitLab can run the script.
+- **One version.** `tests/test_ci_templates.py` fails unless `pyproject.toml`, the action's
+  default and the template's image tag agree.
+- **Placement.** Both live in the hosts' own folders, `.github/` and `.gitlab/`, which keeps the
+  root lean; an action outside the root cannot be listed in the GitHub Marketplace.
+
 ## Profiles
 
 `profiles.py` checks the profiles it knows after the core rules, on the same `Document`. A
