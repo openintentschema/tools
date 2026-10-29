@@ -14,7 +14,9 @@ Relevant here are, for example:
 - a signature, DSSE envelope or Sigstore bundle that `ois validate` accepts although it was
   forged, tampered with or made with a key or trusted root that was not given as trusted;
 - a private key written readable by others, or a signing command that leaks key material;
-- anything that affects the integrity of the published package or its release workflow.
+- anything that affects the integrity of the published package or its release workflow;
+- a package that presents itself as part of the project under another name or scope; the
+  official ones are listed in the README.
 
 A weakness in the specification itself, such as a rule that lets forged evidence pass in every
 conforming validator, belongs to the

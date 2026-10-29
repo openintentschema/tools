@@ -69,6 +69,15 @@ docker run --rm --network none -v "$PWD:/work" --user "$(id -u):$(id -g)" \
 - Tags: `0.13.0`, `0.13` and `latest`. Each image carries a signed build provenance and an SBOM:
   `gh attestation verify oci://ghcr.io/openintentschema/ois-tools:0.13.0 --owner openintentschema`.
 
+## Official packages
+
+Published only as [`ois-tools` on PyPI](https://pypi.org/project/ois-tools/),
+[`ois-tools` on npm](https://www.npmjs.com/package/ois-tools) and
+`ghcr.io/openintentschema/ois-tools`, each built and signed by a workflow of the
+`openintentschema` organization on GitHub. A package under another name or scope is not part of
+the project. How to check where a download was built:
+[Official packages](https://openintentschema.io/develop/tools/#official-packages).
+
 ## Use in CI
 
 **GitHub Actions:** the action `.github/actions/setup` installs `ois` in the version of its tag,
