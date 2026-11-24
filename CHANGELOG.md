@@ -5,7 +5,7 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
-## 0.15.0
+## 0.15.0 (2026-11-24)
 
 - Draft 5 of the specification: the passport predicate type, the schema `$id` and the coverage
   method URI are under `https://openintentschema.io/`; passports with the old placeholder type
