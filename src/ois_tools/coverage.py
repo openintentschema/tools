@@ -17,7 +17,7 @@ from ois_tools.signing import TrustedKey, is_envelope, open_envelope
 
 Record = dict[str, Any]
 
-METHOD = "https://ois.example/methods/basic-intent-coverage/v0.1"  # placeholder until RFC #6
+METHOD = "https://openintentschema.io/methods/basic-intent-coverage/v0.1"
 NAMES = (
     "intentCoverage",
     "intentCoverageAttested",

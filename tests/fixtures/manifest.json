@@ -105,6 +105,16 @@
       ]
     },
     {
+      "path": "valid/passport-without-scope.json",
+      "description": "A passport without scope: all three criteria of the intent count, AC-1 and AC-2 with criticality high and NFR-1 medium, so the weighted coverage (3 of 8) differs from the plain one (1 of 3).",
+      "expect": [
+        {
+          "rule": "R12",
+          "level": "warning"
+        }
+      ]
+    },
+    {
       "path": "invalid/schema/unknown-top-level-field.json",
       "description": "A top-level field that the record type does not define (section 4).",
       "expect": [

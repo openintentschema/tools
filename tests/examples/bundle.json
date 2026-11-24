@@ -34,16 +34,16 @@
       "criteria": [
         { "key": "AC-1", "notation": "gherkin", "kind": "functional", "criticality": "high",
           "statement": "Given a logged-in customer, when they submit a valid Swiss address, then the new address is saved with the chosen effective date",
-          "digest": { "sha256": "71c4e9a2b5d80f36c1e7a49b2d60f5e38c9a14d7b2e06f5a3c81d9e4b7f20a63" } },
+          "digest": { "sha256": "c6aa1922fdd002acc1087b24060aa2a20650536b8693725f5c74761660df1d3a" } },
         { "key": "AC-2", "notation": "ears", "kind": "functional", "criticality": "high",
           "statement": "WHEN an address cannot be assigned to a canton, THE portal SHALL flag the premium region for manual review",
-          "digest": { "sha256": "b4e81d3c7a6f09e25d1c84a7b3f60e29d5a8c17b4e03f6a2d9c58e1b7a4f306d" } },
+          "digest": { "sha256": "ebd6350ec92d58cc7c77e62ebf40ea2d26922f8ec95ad85c626ff6b39f8599f6" } },
         { "key": "NFR-1", "notation": "ears", "kind": "non-functional", "criticality": "medium",
           "statement": "THE portal SHALL confirm an address change within 500 milliseconds at the 95th percentile",
           "target": { "metric": "responseTimeP95", "operator": "lte", "value": 500, "unit": "ms" },
-          "digest": { "sha256": "3d9b7a52e18c4f06b7a2d95e1c38f06a4e7d2b91c5f8a30e6b1d47c9a2e58f17" } }
+          "digest": { "sha256": "eccddffcc90a273e6f6663b1f4bd31de390acd914bfb076f8d4cf54ca443904b" } }
       ],
-      "digest": { "sha256": "2e7d4a91c6b38f05e1a9d72c4b60f83e95a1d7c2b4f06e38a9c15d7b2e40f6a1" }
+      "digest": { "sha256": "1358302ab5174e32bff0df5c244bac5eca011e9d0b6c2cd3d4166db2f0223552" }
     },
     {
       "ois": "0.1", "type": "artifact", "id": "https://ois.acme.example/artifacts/ART-301",
@@ -104,7 +104,7 @@
       "createdAt": "2026-10-14T10:05:00Z",
       "gate": "intent-approval",
       "subject": "https://ois.acme.example/intents/INT-142@1",
-      "subjectDigest": { "sha256": "2e7d4a91c6b38f05e1a9d72c4b60f83e95a1d7c2b4f06e38a9c15d7b2e40f6a1" },
+      "subjectDigest": { "sha256": "1358302ab5174e32bff0df5c244bac5eca011e9d0b6c2cd3d4166db2f0223552" },
       "outcome": "approved",
       "decidedBy": "https://ois.acme.example/actors/po-7f3a",
       "decidedAt": "2026-10-14T10:05:00Z",

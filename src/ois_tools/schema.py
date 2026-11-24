@@ -16,7 +16,7 @@ from ois_tools.report import Level, Report, Result
 
 SCHEMA_FILE = "ois-0.1.schema.json"
 STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
-PASSPORT_PREDICATE_TYPE = "https://ois.example/passport/v0.1"  # placeholder until the domain is set
+PASSPORT_PREDICATE_TYPE = "https://openintentschema.io/passport/v0.1"
 RECORD_TYPES = ("intent", "artifact", "actor", "evidence", "decision", "finding")
 
 

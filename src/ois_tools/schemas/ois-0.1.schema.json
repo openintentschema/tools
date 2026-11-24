@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ois.example/schema/v0.1/ois.schema.json",
+  "$id": "https://openintentschema.io/schema/v0.1/ois.schema.json",
   "title": "Open Intent Schema v0.1",
   "oneOf": [
     { "$ref": "#/$defs/record" },

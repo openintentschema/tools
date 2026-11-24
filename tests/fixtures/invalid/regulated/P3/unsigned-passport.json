@@ -8,7 +8,7 @@
       }
     }
   ],
-  "predicateType": "https://ois.example/passport/v0.1",
+  "predicateType": "https://openintentschema.io/passport/v0.1",
   "predicate": {
     "ois": "0.1",
     "release": {
@@ -333,7 +333,7 @@
       {
         "name": "intentCoverage",
         "value": 0.5,
-        "method": "https://ois.example/methods/basic-intent-coverage/v0.1"
+        "method": "https://openintentschema.io/methods/basic-intent-coverage/v0.1"
       }
     ],
     "issuedBy": "https://ois.acme.example/actors/passport-issuer@1.0",
