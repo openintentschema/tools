@@ -15,8 +15,8 @@ uv run mypy src tests scripts        # strict
 ```
 
 CI (`.github/workflows/checks.yml`) runs the same on Python 3.13, 3.14 and 3.15, plus a job that
-checks the copies from the specification (below) and one that builds the container image and runs
-commands in it without network. Locally:
+checks the copies from the specification (below), one that builds the container image and runs
+commands in it without network, and one that installs `ois` with the setup action. Locally:
 
 ```bash
 docker build -t ois-tools:dev .
@@ -81,7 +81,9 @@ fix.
 
 1. Add the changes under a new version in `CHANGELOG.md` and set the version in `pyproject.toml`,
    in the `version` default of `.github/actions/setup/action.yml` and in the image tag of
-   `.gitlab/ci/ois.gitlab-ci.yml`; `tests/test_ci_templates.py` checks that they agree.
+   `.gitlab/ci/ois.gitlab-ci.yml`; `tests/test_ci_templates.py` checks that they agree. The
+   version also stands in the README (image tags, action ref, GitLab include URL) and in the
+   header comment of the GitLab template; then run `uv lock`.
 2. Merge to `main` and wait for CI.
 3. Push a tag: `git tag v<version> && git push origin v<version>`.
 
@@ -90,14 +92,15 @@ package, smoke-tests the installed wheel and publishes to PyPI with trusted publ
 stored token, and PyPI records signed attestations of where the package was built. After the
 PyPI job, it builds the container image from the `Dockerfile` for linux/amd64 and linux/arm64,
 pushes it to `ghcr.io/openintentschema/ois-tools` (tags `<version>`, `<major>.<minor>`,
-`latest`) with an SBOM, attests its build provenance and runs it once without network. The
+`latest`) with an SBOM, attests its build provenance and runs it once without network. A last job installs the release
+from PyPI with the setup action. The
 `pypi` environment asks a maintainer to approve each release and accepts only tags `v*`
 (*Settings → Environments → pypi*). A published version cannot be replaced; fix forward with a
 new version.
 
-The first image push creates the package on GitHub as private. Make it public once: organization
-*Packages → ois-tools → Package settings → Change visibility*, and check that it is linked to
-this repository (the image label `org.opencontainers.image.source` does that).
+The first image push created the package on GitHub as private; it was made public once under
+*Packages → ois-tools → Package settings → Change visibility* and is linked to this repository
+through the image label `org.opencontainers.image.source`.
 
 After a release, update the guides on the website (specification repository,
 `site/src/content/docs/`) that describe a changed command, set `OIS_TOOLS` in the comparison job

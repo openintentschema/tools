@@ -5,6 +5,9 @@ during 0.x any release may change behaviour.
 
 ## Unreleased
 
+- `ois junit --help` names every report format it reads; `ois passport build --help` says that
+  `--approve-release-by` always adds a release decision.
+
 ## 0.15.0 (2026-11-24)
 
 - Draft 5 of the specification: the passport predicate type, the schema `$id` and the coverage

@@ -130,7 +130,7 @@ cat bundle.json | ois validate -
 
 Each file holds one JSON document: a single record, a bundle, or a passport as an in-toto
 Statement v1. Exit code 0 means every file conforms, 1 means at least one violation, 2 means a
-file could not be read. Reports point at the field concerned:
+file could not be read. A file that is not JSON is a violation, reported with the rule `json`. Reports point at the field concerned:
 
 ```
 same-producer.json: violation [R5] $.records[12].derivedFrom: test and subject are both produced by https://ois.acme.example/actors/dev-agent
@@ -301,7 +301,8 @@ ois measure summary.json --intent https://ois.acme.example/intents/INT-9@1 \
 
 ## Record artifacts, actors, evidence, decisions and findings
 
-`ois record` writes every other record type, one record per command, to `.ois/<type>s/`. It
+`ois record` writes every other record type, one record per command, to `.ois/<type>s/`
+(`.ois/evidence/` for evidence). It
 computes what is error-prone by hand, validates the record and prints the reference other records
 use for it, so a pipeline can pass it on:
 
@@ -359,8 +360,8 @@ ois passport build .ois/ ci-bundles/ \
   same id are refused (R10).
 - The passport lists the latest approved version of each intent unless `--intent` names them, and
   embeds every input record. Its subject is the build artifact with its digest.
-- `--approve-release-by` adds the release decision for the build when the records carry none
-  (R16). Exit code 1 means the passport would break a rule and nothing was written; warnings such as
+- `--approve-release-by` adds a release decision for the build by that actor (R16); leave it out
+  when the records already carry one. Exit code 1 means the passport would break a rule and nothing was written; warnings such as
   R12 are printed and the passport is written.
 - The passport reports intent coverage by the reference method of Appendix D in `assessments`
   (below); `--no-coverage` leaves it out.
@@ -491,8 +492,8 @@ ois validate passport.sigstore.json --trusted-root trusted_root.json
 ## Privacy
 
 No command opens a network connection except `ois trust update`, which fetches a Sigstore trusted
-root when you run it. The JSON Schema ships inside the package, `ois junit`, `ois cucumber` and `ois
-record` read local files and the local Git checkout only, and verifying signatures uses local files.
+root when you run it. The JSON Schema ships inside the package, `ois junit`, `ois cucumber`, `ois measure`
+and `ois record` read local files and the local Git checkout only, and verifying signatures uses local files.
 Installing the package contacts PyPI, pulling the container image contacts GitHub (ghcr.io), and
 `uvx` without a local Python downloads one from GitHub. Details and a diagram: [Privacy and data
 flows](https://openintentschema.io/privacy/).

@@ -40,8 +40,9 @@ input JSON ──► schema.check ──► conforms? ──no──► reports 
                          Result(reports: list[Report])
 ```
 
-`validate()` in `validator.py` runs the schema first. The integrity rules run only on input
-that passed it, so they can rely on its structure.
+`validate()` in `validator.py` opens an envelope first (see Signatures), then runs the schema.
+The integrity rules and the profiles run only on input that passed it, so they can rely on its
+structure.
 
 ## Modules
 
@@ -52,9 +53,9 @@ that passed it, so they can rely on its structure.
 | `document.py` | `Document`: the records of the input with their JSONPaths, reference resolution, every Ref-typed field. |
 | `rules.py` | One function per integrity rule, in rule order, registered in `RECORD_RULES` or `CONTAINER_RULES`. |
 | `digests.py` | Criterion and intent `sha256` over RFC 8785 (JCS), digest-set equality. |
-| `validator.py` | `validate()`: schema, then rules. |
+| `validator.py` | `validate()`: signatures, schema, then rules and profiles. |
 | `cli.py` | `ois`: the entry point; passes the arguments after the command name to that command's `main`. |
-| `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation, 2 unreadable file. |
+| `validate_cli.py` | `ois validate`: exit 0 conforms, 1 violation (also a file that is not JSON, rule `json`), 2 unreadable file. |
 | `sarif.py` | SARIF 2.1.0 output of `ois validate`. |
 | `cucumber.py`, `cucumber_cli.py` | Gherkin scenarios as criteria (`ois intent from-gherkin`) and Cucumber runs as evidence (`ois cucumber`). |
 | `profiles.py` | Known profiles (`regulated/v0.1`) and their rules, applied when listed or asked for. |
@@ -112,7 +113,7 @@ draft 5 of the specification.
 No command opens a network connection, with one explicit exception: `ois trust update` fetches a
 Sigstore trusted root through TUF when it is run, so that verifiers need not use another tool;
 verification itself reads that file. The schema is bundled (`schemas/`) and loaded through a local
-`referencing` registry, so no `$ref` is fetched; `ois junit`, `ois cucumber` and `ois record` run
+`referencing` registry, so no `$ref` is fetched; `ois junit`, `ois cucumber`, `ois measure` and `ois record` run
 local `git` commands only (`rev-parse`, `ls-files`, `show`, `diff`, `remote get-url`). This was
 verified by running every command and the whole test suite in a sandbox that blocks all network
 access, and the container image with `docker run --network none` in CI. A new dependency or feature
@@ -156,8 +157,8 @@ it to users.
 
 The `Dockerfile` builds the wheel from source in one stage and installs it in a slim Python image
 with the runtime dependencies exported from `uv.lock` and checked by hash, so the image holds
-exactly what the lock file names. git is installed because `ois junit`, `ois cucumber` and `ois
-record` read the checkout; `safe.directory '*'` lets git read a checkout mounted from the host,
+exactly what the lock file names. git is installed because `ois junit`, `ois cucumber`, `ois measure`
+and `ois record` read the checkout; `safe.directory '*'` lets git read a checkout mounted from the host,
 which belongs to another user. The image runs as an unprivileged user with `HOME=/tmp`, so `docker
 run --user` with the host's ids works and written files belong to the host user. Its entrypoint is
 `ois`, so the arguments after the image name are those of the command line; CI systems that run a
@@ -307,7 +308,7 @@ actors, decisions and findings were written by hand. Design choices:
 
 - **One record per command, its reference on stdout.** A pipeline captures it
   (`BUILD=$(ois record artifact …)`) and passes it to the next command; what was written goes to
-  stderr. Records go to `.ois/<type>s/`, next to what `ois intent` writes, so `ois passport build
+  stderr. Records go to `.ois/<type>s/` (`.ois/evidence/` for evidence), next to what `ois intent` writes, so `ois passport build
   .ois/` finds them.
 - **Ids that do not depend on the moment.** Actors are named (`actors/ci-build`, versioned by
   `--version`); artifacts take a readable name and the start of their digest; evidence, decisions
@@ -316,8 +317,8 @@ actors, decisions and findings were written by hand. Design choices:
   under an existing id is refused, as R10 would.
 - **Git is the default location.** A file without `--location` must be committed and unchanged
   (`ls-files --error-unmatch`, `diff --quiet HEAD`), so that `sha256`, `gitCommit` and
-  `git+<origin>@<HEAD>` describe the same content. The location reuses `junit.location_of`, which
-  strips credentials.
+  `git+<origin>@<HEAD>` describe the same content. The location comes from `records.location_of`,
+  which `ois junit` uses too and which strips credentials.
 - **Rules where the records at hand allow them.** Each record passes the schema and R17 before it
   is written. `decision` resolves its subject among the output directory and `--records` as
   validators do, copies the subject's digest (R1, R16) and checks the well-known gates of section

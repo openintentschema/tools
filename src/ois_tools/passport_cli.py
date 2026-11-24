@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     building.add_argument("--subject-name", help="name of the statement subject (default: release)")
     building.add_argument(
         "--approve-release-by",
-        help="add a release decision by this actor if the records carry none",
+        help="add a release decision for the build by this actor",
     )
     building.add_argument("--release-outcome", choices=("approved", "passed"), default="approved")
     building.add_argument("--release-decision-id")

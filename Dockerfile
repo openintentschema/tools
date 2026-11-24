@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.title="ois-tools" \
       org.opencontainers.image.documentation="https://openintentschema.io/develop/tools/" \
       org.opencontainers.image.licenses="Apache-2.0"
 
-# git for ois junit, ois cucumber and ois record, trusting checkouts of any owner.
+# git for ois junit, ois cucumber, ois measure and ois record, trusting checkouts of any owner.
 RUN apt-get update \
  && apt-get install --yes --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/* \

@@ -26,10 +26,11 @@ EXIT_USAGE = 2
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="ois junit",
-        description="Turn JUnit XML reports into an OIS bundle (Level 1, spec section 11.4), "
+        description="Turn test reports (JUnit XML, TRX, Playwright, Jest and Vitest JSON, "
+        "go test -json) into an OIS bundle (Level 1, spec section 11.4), "
         "or with --intent into evidence for the criteria that tests name by key.",
     )
-    parser.add_argument("reports", nargs="+", metavar="REPORT", help="JUnit XML file, or -")
+    parser.add_argument("reports", nargs="+", metavar="REPORT", help="test report, or -")
     parser.add_argument(
         "--namespace",
         default=os.environ.get("OIS_NAMESPACE"),

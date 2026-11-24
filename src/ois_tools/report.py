@@ -13,7 +13,7 @@ class Level(StrEnum):
 @dataclass(frozen=True)
 class Report:
     level: Level
-    rule: str  # "schema" for Appendix B, otherwise R1 to R15
+    rule: str  # "schema", "signature", R1 to R17, or a profile rule such as regulated/P1
     message: str
     path: str  # JSONPath into the input document
 

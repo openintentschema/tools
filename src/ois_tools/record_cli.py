@@ -1,7 +1,8 @@
 """Command line interface: ois record artifact | actor | evidence | decision | finding | supersede |
 bundle
 
-Each command writes one record to <output-dir>/<type>s/ and prints its reference."""
+Each command writes one record to <output-dir>/<type>s/ (evidence/ for evidence) and prints its
+reference."""
 
 import argparse
 import json
