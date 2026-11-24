@@ -25,7 +25,7 @@ rule change lands in both.
 | Path | Content |
 | --- | --- |
 | `src/ois_tools/` | the package; one module per concern, see [docs/architecture.md](docs/architecture.md) |
-| `tests/` | unit tests per module; `fixtures/` and `examples/` are copies from the specification |
+| `tests/` | unit tests per module; `fixtures/` and `examples/` are copies from the specification; `junit/`, `cucumber/`, `measures/` are reports of real runs |
 | `scripts/sync_spec.py`, `spec.lock` | copy schema, examples and fixtures; the specification commit they come from |
 | `Dockerfile` | the container image `ghcr.io/openintentschema/ois-tools`, published by `release.yml` |
 | `.github/actions/setup/`, `.gitlab/ci/` | the GitHub Action and the GitLab CI template; their versions follow `pyproject.toml` |
@@ -49,8 +49,13 @@ uv run scripts/sync_spec.py ../openintentschema # update the copies from a clean
 - A new or changed rule starts as an RFC there; then fixtures, sync, implementation, and the rule
   in `IMPLEMENTED` of `tests/test_fixtures.py` (see docs/development.md).
 - Tests first; a bug fix starts with a test that shows the bug.
+- A report format is supported from a real run of the newest release of its tool, kept in
+  `tests/junit/`, `tests/cucumber/` or `tests/measures/` with error texts shortened and local paths
+  replaced; the test module's docstring names the versions.
 - Every command validates what it writes and opens no network connection; the one exception is
   `ois trust update`, which fetches a Sigstore trusted root when run.
+- Code comments and docstrings state only the essentials; rationale goes to
+  `docs/architecture.md`.
 - Keep `docs/architecture.md` current with design decisions, `CHANGELOG.md` with user-visible
   changes, and the README and the website guides with every changed command.
 - English everywhere; rule IDs and levels exactly as in the specification.
